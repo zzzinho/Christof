@@ -26,10 +26,6 @@ struct OccasionPicker: View {
                     Text("수동")
                 } footer: {
                     Text("고른 명절을 날짜와 상관없이 보여줍니다. 일출·일몰·보름달은 계속 자동입니다.")
-                    #if os(macOS)
-                    // macOS 는 개발 팀 서명 없이 App Group 을 쓸 수 없어 위젯과 설정을 공유하지 못한다.
-                    Text("macOS 위젯에는 아직 반영되지 않습니다. 이 미리보기에만 적용됩니다.")
-                    #endif
                 }
             }
             .navigationTitle("이벤트")
