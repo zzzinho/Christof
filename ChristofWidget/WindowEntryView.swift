@@ -9,7 +9,6 @@ struct WindowEntryView: View {
     var body: some View {
         WindowView(context: entry.context, style: style)
             .containerBackground(.background, for: .widget)
-            .widgetURL(AppLink.occasionPicker)
     }
 
     private var style: WindowSize {

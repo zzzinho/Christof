@@ -1,6 +1,6 @@
 import Foundation
 
-public enum WeatherCondition: Sendable, Hashable, CaseIterable {
+public enum WeatherCondition: Sendable, Hashable, CaseIterable, Codable {
     case clear, partlyCloudy, overcast, fog, drizzle, rain, snow, thunderstorm
 
     public var koreanName: String {

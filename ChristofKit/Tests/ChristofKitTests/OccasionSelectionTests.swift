@@ -37,15 +37,3 @@ func manualKeepsCelestialOccasions() throws {
 func unknownManualFallsBackToAutomatic() {
     #expect(occasionIDs(at: kst(2026, 12, 25, 12), .manual(occasionID: "JP.obon")) == ["KR.christmas"])
 }
-
-@Test("저장한 선택을 다시 읽는다")
-func storeRoundTrip() {
-    let suite = "christof.tests.\(UUID().uuidString)"
-    defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
-    let store = OccasionSelectionStore(suiteName: suite)
-    #expect(store.load() == .automatic)
-    store.save(.manual(occasionID: "KR.seollal"))
-    #expect(store.load() == .manual(occasionID: "KR.seollal"))
-    store.save(.automatic)
-    #expect(store.load() == .automatic)
-}

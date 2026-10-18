@@ -1,34 +1,22 @@
 import ChristofKit
 import Foundation
 
-struct PreviewSettings {
+/// 화면에서 편집 중인 값. 지역은 미리보기용이고, 나머지는 저장하면 위젯에 반영된다.
+struct PreviewSettings: Equatable {
     var region = CountryRegistry.standard.defaultRegion
-    var usesCurrentTime = true
-    var customDate = Date.now
+    var usesCurrentTime: Bool
+    var customDate: Date
     var forcedCondition: WeatherCondition?
+    var occasion: OccasionSelection
 
-    func sceneContext(now: Date, realForecast: WeatherForecast?, selection: OccasionSelection, factory: SceneContextFactory) -> SceneContext {
-        let date = usesCurrentTime ? now : customDate
-        let forecast = forcedCondition.map { WeatherForecast(samples: [.forced($0, at: date)]) } ?? realForecast
-        return factory.context(at: date, region: region, forecast: forecast, selection: selection)
+    init(saved: SceneSettings) {
+        usesCurrentTime = saved.fixedDate == nil
+        customDate = saved.fixedDate ?? .now
+        forcedCondition = saved.forcedWeather
+        occasion = saved.occasion
     }
-}
 
-extension WeatherSample {
-    // ponytail: 강제 날씨의 구름량·세기·기온은 고정값. 세기별 모습을 봐야 하면 슬라이더를 추가한다.
-    static func forced(_ condition: WeatherCondition, at date: Date) -> WeatherSample {
-        let (cloudCover, intensity): (Double, Double) = switch condition {
-        case .clear: (0, 0)
-        case .partlyCloudy: (0.4, 0)
-        case .overcast: (1, 0)
-        case .fog, .drizzle, .rain, .snow, .thunderstorm: (1, 0.7)
-        }
-        return WeatherSample(
-            time: date,
-            condition: condition,
-            intensity: intensity,
-            cloudCover: cloudCover,
-            temperatureCelsius: condition == .snow ? -2 : 18
-        )
+    var sceneSettings: SceneSettings {
+        SceneSettings(fixedDate: usesCurrentTime ? nil : customDate, forcedWeather: forcedCondition, occasion: occasion)
     }
 }

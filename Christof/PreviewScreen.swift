@@ -1,33 +1,35 @@
 import ChristofKit
 import SwiftUI
+import WidgetKit
 
 struct PreviewScreen: View {
-    @State private var settings = PreviewSettings()
+    private let store = SceneSettingsStore()
+    @State private var saved: SceneSettings
+    @State private var settings: PreviewSettings
     @State private var realForecast: Result<WeatherForecast, any Error>?
-    @State private var occasionSelection = OccasionSelectionStore().load()
-    @State private var showsOccasionPicker = false
     private let weather: any WeatherProviding = .standard
     private let factory = SceneContextFactory()
+
+    init() {
+        let saved = SceneSettingsStore().load()
+        _saved = State(initialValue: saved)
+        _settings = State(initialValue: PreviewSettings(saved: saved))
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                SettingsPanel(settings: $settings, forecastStatus: forecastStatus, occasionTitle: OccasionPicker.title(of: occasionSelection), showsOccasionPicker: $showsOccasionPicker)
+                SettingsPanel(settings: $settings, forecastStatus: forecastStatus)
+                SaveBar(hasChanges: settings.sceneSettings != saved, save: save)
                 TimelineView(.everyMinute) { timeline in
                     // 실패는 위 상태 문구로 보여주고, 장면은 날씨 없이 그린다.
-                    let context = settings.sceneContext(now: timeline.date, realForecast: try? realForecast?.get(), selection: occasionSelection, factory: factory)
+                    let context = factory.context(now: timeline.date, region: settings.region, realForecast: try? realForecast?.get(), settings: settings.sceneSettings)
                     WindowPreviews(context: context)
                 }
                 WidgetGuide()
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .sheet(isPresented: $showsOccasionPicker) {
-            OccasionPicker(selection: $occasionSelection)
-        }
-        .onOpenURL { url in
-            if url == AppLink.occasionPicker { showsOccasionPicker = true }
         }
         .task(id: settings.region) {
             realForecast = nil
@@ -40,6 +42,12 @@ struct PreviewScreen: View {
             // 지역이 바뀌어 취소된 요청이 새 지역의 상태를 덮지 않게 한다.
             if !Task.isCancelled { realForecast = result }
         }
+    }
+
+    private func save() {
+        saved = settings.sceneSettings
+        store.save(saved)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private var forecastStatus: String {
@@ -62,14 +70,11 @@ struct PreviewScreen: View {
 private struct SettingsPanel: View {
     @Binding var settings: PreviewSettings
     let forecastStatus: String
-    let occasionTitle: String
-    @Binding var showsOccasionPicker: Bool
+
+    private static let occasions = CountryRegistry.standard.profiles.flatMap(\.occasions)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            LabeledContent("이벤트") {
-                Button(occasionTitle) { showsOccasionPicker = true }
-            }
             LabeledContent("지역") {
                 Picker("지역", selection: $settings.region) {
                     ForEach(CountryRegistry.standard.regions) { Text($0.name).tag($0) }
@@ -102,6 +107,34 @@ private struct SettingsPanel: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
+            LabeledContent("이벤트") {
+                Picker("이벤트", selection: $settings.occasion) {
+                    Text("자동").tag(OccasionSelection.automatic)
+                    ForEach(Self.occasions) { Text($0.name).tag(OccasionSelection.manual(occasionID: $0.id)) }
+                }
+                .labelsHidden()
+            }
+            if settings.occasion != .automatic {
+                Text("고른 명절을 날짜와 상관없이 보여줍니다. 일출·일몰·보름달은 계속 자동입니다.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+private struct SaveBar: View {
+    let hasChanges: Bool
+    let save: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Button("저장", action: save)
+                .buttonStyle(.borderedProminent)
+                .disabled(!hasChanges)
+            Text(hasChanges ? "저장하면 시각·날씨·이벤트가 위젯에 반영됩니다. 지역은 위젯마다 위젯 편집에서 고릅니다." : "위젯에 반영된 설정입니다.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
     }
 }
@@ -153,11 +186,11 @@ private struct WidgetGuide: View {
             #if os(macOS)
             Text("바탕화면을 우클릭 → 위젯 편집 → Christof 를 찾아 바탕화면에 놓습니다.")
             Text("지역은 위젯을 우클릭 → 위젯 편집에서 고릅니다.")
-            Text("위젯을 누르면 이 앱에서 이벤트를 자동·수동으로 고를 수 있습니다.")
+            Text("위젯을 누르면 이 앱이 열립니다. 시각·날씨·이벤트를 바꾸고 저장하면 위젯에 반영됩니다.")
             #else
             Text("홈 화면을 길게 누르기 → 편집 → 위젯 추가 → Christof 를 고릅니다.")
             Text("지역은 위젯을 길게 눌러 위젯 편집에서 고릅니다.")
-            Text("위젯을 누르면 이 앱에서 이벤트를 자동·수동으로 고를 수 있습니다.")
+            Text("위젯을 누르면 이 앱이 열립니다. 시각·날씨·이벤트를 바꾸고 저장하면 위젯에 반영됩니다.")
             #endif
         }
         .font(.callout)

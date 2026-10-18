@@ -9,33 +9,35 @@ struct WindowEntry: TimelineEntry {
 struct WindowTimelineProvider: AppIntentTimelineProvider {
     var weather: any WeatherProviding = .standard
     var factory = SceneContextFactory()
-    var selections = OccasionSelectionStore()
+    var store = SceneSettingsStore()
 
     func placeholder(in context: Context) -> WindowEntry {
-        entry(at: .now, region: CountryRegistry.standard.defaultRegion, forecast: nil, selection: .automatic)
+        entry(at: .now, region: CountryRegistry.standard.defaultRegion, forecast: nil, settings: .live)
     }
 
     // 위젯 갤러리·편집 화면은 바로 떠야 하므로 네트워크를 기다리지 않는다.
     func snapshot(for configuration: SelectRegionIntent, in context: Context) async -> WindowEntry {
-        entry(at: .now, region: configuration.selectedRegion, forecast: nil, selection: selections.load())
+        entry(at: .now, region: configuration.selectedRegion, forecast: nil, settings: store.load())
     }
 
     func timeline(for configuration: SelectRegionIntent, in context: Context) async -> Timeline<WindowEntry> {
         let region = configuration.selectedRegion
+        let settings = store.load()
         let now = Date.now
         // 예보 실패(오프라인 등)는 날씨 없는 장면으로 그리고, 30분 뒤 다시 시도한다(하루 48회, 리로드 예산 40~70회 안).
         let forecast = try? await weather.forecast(for: region)
-        let selection = selections.load()
         let minuteStart = Date(timeIntervalSinceReferenceDate: (now.timeIntervalSinceReferenceDate / 60).rounded(.down) * 60)
         // 리로드는 1시간 뒤 요청하지만 시스템이 미룰 수 있어, 엔트리를 3시간치 만들어 그동안 시계가 멈추지 않게 한다.
-        let entries = (0..<180).map { minute in
-            entry(at: minuteStart.addingTimeInterval(Double(minute) * 60), region: region, forecast: forecast, selection: selection)
+        // 시각을 고정했으면 장면이 바뀌지 않으므로 하나면 된다.
+        let count = settings.fixedDate == nil ? 180 : 1
+        let entries = (0..<count).map { minute in
+            entry(at: minuteStart.addingTimeInterval(Double(minute) * 60), region: region, forecast: forecast, settings: settings)
         }
         let policy: TimelineReloadPolicy = .after(now.addingTimeInterval((forecast == nil ? 30 : 60) * 60))
         return Timeline(entries: entries, policy: policy)
     }
 
-    private func entry(at date: Date, region: Region, forecast: WeatherForecast?, selection: OccasionSelection) -> WindowEntry {
-        WindowEntry(date: date, context: factory.context(at: date, region: region, forecast: forecast, selection: selection))
+    private func entry(at date: Date, region: Region, forecast: WeatherForecast?, settings: SceneSettings) -> WindowEntry {
+        WindowEntry(date: date, context: factory.context(now: date, region: region, realForecast: forecast, settings: settings))
     }
 }

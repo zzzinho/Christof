@@ -9,6 +9,12 @@ public struct SceneContextFactory: Sendable {
         self.universalOccasions = universalOccasions
     }
 
+    public func context(now: Date, region: Region, realForecast: WeatherForecast?, settings: SceneSettings) -> SceneContext {
+        let date = settings.fixedDate ?? now
+        let forecast = settings.forcedWeather.map { WeatherForecast(samples: [.forced($0, at: date)]) } ?? realForecast
+        return context(at: date, region: region, forecast: forecast, selection: settings.occasion)
+    }
+
     /// 수동 선택은 국가 이벤트만 바꾸고, 해·달 이벤트는 늘 날짜로 판정한다.
     public func context(at date: Date, region: Region, forecast: WeatherForecast?, selection: OccasionSelection = .automatic) -> SceneContext {
         let profile = countries.profile(for: region.countryCode)
