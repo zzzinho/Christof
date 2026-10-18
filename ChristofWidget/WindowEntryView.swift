@@ -11,8 +11,7 @@ struct WindowEntryView: View {
             .containerBackground(.background, for: .widget)
     }
 
-    // macOS SwiftUI 에도 WindowStyle 이 있어 모듈로 한정한다.
-    private var style: ChristofKit.WindowStyle {
+    private var style: WindowSize {
         switch family {
         case .systemSmall: .compact
         case .systemLarge, .systemExtraLarge: .expanded

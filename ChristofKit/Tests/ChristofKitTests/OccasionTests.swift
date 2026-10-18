@@ -55,6 +55,15 @@ func sunEventRuleWindow(_ event: SunEventRule.Event, _ offset: (minutes: Double,
     #expect(rule.isActive(at: time.addingTimeInterval(offset.minutes * 60), in: seoul) == offset.expected)
 }
 
+// Open-Meteo archive: 레이캬비크 2026-06-20 일몰은 6/21 00:01:51 UTC(자정을 넘는다).
+@Test("자정을 넘는 일몰도 자정 전 창에서 진행 중", arguments: [
+    ("레이캬비크 하지 무렵 23:45, 일몰 17분 전", Date(timeIntervalSince1970: 1782000111 - 17 * 60), true),
+])
+func sunEventRuleAcrossMidnight(_ label: String, _ date: Date, _ expected: Bool) {
+    let reykjavik = Region(id: "test.reykjavik", name: "레이캬비크", countryCode: "IS", latitude: 64.1355, longitude: -21.8954, timeZone: TimeZone(identifier: "Atlantic/Reykjavik")!)
+    #expect(SunEventRule(.sunset, window: 30 * 60).isActive(at: date, in: reykjavik) == expected, "\(label)")
+}
+
 @Test("극야로 해가 뜨지 않는 날은 일출 이벤트가 없다")
 func sunEventRuleWithoutSunrise() {
     let longyearbyen = Region(id: "test.svalbard", name: "롱위에아르뷔엔", countryCode: "NO", latitude: 78.2232, longitude: 15.6267, timeZone: TimeZone(identifier: "Arctic/Longyearbyen")!)
@@ -66,6 +75,7 @@ func sunEventRuleWithoutSunrise() {
 @Test("보름달 규칙은 달이 거의 차서 해가 진 하늘에 떠 있을 때만 진행 중", arguments: [
     ("보름 당일 밤", kst(2025, 10, 7, 21, 0), true),
     ("보름이어도 해가 떠 있는 낮은 아니다", kst(2025, 10, 7, 12, 0), false),
+    ("보름 이틀 뒤 밤은 아니다", kst(2025, 10, 9, 21, 0), false),
     ("보름 사흘 뒤 밤은 아니다", kst(2025, 10, 10, 21, 0), false),
     ("해가 졌어도 보름달이 뜨기 전은 아니다", kst(2026, 3, 4, 19, 0), false),
     ("같은 날 보름달이 뜬 뒤는 진행 중", kst(2026, 3, 4, 20, 0), true),

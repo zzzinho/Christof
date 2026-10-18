@@ -4,9 +4,7 @@ public struct FullMoonDecoration: SceneLayerProvider {
     public init() {}
 
     @MainActor public func layers(for context: SceneContext) -> [WindowLayer] {
-        guard context.sun.altitude < 0,
-              let position = CelestialPosition.moon(context.moon, latitude: context.region.latitude)
-        else { return [] }
+        guard case let (position, visibility)? = MoonEffect.visibleMoon(in: context) else { return [] }
         return [
             WindowLayer(id: "decoration.fullMoon", depth: LayerDepth(LayerDepth.celestialBody.value - 1)) {
                 Canvas { ctx, size in
@@ -18,12 +16,12 @@ public struct FullMoonDecoration: SceneLayerProvider {
                         Path(ellipseIn: CGRect(center: center, radius: halo)),
                         with: .radialGradient(
                             Gradient(stops: [
-                                .init(color: warm.color(0.7), location: 0),
-                                .init(color: warm.color(0.3), location: 0.45),
+                                .init(color: warm.color(0.7 * visibility), location: 0),
+                                .init(color: warm.color(0.3 * visibility), location: 0.45),
                                 .init(color: warm.color(0), location: 1),
                             ]),
                             center: center, startRadius: moon, endRadius: halo))
-                    ctx.stroke(Path(ellipseIn: CGRect(center: center, radius: moon * 1.6)), with: .color(warm.color(0.35)), lineWidth: moon * 0.12)
+                    ctx.stroke(Path(ellipseIn: CGRect(center: center, radius: moon * 1.6)), with: .color(warm.color(0.35 * visibility)), lineWidth: moon * 0.12)
                 }
             }
         ]

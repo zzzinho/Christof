@@ -1,6 +1,6 @@
 import CoreGraphics
 
-public enum WindowStyle: Sendable, CaseIterable {
+public enum WindowSize: Sendable, CaseIterable {
     case compact
     case regular
     case expanded
@@ -14,5 +14,5 @@ public enum WindowStyle: Sendable, CaseIterable {
         }
     }
 
-    var showsDetails: Bool { self != .compact }
+    var showsRegion: Bool { self != .compact }
 }

@@ -17,33 +17,18 @@ struct PreviewSettings {
 extension WeatherSample {
     // ponytail: 강제 날씨의 구름량·세기·기온은 고정값. 세기별 모습을 봐야 하면 슬라이더를 추가한다.
     static func forced(_ condition: WeatherCondition, at date: Date) -> WeatherSample {
-        let cloudCover: Double = switch condition {
-        case .clear: 0
-        case .partlyCloudy: 0.4
-        default: 1
+        let (cloudCover, intensity): (Double, Double) = switch condition {
+        case .clear: (0, 0)
+        case .partlyCloudy: (0.4, 0)
+        case .overcast: (1, 0)
+        case .fog, .drizzle, .rain, .snow, .thunderstorm: (1, 0.7)
         }
-        let hasPrecipitation = ![.clear, .partlyCloudy, .overcast].contains(condition)
         return WeatherSample(
             time: date,
             condition: condition,
-            intensity: hasPrecipitation ? 0.7 : 0,
+            intensity: intensity,
             cloudCover: cloudCover,
             temperatureCelsius: condition == .snow ? -2 : 18
         )
-    }
-}
-
-extension WeatherCondition {
-    var koreanName: String {
-        switch self {
-        case .clear: "맑음"
-        case .partlyCloudy: "구름 조금"
-        case .overcast: "흐림"
-        case .fog: "안개"
-        case .drizzle: "이슬비"
-        case .rain: "비"
-        case .snow: "눈"
-        case .thunderstorm: "뇌우"
-        }
     }
 }

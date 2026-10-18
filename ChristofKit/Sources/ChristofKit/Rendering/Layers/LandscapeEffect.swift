@@ -8,21 +8,23 @@ struct LandscapeEffect: SceneLayerProvider {
         let blossoms: Bool
     }
 
-    private static func colors(for season: Season, snowing: Bool) -> Colors {
-        if snowing || season == .winter {
+    private static func colors(for season: Season, snowCovered: Bool) -> Colors {
+        if snowCovered {
             return Colors(ground: RGB(hex: 0xEEF2F7), hill: RGB(hex: 0xD5DEE9), crowns: [], blossoms: false)
         }
         return switch season {
         case .spring: Colors(ground: RGB(hex: 0x8CC56B), hill: RGB(hex: 0x7FAE6A), crowns: [RGB(hex: 0xF6B9CC), RGB(hex: 0xF2A3BC)], blossoms: true)
         case .summer: Colors(ground: RGB(hex: 0x5DA548), hill: RGB(hex: 0x4E8F4A), crowns: [RGB(hex: 0x3E8E41), RGB(hex: 0x2F7D3A), RGB(hex: 0x4C9A3C)], blossoms: false)
         case .autumn: Colors(ground: RGB(hex: 0xB9A04C), hill: RGB(hex: 0x9E7B45), crowns: [RGB(hex: 0xE0662C), RGB(hex: 0xC8402A), RGB(hex: 0xE8A33A)], blossoms: false)
-        case .winter: Colors(ground: RGB(hex: 0xEEF2F7), hill: RGB(hex: 0xD5DEE9), crowns: [], blossoms: false)
+        case .winter: Colors(ground: RGB(hex: 0xA79E7E), hill: RGB(hex: 0x8C8670), crowns: [], blossoms: false)
         }
     }
 
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         let palette = SkyPalette(context)
-        let colors = Self.colors(for: context.season, snowing: context.weather?.condition == .snow)
+        // 따뜻한 겨울(부산·제주, 다른 나라 남쪽)은 마른 땅으로 두고, 눈이 오거나 영하일 때만 눈밭으로 그린다.
+        let snowCovered = context.weather.map { $0.condition == .snow || (context.season == .winter && $0.temperatureCelsius <= 0) } ?? false
+        let colors = Self.colors(for: context.season, snowCovered: snowCovered)
         let lights = max(0, 1 - palette.daylight / 0.45)
         return [
             WindowLayer(id: "landscape", depth: .landscape) {

@@ -1,12 +1,10 @@
 import SwiftUI
 
 struct CloudEffect: SceneLayerProvider {
-    private static let decked: Set<WeatherCondition> = [.overcast, .drizzle, .rain, .snow, .thunderstorm]
-
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         guard let weather = context.weather else { return [] }
         let count = Int((weather.cloudCover * 7).rounded())
-        let deck = Self.decked.contains(weather.condition)
+        let deck = weather.condition.hasCloudDeck
         guard count > 0 || deck else { return [] }
         let color = SkyPalette(context).cloud
         return [

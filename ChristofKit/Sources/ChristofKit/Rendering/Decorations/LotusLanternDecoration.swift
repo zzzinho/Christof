@@ -9,6 +9,7 @@ public struct LotusLanternDecoration: SceneLayerProvider {
 
     @MainActor public func layers(for context: SceneContext) -> [WindowLayer] {
         let lights = max(0, 1 - SkyPalette(context).daylight / 0.5)
+        let bodies = [CelestialPosition.sun(context.sun, latitude: context.region.latitude), MoonEffect.visibleMoon(in: context)?.position].compactMap { $0 }
         return [
             WindowLayer(id: "decoration.lotusLantern", depth: .decoration) {
                 Canvas { ctx, size in
@@ -18,11 +19,18 @@ public struct LotusLanternDecoration: SceneLayerProvider {
                     line.move(to: CGPoint(x: 0, y: end))
                     line.addQuadCurve(to: CGPoint(x: size.width, y: end), control: CGPoint(x: size.width / 2, y: sag))
                     ctx.stroke(line, with: .color(RGB(hex: 0x3B2F2A).color(0.8)), lineWidth: max(0.8, u * 0.008))
-                    let count = max(3, Int(size.width / (u * 0.34)))
+                    // 짝수여야 가운데 연등이 세로 창살 뒤에 걸리지 않는다.
+                    let count = max(4, Int(size.width / (u * 0.34)) / 2 * 2)
+                    let radius = u * 0.065
+                    // 해(지평선 근처 최대 0.0975·u)·달(0.08·u)을 가리지 않게 그 자리 연등은 뺀다.
+                    let clearance = u * 0.1 + radius * 1.7
                     for i in 0..<count {
                         let t = (Double(i) + 0.5) / Double(count)
                         let hook = CGPoint(x: size.width * t, y: (1 - t) * (1 - t) * end + 2 * (1 - t) * t * sag + t * t * end)
-                        Self.drawLantern(&ctx, hook: hook, radius: u * 0.065, color: Self.colors[i % Self.colors.count], lights: lights)
+                        let center = CGPoint(x: hook.x, y: hook.y + radius * 1.6)
+                        let hidesBody = bodies.contains { hypot($0.x * size.width - center.x, $0.y * size.height - center.y) < clearance }
+                        if hidesBody { continue }
+                        Self.drawLantern(&ctx, hook: hook, radius: radius, color: Self.colors[i % Self.colors.count], lights: lights)
                     }
                 }
             }

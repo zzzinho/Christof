@@ -2,6 +2,19 @@ import Foundation
 
 public enum WeatherCondition: Sendable, Hashable, CaseIterable {
     case clear, partlyCloudy, overcast, fog, drizzle, rain, snow, thunderstorm
+
+    public var koreanName: String {
+        switch self {
+        case .clear: "맑음"
+        case .partlyCloudy: "구름 조금"
+        case .overcast: "흐림"
+        case .fog: "안개"
+        case .drizzle: "이슬비"
+        case .rain: "비"
+        case .snow: "눈"
+        case .thunderstorm: "뇌우"
+        }
+    }
 }
 
 public struct WeatherSample: Sendable, Hashable {

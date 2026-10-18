@@ -4,7 +4,7 @@ import SwiftUI
 struct PreviewScreen: View {
     @State private var settings = PreviewSettings()
     @State private var realForecast: Result<WeatherForecast, any Error>?
-    private let weather = OpenMeteoWeatherProvider()
+    private let weather: any WeatherProviding = .standard
     private let factory = SceneContextFactory()
 
     var body: some View {
@@ -37,9 +37,17 @@ struct PreviewScreen: View {
     private var forecastStatus: String {
         switch realForecast {
         case nil: "실제 예보 불러오는 중…"
-        case .success(let forecast): "실제 예보 \(forecast.samples.count)시간분 받음"
+        case .success(let forecast): status(of: forecast)
         case .failure(let error): "실제 예보를 가져오지 못했습니다: \(error.localizedDescription)"
         }
+    }
+
+    private func status(of forecast: WeatherForecast) -> String {
+        guard let first = forecast.samples.first, let last = forecast.samples.last else { return "실제 예보가 비어 있습니다" }
+        let format = Date.FormatStyle(date: .abbreviated, time: .shortened, timeZone: settings.region.timeZone)
+        let range = "실제 예보 \(first.time.formatted(format)) ~ \(last.time.formatted(format))"
+        guard !settings.usesCurrentTime, forecast.sample(at: settings.customDate) == nil else { return range }
+        return range + "\n지정한 시각이 예보 범위 밖이라 날씨 없이 그립니다. 날씨를 직접 고르세요."
     }
 }
 
@@ -93,9 +101,7 @@ private struct WindowPreviews: View {
             Text(summary)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
-            preview("작게", style: .compact)
-            preview("중간", style: .regular)
-            preview("크게", style: .expanded)
+            ForEach(WindowSize.allCases, id: \.self) { preview(style: $0) }
         }
     }
 
@@ -106,15 +112,22 @@ private struct WindowPreviews: View {
         return "\(context.region.name) \(time) · 날씨 \(weather) · 이벤트 \(occasions)"
     }
 
-    // macOS SwiftUI 에도 WindowStyle 이 있어 모듈로 한정한다.
-    private func preview(_ title: String, style: ChristofKit.WindowStyle) -> some View {
+    private func preview(style: WindowSize) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title)
+            Text(Self.title(of: style))
                 .font(.caption)
                 .foregroundStyle(.secondary)
             WindowView(context: context, style: style)
                 .frame(width: style.referenceSize.width, height: style.referenceSize.height)
                 .clipShape(.rect(cornerRadius: 22))
+        }
+    }
+
+    private static func title(of style: WindowSize) -> String {
+        switch style {
+        case .compact: "작게"
+        case .regular: "중간"
+        case .expanded: "크게"
         }
     }
 }

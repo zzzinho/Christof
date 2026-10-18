@@ -91,6 +91,8 @@ private let night = (altitude: -40.0, azimuth: 0.0)
     LayerRule(rule: "낮이면 해만 있고 달과 별은 없다", providers: [SunEffect(), MoonEffect(), StarEffect()], context: scene(), expected: ["sun": .outside]),
     LayerRule(rule: "달이 지평선 아래면 밤이라도 달과 보름달 장식을 그리지 않는다", providers: [MoonEffect(), FullMoonDecoration()],
               context: scene(sun: night.altitude, azimuth: night.azimuth, moonAltitude: -10), expected: [:]),
+    LayerRule(rule: "뇌우로 달이 가려지면 보름달 장식도 그리지 않는다", providers: [MoonEffect(), FullMoonDecoration()],
+              context: scene(sun: night.altitude, azimuth: night.azimuth, weather: sample(.thunderstorm, cloudCover: 1)), expected: [:]),
     LayerRule(rule: "흐린 밤엔 별이 없다", providers: [StarEffect()],
               context: scene(sun: night.altitude, azimuth: night.azimuth, weather: sample(.overcast, cloudCover: 1)), expected: [:]),
     LayerRule(rule: "눈이 오면 창턱에 쌓인 눈은 창틀 위에 그린다", providers: [SnowEffect()], context: scene(weather: sample(.snow)),
@@ -136,7 +138,8 @@ func moonLitSideFollowsPhase(phase: Double, minX: Double, maxX: Double) {
 
 struct CaptionRule: Sendable, CustomTestStringConvertible {
     let rule: String
-    let style: ChristofKit.WindowStyle
+    let style: WindowSize
+    let locale: String
     let date: String
     let temperature: Double?
     let time: String
@@ -147,19 +150,29 @@ struct CaptionRule: Sendable, CustomTestStringConvertible {
 
 @MainActor @Test(arguments: [
     // 서울은 1988년 이후 일광 절약 시간이 없어 UTC+9 고정이다.
-    CaptionRule(rule: "시각은 지역 시간대의 24시간제", style: .compact, date: "2026-10-18T14:05:00Z", temperature: 11.6, time: "23:05", degrees: "12°", details: nil),
-    CaptionRule(rule: "영하 기온은 반올림해 부호를 붙인다", style: .compact, date: "2026-10-18T00:00:00Z", temperature: -2.6, time: "09:00", degrees: "-3°", details: nil),
-    CaptionRule(rule: "0도 근처 음수는 -0° 가 아니라 0°", style: .compact, date: "2026-10-18T00:00:00Z", temperature: -0.4, time: "09:00", degrees: "0°", details: nil),
-    CaptionRule(rule: "날씨를 모르면 기온은 --°", style: .compact, date: "2026-10-18T00:00:00Z", temperature: nil, time: "09:00", degrees: "--°", details: nil),
-    CaptionRule(rule: "regular 는 지역과 첫 이벤트 이름을 더한다", style: .regular, date: "2026-09-25T12:00:00Z", temperature: 19, time: "21:00", degrees: "19°", details: "서울 · 추석"),
+    CaptionRule(rule: "시각은 지역 시간대로, 24시간제 로캘이면 24시간제", style: .compact, locale: "en_GB", date: "2026-10-18T14:05:00Z", temperature: 11.6, time: "23:05", degrees: "12°", details: "추석"),
+    CaptionRule(rule: "12시간제 로캘이면 오전·오후를 붙인다", style: .compact, locale: "ko_KR", date: "2026-10-18T14:05:00Z", temperature: 11.6, time: "오후 11:05", degrees: "12°", details: "추석"),
+    CaptionRule(rule: "영하 기온은 반올림해 부호를 붙인다", style: .compact, locale: "en_GB", date: "2026-10-18T00:00:00Z", temperature: -2.6, time: "9:00", degrees: "-3°", details: "추석"),
+    CaptionRule(rule: "0도 근처 음수는 -0° 가 아니라 0°", style: .compact, locale: "en_GB", date: "2026-10-18T00:00:00Z", temperature: -0.4, time: "9:00", degrees: "0°", details: "추석"),
+    CaptionRule(rule: "날씨를 모르면 기온은 --°", style: .compact, locale: "en_GB", date: "2026-10-18T00:00:00Z", temperature: nil, time: "9:00", degrees: "--°", details: "추석"),
+    CaptionRule(rule: "regular 는 첫 이벤트 앞에 지역을 더한다", style: .regular, locale: "en_GB", date: "2026-09-25T12:00:00Z", temperature: 19, time: "21:00", degrees: "19°", details: "서울 · 추석"),
 ])
 func captionShowsLocalTimeTemperatureAndDetails(_ rule: CaptionRule) throws {
     let occasions = [Occasion(id: "chuseok", name: "추석", rule: AlwaysActive()), Occasion(id: "fullMoon", name: "보름달", rule: AlwaysActive())]
     let date = try Date(rule.date, strategy: .iso8601)
-    let caption = WindowCaption(context: scene(weather: rule.temperature.map { sample(.clear, temperature: $0) }, date: date, occasions: occasions), style: rule.style)
+    let context = scene(weather: rule.temperature.map { sample(.clear, temperature: $0) }, date: date, occasions: occasions)
+    let caption = WindowCaption(context: context, style: rule.style, locale: Locale(identifier: rule.locale))
     #expect(caption.time == rule.time)
     #expect(caption.temperature == rule.degrees)
     #expect(caption.details == rule.details)
+}
+
+@MainActor @Test(arguments: WindowSize.allCases)
+func captionReadsRegionTimeWeatherTemperatureAndOccasionsAtEverySize(_ style: WindowSize) throws {
+    let occasions = [Occasion(id: "chuseok", name: "추석", rule: AlwaysActive()), Occasion(id: "fullMoon", name: "보름달", rule: AlwaysActive())]
+    let context = scene(weather: sample(.rain, temperature: 19), date: try Date("2026-09-25T12:00:00Z", strategy: .iso8601), occasions: occasions)
+    let caption = WindowCaption(context: context, style: style, locale: Locale(identifier: "en_GB"))
+    #expect(caption.accessibilityText == "서울, 21:00, 비, 19°, 추석, 보름달")
 }
 
 @MainActor @Test func sameSceneRendersIdenticalPixels() throws {

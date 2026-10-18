@@ -2,10 +2,10 @@ import SwiftUI
 
 public struct WindowView: View {
     private let context: SceneContext
-    private let style: WindowStyle
+    private let style: WindowSize
     private let composer: WindowSceneComposer
 
-    public init(context: SceneContext, style: WindowStyle = .regular, composer: WindowSceneComposer = WindowSceneComposer()) {
+    public init(context: SceneContext, style: WindowSize = .regular, composer: WindowSceneComposer = WindowSceneComposer()) {
         self.context = context
         self.style = style
         self.composer = composer

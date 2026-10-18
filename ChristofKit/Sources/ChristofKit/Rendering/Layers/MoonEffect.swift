@@ -4,12 +4,7 @@ struct MoonEffect: SceneLayerProvider {
     static let radiusRatio = 0.08
 
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
-        guard context.sun.altitude < 0,
-              let position = CelestialPosition.moon(context.moon, latitude: context.region.latitude)
-        else { return [] }
-        let palette = SkyPalette(context)
-        let visibility = 1 - palette.gloom * 1.25
-        guard visibility > 0.05 else { return [] }
+        guard case let (position, visibility)? = Self.visibleMoon(in: context) else { return [] }
         let phase = context.moon.phase
         let mirrored = context.region.latitude < 0
         return [
@@ -29,6 +24,14 @@ struct MoonEffect: SceneLayerProvider {
                 }
             }
         ]
+    }
+
+    static func visibleMoon(in context: SceneContext) -> (position: UnitPoint, visibility: Double)? {
+        guard context.sun.altitude < 0,
+              let position = CelestialPosition.moon(context.moon, latitude: context.region.latitude),
+              let visibility = SkyPalette(context).celestialVisibility
+        else { return nil }
+        return (position, visibility)
     }
 
     /// 차는 달(위상 < 0.5)은 북반구에서 오른쪽이 밝다. 경계선은 x 반지름이 cos(2π·위상)인 반타원.

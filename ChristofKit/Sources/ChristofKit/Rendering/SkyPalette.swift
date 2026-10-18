@@ -89,17 +89,13 @@ struct SkyPalette {
     }
 
     static func gloom(of weather: WeatherSample) -> Double {
-        let base: Double = switch weather.condition {
-        case .clear: 0
-        case .partlyCloudy: 0.1
-        case .overcast: 0.5
-        case .fog: 0.45
-        case .drizzle: 0.45
-        case .rain: 0.6
-        case .snow: 0.4
-        case .thunderstorm: 0.8
-        }
-        return min(1, max(base, weather.cloudCover * 0.35))
+        min(1, max(weather.condition.gloom, weather.cloudCover * 0.35))
+    }
+
+    /// 해·달과 그 장식이 함께 쓴다. 너무 흐려 안 보이면 nil.
+    var celestialVisibility: Double? {
+        let visibility = 1 - gloom * 1.25
+        return visibility > 0.05 ? visibility : nil
     }
 
     private static func dull(_ color: RGB, _ gloom: Double) -> RGB {

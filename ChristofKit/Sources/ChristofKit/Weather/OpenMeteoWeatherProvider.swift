@@ -16,3 +16,8 @@ public struct OpenMeteoWeatherProvider: WeatherProviding {
         return try OpenMeteoResponse.forecast(from: data)
     }
 }
+
+// 앱 미리보기와 위젯이 같은 출처를 쓰도록 기본값을 여기 한 곳에 둔다.
+extension WeatherProviding where Self == OpenMeteoWeatherProvider {
+    public static var standard: Self { .init() }
+}

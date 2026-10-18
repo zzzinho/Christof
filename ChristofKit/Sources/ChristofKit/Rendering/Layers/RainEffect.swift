@@ -2,7 +2,7 @@ import SwiftUI
 
 struct RainEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
-        guard let weather = context.weather, [.drizzle, .rain, .thunderstorm].contains(weather.condition) else { return [] }
+        guard let weather = context.weather, weather.condition.isRain else { return [] }
         let drizzle = weather.condition == .drizzle
         let count = drizzle ? 40 + Int(60 * weather.intensity) : 70 + Int(130 * weather.intensity)
         let opacity = 0.35 + 0.25 * SkyPalette(context).daylight

@@ -3,7 +3,7 @@ import SwiftUI
 struct StarEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         let palette = SkyPalette(context)
-        if let condition = context.weather?.condition, condition != .clear, condition != .partlyCloudy { return [] }
+        if let condition = context.weather?.condition, !condition.showsStars { return [] }
         let opacity = (1 - palette.daylight / 0.4) * (1 - palette.gloom * 2)
         guard opacity > 0.05 else { return [] }
         return [

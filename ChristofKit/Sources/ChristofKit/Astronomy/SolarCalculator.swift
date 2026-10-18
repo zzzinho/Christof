@@ -20,8 +20,8 @@ public enum SolarCalculator {
         )
     }
 
-    // ponytail: 현지 정오에서 가장 가까운 사건을 고른다. 고위도 여름처럼 일몰이 자정을 넘으면 다음 날 0시 이후 시각이 나온다.
-    // 그날 범위로 자르려면 결과를 startOfDay..<다음 날 로 걸러 nil 로 바꾼다.
+    // ponytail: 현지 12:00 기준 ±12시간 안의 사건을 고른다. 자정을 넘는 일몰은 그날 0시 이후 시각, 곧 전날 저녁에 진 시각으로 나와
+    // sunset < sunrise 가 될 수 있다. 그날 저녁의 일몰이 필요하면 다음 날로 한 번 더 구한다.
     // -0.833° 는 해 윗가장자리가 지평선에 닿는 고도다.
     private static func horizonCrossing(near start: Date, latitude: Double, longitude: Double, rising: Bool) -> Date? {
         let lat = radians(latitude)

@@ -116,7 +116,7 @@ private let usnoMoonPositions: [(label: String, utc: TimeInterval, latitude: Dou
     (label: "서울 2026-09-25 21:00 KST 추석", utc: 1790337600, latitude: 37.5665, longitude: 126.9780, altitude: 36.755321, azimuth: 131.954286),
     (label: "서울 2026-03-22 20:00 KST 초승달은 서쪽", utc: 1774177200, latitude: 37.5665, longitude: 126.9780, altitude: 29.451365, azimuth: 275.698788),
     (label: "부산 2026-06-21 19:41 KST 상현 무렵", utc: 1782038460, latitude: 35.10168, longitude: 129.03004, altitude: 48.317631, azimuth: 219.00742),
-    (label: "시드니 2026-01-04 03:00 AEDT, 남반구라 달이 북쪽", utc: 1767542400, latitude: -33.8688, longitude: 151.2093, altitude: 32.177303, azimuth: 347.904183),
+    (label: "시드니 2026-01-05 03:00 AEDT(2026-01-04 16:00Z), 남반구라 달이 북쪽", utc: 1767542400, latitude: -33.8688, longitude: 151.2093, altitude: 32.177303, azimuth: 347.904183),
 ]
 
 @Test("달의 고도·방위각은 USNO 와 0.5° 안에서 맞는다", arguments: usnoMoonPositions)

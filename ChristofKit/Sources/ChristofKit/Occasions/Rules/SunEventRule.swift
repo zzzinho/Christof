@@ -14,9 +14,11 @@ public struct SunEventRule: OccasionRule {
     }
 
     public func isActive(at date: Date, in region: Region) -> Bool {
-        let sun = SolarCalculator.state(at: date, latitude: region.latitude, longitude: region.longitude, timeZone: region.timeZone)
-        // ponytail: 그날의 일출·일몰만 본다. 자정 가까이 해가 뜨고 지는 고위도에선 자정을 넘는 창을 놓친다. 필요하면 전날·다음날 시각도 함께 본다.
-        guard let time = event == .sunrise ? sun.sunrise : sun.sunset else { return false }
-        return abs(date.timeIntervalSince(time)) <= window
+        // 사건 시각은 지역 날짜마다 하나라, 창이 자정을 걸치면(자정 무렵 일몰) 창 양 끝의 날짜를 모두 봐야 한다. window < 12시간을 가정한다.
+        [date.addingTimeInterval(-window), date.addingTimeInterval(window)].contains { edge in
+            let sun = SolarCalculator.state(at: edge, latitude: region.latitude, longitude: region.longitude, timeZone: region.timeZone)
+            guard let time = event == .sunrise ? sun.sunrise : sun.sunset else { return false }
+            return abs(date.timeIntervalSince(time)) <= window
+        }
     }
 }
