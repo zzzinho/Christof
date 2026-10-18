@@ -11,6 +11,14 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 - 이벤트: 해당 국가의 명절·기념일(설날, 추석, 크리스마스, 할로윈 등)과 해·달 이벤트(일출·일몰·보름달). 캘린더 일정 같은 개인 데이터는 다루지 않는다. 한국부터 만든다.
 - 테스트: 코드 서명 인증서가 없어서 iOS 시뮬레이터로 실행을 확인한다. macOS 타깃은 빌드까지만 검증한다.
 
+## 명령
+
+- 패키지 테스트: `swift test --package-path ChristofKit`
+- 일부 테스트만: `swift test --package-path ChristofKit --filter <테스트 파일 이름 또는 함수 이름>` (예: `--filter OccasionTests`)
+- 장면 스냅샷 PNG: `swift run --package-path ChristofKit ChristofSnapshots <출력 폴더>`. 실제 지역·날짜를 `SceneContextFactory` 에 넣고 날씨만 가짜로 준다. 그리기를 바꾸면 PNG를 직접 열어 확인한다.
+- 앱·위젯 빌드: `xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'generic/platform=iOS Simulator' build`, macOS는 `-destination 'platform=macOS'`. 개발 팀 없이 Sign to Run Locally로 서명하므로 서명 옵션을 덮어쓰지 않는다.
+- 시뮬레이터: 이 Mac에는 iOS 26.5 런타임만 있다(배포 타깃 26.0).
+
 ## 코드 규칙: SRP·OCP
 
 목적은 이벤트를 쉽게 추가·제거·수정하고, 국가별로 확장할 수 있게 하는 것이다.
