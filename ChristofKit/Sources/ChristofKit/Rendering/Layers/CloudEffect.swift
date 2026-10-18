@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 구름. 구름량만큼 개수가 늘고, 궂은 날엔 하늘 위쪽을 덮는 구름층이 깔리며 어두워진다.
 struct CloudEffect: SceneLayerProvider {
     private static let decked: Set<WeatherCondition> = [.overcast, .drizzle, .rain, .snow, .thunderstorm]
 

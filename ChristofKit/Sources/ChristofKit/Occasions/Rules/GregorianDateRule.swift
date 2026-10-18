@@ -1,6 +1,5 @@
 import Foundation
 
-/// 양력 기념일. 지역 시간대의 하루 단위로 판정한다.
 public struct GregorianDateRule: OccasionRule {
     public let month: Int
     public let day: Int

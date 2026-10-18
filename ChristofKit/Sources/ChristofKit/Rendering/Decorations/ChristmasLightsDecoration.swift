@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 크리스마스 전구 줄. 창틀 위쪽과 양옆을 따라 늘어져 창틀 위에 그린다.
 public struct ChristmasLightsDecoration: SceneLayerProvider {
     public init() {}
 
@@ -15,7 +14,6 @@ public struct ChristmasLightsDecoration: SceneLayerProvider {
                     let u = min(size.width, size.height)
                     let inset = g.frame * 0.5
                     let spacing = u * 0.17
-                    // 위: 왼쪽 위 → 오른쪽 위, 아래로 처짐. 옆: 위 → 창턱, 유리 쪽으로 처짐.
                     var runs: [(CGPoint, CGPoint, CGVector)] = []
                     let across = max(3, Int((size.width - inset * 2) / spacing))
                     for i in 0..<across {

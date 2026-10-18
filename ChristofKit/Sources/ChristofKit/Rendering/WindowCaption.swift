@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 창턱 앞면에 적는 글: 지역 시각, 기온, (regular 이상) 지역·이벤트 이름.
 struct WindowCaption: View {
     let time: String
     let temperature: String

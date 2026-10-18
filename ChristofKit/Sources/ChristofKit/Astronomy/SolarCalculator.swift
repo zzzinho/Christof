@@ -1,6 +1,6 @@
 import Foundation
 
-/// NOAA 태양 위치 알고리즘으로 해의 고도·방위각과 그날의 일출·일몰을 구한다.
+/// NOAA 태양 위치 알고리즘.
 public enum SolarCalculator {
     public static func state(at date: Date, latitude: Double, longitude: Double, timeZone: TimeZone) -> SunState {
         let sun = SolarPosition(date: date)
@@ -22,7 +22,7 @@ public enum SolarCalculator {
 
     // ponytail: 현지 정오에서 가장 가까운 사건을 고른다. 고위도 여름처럼 일몰이 자정을 넘으면 다음 날 0시 이후 시각이 나온다.
     // 그날 범위로 자르려면 결과를 startOfDay..<다음 날 로 걸러 nil 로 바꾼다.
-    /// 해 윗가장자리가 지평선에 닿는 시각(고도 -0.833°). 해가 하루 종일 떠 있거나 지면 nil.
+    // -0.833° 는 해 윗가장자리가 지평선에 닿는 고도다.
     private static func horizonCrossing(near start: Date, latitude: Double, longitude: Double, rising: Bool) -> Date? {
         let lat = radians(latitude)
         var time = start
@@ -42,13 +42,11 @@ public enum SolarCalculator {
 private func radians(_ degrees: Double) -> Double { degrees * .pi / 180 }
 private func degrees(_ radians: Double) -> Double { radians * 180 / .pi }
 
-/// 각도를 -180..<180 으로 접는다.
 private func wrapped(_ degrees: Double) -> Double {
     let turns = (degrees + 180) / 360
     return (turns - turns.rounded(.down)) * 360 - 180
 }
 
-/// NOAA 계산식의 한 시각 해 위치. 적위는 라디안, 균시차는 분.
 private struct SolarPosition {
     let declination: Double
     let equationOfTime: Double
@@ -75,7 +73,6 @@ private struct SolarPosition {
         )
     }
 
-    /// 시간각(도, -180..<180). 남중이 0, 오전이 음수.
     func hourAngle(at date: Date, longitude: Double) -> Double {
         let utcMinutes = date.timeIntervalSince1970.truncatingRemainder(dividingBy: 86400) / 60
         let trueSolarMinutes = utcMinutes + equationOfTime + 4 * longitude

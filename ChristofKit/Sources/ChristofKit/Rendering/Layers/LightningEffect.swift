@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 뇌우의 번개. 뇌우면 늘 그리고, 모양은 지역 시각의 '시'로 정한다(같은 입력이면 같은 번개).
 struct LightningEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         guard let weather = context.weather, weather.condition == .thunderstorm else { return [] }
@@ -9,7 +8,6 @@ struct LightningEffect: SceneLayerProvider {
         let seed = UInt64(calendar.component(.hour, from: context.date))
         let flash = 0.25 + 0.25 * weather.intensity
         return [
-            // 구름 앞, 먼 풍경 뒤에 친다.
             WindowLayer(id: "lightning", depth: LayerDepth(35)) {
                 Canvas { ctx, size in
                     let u = min(size.width, size.height)

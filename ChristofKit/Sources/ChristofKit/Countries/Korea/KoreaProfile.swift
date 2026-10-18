@@ -1,6 +1,5 @@
 import Foundation
 
-/// 한국. 지역은 `KoreaRegions`, 이벤트는 `KoreaOccasions` 에 있다.
 public struct KoreaProfile: CountryProfile {
     public init() {}
 

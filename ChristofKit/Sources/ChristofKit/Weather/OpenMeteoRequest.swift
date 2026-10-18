@@ -1,6 +1,5 @@
 import Foundation
 
-/// Open-Meteo `/v1/forecast` 요청 URL을 만든다.
 enum OpenMeteoRequest {
     // 리터럴이라 실패하지 않는다.
     private static let endpoint = URL(string: "https://api.open-meteo.com/v1/forecast")!

@@ -1,12 +1,10 @@
 import ChristofKit
 import Foundation
 
-/// 미리보기 화면에서 고른 값. 장면은 매번 여기서 파생한다.
 struct PreviewSettings {
     var region = CountryRegistry.standard.defaultRegion
     var usesCurrentTime = true
     var customDate = Date.now
-    /// nil 이면 실제 예보를 쓴다.
     var forcedCondition: WeatherCondition?
 
     func sceneContext(now: Date, realForecast: WeatherForecast?, factory: SceneContextFactory) -> SceneContext {

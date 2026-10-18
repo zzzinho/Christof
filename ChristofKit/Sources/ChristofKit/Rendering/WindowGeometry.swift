@@ -1,14 +1,10 @@
 import CoreGraphics
 
-/// 창문 크기에서 창틀·유리·창턱 자리를 정한다. 창틀, 레이어 합성, 창틀 위 장식이 같은 값을 쓴다.
 struct WindowGeometry {
-    /// 창틀 두께. 짧은 변에 비례한다.
     let frame: CGFloat
     let mullion: CGFloat
     let glass: CGRect
-    /// 창턱 윗면. 장식과 쌓인 눈이 놓인다.
     let sillTop: CGRect
-    /// 창턱 앞면. 캡션 자리.
     let sillFace: CGRect
 
     var glassCornerRadius: CGFloat { frame * 0.3 }

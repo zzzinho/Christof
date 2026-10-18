@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 할로윈 호박 등불. 창턱 위에 놓여 창틀 위에 그린다. 밤엔 얼굴이 빛난다.
 public struct JackOLanternDecoration: SceneLayerProvider {
     public init() {}
 

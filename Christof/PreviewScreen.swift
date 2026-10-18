@@ -3,7 +3,6 @@ import SwiftUI
 
 struct PreviewScreen: View {
     @State private var settings = PreviewSettings()
-    /// nil 이면 불러오는 중.
     @State private var realForecast: Result<WeatherForecast, any Error>?
     private let weather = OpenMeteoWeatherProvider()
     private let factory = SceneContextFactory()

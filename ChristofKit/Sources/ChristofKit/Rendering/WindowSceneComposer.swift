@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 기본 효과와 진행 중인 이벤트 장식의 레이어를 모아 깊이 순으로 정렬한다.
 @MainActor
 public struct WindowSceneComposer {
     private let providers: [any SceneLayerProvider]

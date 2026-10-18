@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 0...1 sRGB. 보간·명암 계산을 하려고 SwiftUI `Color` 대신 쓴다.
+/// 보간·명암 계산을 하려고 SwiftUI `Color` 대신 쓴다.
 struct RGB: Equatable {
     var r: Double
     var g: Double
@@ -26,7 +26,6 @@ struct RGB: Equatable {
         RGB(r: r * k, g: g * k, b: b * k)
     }
 
-    /// 채널 차이의 최댓값. 연속성 검사용.
     func distance(to other: RGB) -> Double {
         max(abs(r - other.r), abs(g - other.g), abs(b - other.b))
     }
@@ -38,26 +37,22 @@ struct RGB: Equatable {
     }
 }
 
-/// 해 고도와 날씨에서 장면 색을 정한다. 하늘·구름·풍경·천체 레이어가 함께 쓴다.
 struct SkyPalette {
     let zenith: RGB
     let horizon: RGB
-    /// 0 밤 ... 1 낮.
     let daylight: Double
-    /// 0 맑음 ... 1 짙은 뇌우. 클수록 채도·밝기를 낮춘다.
     let gloom: Double
     let sun: RGB
     let cloud: RGB
 
-    /// 고도(도)별 천정·지평선 색. 사이는 선형 보간하고 양 끝 밖은 끝 값을 쓴다.
     static let keyframes: [(altitude: Double, zenith: RGB, horizon: RGB)] = [
-        (-18, RGB(hex: 0x0A0F24), RGB(hex: 0x18203D)),  // 천문 박명 끝: 밤
+        (-18, RGB(hex: 0x0A0F24), RGB(hex: 0x18203D)),  // 천문 박명 끝
         (-10, RGB(hex: 0x111A3D), RGB(hex: 0x2B3463)),
-        (-5, RGB(hex: 0x1F2C63), RGB(hex: 0x6A4C7E)),   // 시민 박명: 보랏빛
-        (-1, RGB(hex: 0x34508F), RGB(hex: 0xE0785A)),   // 노을
+        (-5, RGB(hex: 0x1F2C63), RGB(hex: 0x6A4C7E)),
+        (-1, RGB(hex: 0x34508F), RGB(hex: 0xE0785A)),
         (3, RGB(hex: 0x4C74B3), RGB(hex: 0xF2A65E)),
         (10, RGB(hex: 0x5A93D6), RGB(hex: 0xF3D9AE)),
-        (25, RGB(hex: 0x3D86DB), RGB(hex: 0xA8D3F2)),   // 낮
+        (25, RGB(hex: 0x3D86DB), RGB(hex: 0xA8D3F2)),
         (60, RGB(hex: 0x2E7AD9), RGB(hex: 0xC0E2F8)),
     ]
 
@@ -79,7 +74,6 @@ struct SkyPalette {
         self.init(sunAltitude: context.sun.altitude, weather: context.weather)
     }
 
-    /// 풍경 색을 지금 빛에 맞춘다. 밤엔 남색으로 어둡게, 궂은 날엔 바랜다.
     func shade(_ base: RGB) -> RGB {
         Self.dull(base.mixed(with: RGB(hex: 0x0B1022), (1 - daylight) * 0.82), gloom * 0.6)
     }

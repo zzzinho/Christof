@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 창문 자체: 유리 반사, 십자 창살, 창틀, 창턱. 장면과 무관하게 늘 같은 색이라 캡션 대비가 보장된다.
+/// 장면과 무관하게 늘 같은 색이라 캡션 대비가 보장된다.
 struct WindowFrame: View {
     static let paint = RGB(hex: 0xF3EEE6)
 
@@ -30,7 +30,6 @@ struct WindowFrame: View {
             }
             layer.fill(band(0.58, 0.14), with: .color(.white.opacity(0.10)))
             layer.fill(band(0.76, 0.04), with: .color(.white.opacity(0.08)))
-            // 창틀이 유리에 드리운 그림자.
             layer.stroke(glass, with: .color(.black.opacity(0.28)), lineWidth: g.frame * 0.5)
         }
     }
@@ -66,7 +65,6 @@ struct WindowFrame: View {
             with: .linearGradient(
                 Gradient(colors: [RGB(hex: 0xE2D8C7).color, RGB(hex: 0xECE5D9).color]),
                 startPoint: CGPoint(x: 0, y: g.sillFace.minY), endPoint: CGPoint(x: 0, y: g.sillFace.maxY)))
-        // 창턱 윗면이 앞면에 드리운 그림자.
         let shadow = CGRect(x: 0, y: g.sillFace.minY, width: g.sillFace.width, height: g.sillFace.height * 0.22)
         ctx.fill(
             Path(shadow),

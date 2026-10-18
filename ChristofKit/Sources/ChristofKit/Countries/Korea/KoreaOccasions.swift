@@ -1,6 +1,6 @@
 import Foundation
 
-/// 한국 명절·기념일. 앞에 있을수록 우선순위가 높다. 이벤트 추가·제거·수정은 이 목록의 값 하나만 다룬다.
+/// 앞에 있을수록 우선순위가 높다.
 public enum KoreaOccasions {
     public static let all: [Occasion] = [
         Occasion(id: "KR.seollal", name: "설날", rule: LunarDateRule(calendar: .dangi, month: 1, day: 1, daysBefore: 1, daysAfter: 1), decorations: [LuckyPouchDecoration()]),

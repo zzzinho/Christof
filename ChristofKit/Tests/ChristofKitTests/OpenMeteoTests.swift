@@ -4,7 +4,6 @@ import Testing
 @testable import ChristofKit
 
 /// 2026-10-18 서울(37.5665, 126.978) 실제 응답에서 hourly 를 3개(UTC 04:00·05:00·06:00)만 남겼다.
-/// current 는 UTC 04:45 (1792298700).
 private let seoulFixture = Data("""
 {"latitude":37.55,"longitude":127.0,"generationtime_ms":0.07462501525878906,"utc_offset_seconds":0,"timezone":"GMT","timezone_abbreviation":"GMT","elevation":34.0,\
 "current_units":{"time":"unixtime","interval":"seconds","temperature_2m":"°C","weather_code":"wmo code","cloud_cover":"%"},\
@@ -55,9 +54,7 @@ private func seoul(latitude: Double = 37.5665) -> Region {
 private let light = 1.0 / 3, moderate = 2.0 / 3, heavy = 1.0
 
 @Test(arguments: [
-    // 맑음·구름
     (0, WeatherCondition.clear, 0.0), (1, .partlyCloudy, 0), (2, .partlyCloudy, 0), (3, .overcast, 0),
-    // 안개는 짙기 구분 없이 중간
     (45, .fog, moderate), (48, .fog, moderate),
     // 이슬비 약/중/강, 어는 이슬비 약/강
     (51, .drizzle, light), (53, .drizzle, moderate), (55, .drizzle, heavy), (56, .drizzle, light), (57, .drizzle, heavy),
@@ -91,7 +88,7 @@ func sampleAtPicksLatestCurrentOrHourlySample(rule: String, time: TimeInterval, 
     #expect(forecast.sample(at: Date(timeIntervalSince1970: time))?.temperatureCelsius == temperature, "\(rule)")
 }
 
-/// 요청 URL별로 정해 둔 응답을 돌려준다. URL로 나누어 병렬 테스트끼리 섞이지 않는다.
+/// 응답을 요청 URL별로 나누어 병렬 테스트끼리 섞이지 않는다.
 private final class StubURLProtocol: URLProtocol {
     static let responses = Mutex<[URL: (status: Int, body: Data)]>([:])
 

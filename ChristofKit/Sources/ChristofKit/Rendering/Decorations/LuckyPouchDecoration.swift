@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 설날 복주머니. 창틀 위쪽에 끈으로 매달아 창틀 위에 그린다.
 public struct LuckyPouchDecoration: SceneLayerProvider {
     public init() {}
 
@@ -27,7 +26,6 @@ public struct LuckyPouchDecoration: SceneLayerProvider {
                     knot.closeSubpath()
                     ctx.fill(knot, with: .color(RGB(hex: 0x2E5AAC).color))
 
-                    // 끈으로 오므린 윗단.
                     var ruffle = Path()
                     ruffle.move(to: CGPoint(x: cx - u * 0.12, y: top + u * 0.14))
                     ruffle.addQuadCurve(to: CGPoint(x: cx - u * 0.24, y: top - u * 0.02), control: CGPoint(x: cx - u * 0.2, y: top + u * 0.1))

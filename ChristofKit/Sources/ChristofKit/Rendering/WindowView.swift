@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 창문 하나로 그린 위젯 장면. 유리 너머 레이어, 창틀, 창틀 위 장식, 창턱 캡션 순으로 쌓는다.
 public struct WindowView: View {
     private let context: SceneContext
     private let style: WindowStyle

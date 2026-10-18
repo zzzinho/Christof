@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 부처님오신날 연등. 창밖 위쪽에 건 줄에 매달려 있고 밤엔 빛난다.
 public struct LotusLanternDecoration: SceneLayerProvider {
     public init() {}
 
@@ -44,7 +43,6 @@ public struct LotusLanternDecoration: SceneLayerProvider {
                     center: center, startRadius: r * 0.5, endRadius: r * 3))
         }
         let glow = color.mixed(with: RGB(hex: 0xFFF3C4), 0.45 * lights)
-        // 술.
         var tassel = Path()
         for dx in [-0.35, 0, 0.35] {
             tassel.move(to: CGPoint(x: center.x + r * dx, y: center.y + r * 0.7))
@@ -53,7 +51,6 @@ public struct LotusLanternDecoration: SceneLayerProvider {
         ctx.stroke(tassel, with: .color(color.color), lineWidth: max(0.6, r * 0.12))
         ctx.fill(Path(ellipseIn: CGRect(x: center.x - r * 0.6, y: center.y + r * 0.5, width: r * 1.2, height: r * 0.4)), with: .color(RGB(hex: 0x4F9A55).color))
         ctx.fill(Path(ellipseIn: CGRect(x: center.x - r, y: center.y - r * 0.85, width: r * 2, height: r * 1.7)), with: .color(glow.scaled(0.88).color))
-        // 연꽃잎: 아래 줄부터 위로 겹쳐 쌓고 끝은 위를 향한다.
         let petal = glow.mixed(with: RGB(hex: 0xFFFFFF), 0.25)
         let edge = glow.scaled(0.7)
         for (row, (y, count, length)) in [(0.45, 5, 0.75), (0.0, 4, 0.7), (-0.45, 3, 0.6)].enumerated() {

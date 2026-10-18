@@ -1,6 +1,6 @@
 import Foundation
 
-/// 고를 수 있는 한국 지역. 서울이 첫 지역이라 기본 지역이 된다.
+/// 서울이 첫 지역이라 기본 지역이 된다.
 public enum KoreaRegions {
     // 좌표는 Open-Meteo 지오코딩(GeoNames) 의 도시 중심점.
     public static let all: [Region] = [

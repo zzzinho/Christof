@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 안개. 아래로 갈수록 짙고, 세기만큼 풍경을 가린다.
 struct FogEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         guard let weather = context.weather, weather.condition == .fog else { return [] }

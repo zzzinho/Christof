@@ -25,8 +25,6 @@ private func scene(
         season: .autumn, occasions: occasions)
 }
 
-// MARK: - 합성
-
 private struct FixedLayer: SceneLayerProvider {
     let id: String
     let depth: Double
@@ -52,8 +50,6 @@ private struct FixedLayer: SceneLayerProvider {
     #expect(layers.first?.depth == LayerDepth(5))
 }
 
-// MARK: - 하늘 팔레트
-
 @Test(arguments: SkyPalette.keyframes.map(\.altitude))
 func skyPaletteIsContinuousAtKeyframe(altitude: Double) {
     let below = SkyPalette(sunAltitude: altitude - 1e-6, weather: nil)
@@ -73,8 +69,6 @@ func skyPaletteIsContinuousAtKeyframe(altitude: Double) {
     }
     #expect(SkyPalette(sunAltitude: -30, weather: nil).zenith.luminance < clear.zenith.luminance)
 }
-
-// MARK: - 레이어가 생기고 빠지는 조건
 
 struct LayerRule: Sendable, CustomTestStringConvertible {
     let rule: String
@@ -115,10 +109,7 @@ func layersAppearOnlyWhenTheirConditionHolds(_ rule: LayerRule) {
     #expect(Dictionary(uniqueKeysWithValues: layers.map { ($0.id, $0.placement) }) == rule.expected)
 }
 
-// MARK: - 해·달 위치
-
 @Test func moonIsPlacedByItsOwnAltitudeAndAzimuth() throws {
-    // 해 위치와 상관없이 달 자신의 고도·방위각으로 놓는다. 동쪽에 뜬 달은 왼쪽(북반구), 남중한 달은 가운데.
     func moon(altitude: Double, azimuth: Double) -> MoonState { MoonState(phase: 0.5, illumination: 1, altitude: altitude, azimuth: azimuth) }
     #expect(try #require(CelestialPosition.moon(moon(altitude: 39, azimuth: 84), latitude: seoul.latitude)).x < 0.5)
     let south = try #require(CelestialPosition.moon(moon(altitude: 50, azimuth: 180), latitude: seoul.latitude))
@@ -142,8 +133,6 @@ func moonLitSideFollowsPhase(phase: Double, minX: Double, maxX: Double) {
     #expect(abs(lit.minX - minX * 100) < 0.5)
     #expect(abs(lit.maxX - maxX * 100) < 0.5)
 }
-
-// MARK: - 캡션
 
 struct CaptionRule: Sendable, CustomTestStringConvertible {
     let rule: String
@@ -172,8 +161,6 @@ func captionShowsLocalTimeTemperatureAndDetails(_ rule: CaptionRule) throws {
     #expect(caption.temperature == rule.degrees)
     #expect(caption.details == rule.details)
 }
-
-// MARK: - 같은 입력, 같은 그림
 
 @MainActor @Test func sameSceneRendersIdenticalPixels() throws {
     let occasion = Occasion(id: "christmas", name: "크리스마스", rule: AlwaysActive(), decorations: [ChristmasLightsDecoration()])

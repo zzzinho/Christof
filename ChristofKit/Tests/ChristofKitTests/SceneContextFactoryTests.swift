@@ -9,7 +9,6 @@ private func kst(_ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: I
 }
 
 private let seoul = CountryRegistry.standard.region(id: "KR.seoul")!
-/// 등록된 국가 프로필이 없는 지역. 좌표·시간대는 서울과 같다.
 private let unregistered = Region(id: "XX.test", name: "미등록", countryCode: "XX", latitude: seoul.latitude, longitude: seoul.longitude, timeZone: seoul.timeZone)
 
 // 일몰 2026-05-24 19:41 KST 는 SolarCalculator 값.

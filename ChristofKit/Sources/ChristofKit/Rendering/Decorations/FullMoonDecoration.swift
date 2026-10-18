@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 보름달 강조. 밤에 달 자리에 크고 따뜻한 후광을 두른다. 낮이거나 달이 지평선 아래면 그리지 않는다.
 public struct FullMoonDecoration: SceneLayerProvider {
     public init() {}
 
@@ -9,7 +8,6 @@ public struct FullMoonDecoration: SceneLayerProvider {
               let position = CelestialPosition.moon(context.moon, latitude: context.region.latitude)
         else { return [] }
         return [
-            // 달 바로 뒤, 별 앞.
             WindowLayer(id: "decoration.fullMoon", depth: LayerDepth(LayerDepth.celestialBody.value - 1)) {
                 Canvas { ctx, size in
                     let center = CGPoint(x: position.x * size.width, y: position.y * size.height)

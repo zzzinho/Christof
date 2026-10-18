@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 비·이슬비. 뇌우에도 비가 내린다. 세기만큼 빗줄기가 많아진다.
 struct RainEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         guard let weather = context.weather, [.drizzle, .rain, .thunderstorm].contains(weather.condition) else { return [] }

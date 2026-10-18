@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 해. 고도·방위각을 유리 안 위치로 옮기고, 낮을수록 붉게, 궂을수록 흐리게 그린다.
 struct SunEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         guard let position = CelestialPosition.sun(context.sun, latitude: context.region.latitude) else { return [] }

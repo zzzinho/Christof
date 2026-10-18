@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 어둡고 맑은 밤하늘의 별.
 struct StarEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         let palette = SkyPalette(context)

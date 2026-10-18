@@ -12,7 +12,6 @@ struct SunTimesCase: Sendable, CustomTestStringConvertible {
     let label: String
     let latitude: Double
     let longitude: Double
-    /// 그 지역 날짜의 0시 (unixtime).
     let localMidnight: TimeInterval
     let sunrise: TimeInterval
     let sunset: TimeInterval
@@ -40,7 +39,6 @@ func sunTimesMatchOpenMeteo(_ row: SunTimesCase) throws {
     #expect(abs(sunset.timeIntervalSince1970 - row.sunset) < 120)
 }
 
-// 서울 2026-06-20 과 06-21. 1분 차이로 자정을 넘으면 다른 날의 일출·일몰이 나와야 한다.
 // UTC 기준 날짜를 쓰면 두 시각(UTC 6월 20일 14:59, 15:00)이 같은 날로 묶여 틀린다.
 private let aroundSeoulMidnight: [(query: TimeInterval, sunrise: TimeInterval, sunset: TimeInterval)] = [
     (query: 1781967600 - 30, sunrise: 1781899851, sunset: 1781952989),

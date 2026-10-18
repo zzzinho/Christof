@@ -9,7 +9,6 @@ struct SelectRegionIntent: WidgetConfigurationIntent {
     @Parameter(title: "지역")
     var region: RegionEntity?
 
-    /// 고른 지역이 없거나 목록에서 사라졌으면 기본 지역.
     var selectedRegion: Region {
         region?.region ?? CountryRegistry.standard.defaultRegion
     }

@@ -61,7 +61,7 @@ func sunEventRuleWithoutSunrise() {
     #expect(!SunEventRule(.sunrise, window: 30 * 60).isActive(at: kst(2026, 12, 21), in: longyearbyen))
 }
 
-// 보름: 2025-10-07 03:47 UTC (12:47 KST). 평균 삭망월 계산으로도 밝은 면 0.999(10/7 21시), 0.885(10/10 21시).
+// 보름: 2025-10-07 03:47 UTC (12:47 KST).
 // USNO rstt: 2026-03-04 서울 일몰 18:28, 월출 19:23 (보름 다음 날, 밝은 면 0.99).
 @Test("보름달 규칙은 달이 거의 차서 해가 진 하늘에 떠 있을 때만 진행 중", arguments: [
     ("보름 당일 밤", kst(2025, 10, 7, 21, 0), true),

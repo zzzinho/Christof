@@ -4,7 +4,6 @@ import ImageIO
 import SwiftUI
 import UniformTypeIdentifiers
 
-// 시나리오 × 위젯 크기 3종을 PNG 로 그린다. 사용법: ChristofSnapshots <출력 폴더>
 // 실제 지역·날짜를 SceneContextFactory 에 넣어 해·달 계산과 이벤트 판정을 그대로 거치고, 날씨만 가짜 예보를 준다.
 
 struct Scenario {
@@ -43,7 +42,6 @@ func localTime(_ region: Region, _ month: Int, _ day: Int, _ hour: Int, _ minute
     return date
 }
 
-/// SolarCalculator 로 구한 그날의 일출·일몰.
 func sunTime(_ region: Region, _ month: Int, _ day: Int, _ event: KeyPath<SunState, Date?>) -> Date {
     let noon = localTime(region, month, day, 12)
     guard let time = SolarCalculator.state(at: noon, latitude: region.latitude, longitude: region.longitude, timeZone: region.timeZone)[keyPath: event] else {

@@ -1,6 +1,5 @@
 import Foundation
 
-/// WMO 날씨 코드(Open-Meteo `weather_code`)를 날씨 종류와 세기(0...1)로 해석한다.
 enum WMOWeatherCode {
     private static let light = 1.0 / 3
     private static let moderate = 2.0 / 3

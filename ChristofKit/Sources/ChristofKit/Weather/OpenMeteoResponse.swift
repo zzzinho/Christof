@@ -1,6 +1,5 @@
 import Foundation
 
-/// Open-Meteo `/v1/forecast` 응답 JSON(`timeformat=unixtime`)을 `WeatherForecast` 로 바꾼다.
 enum OpenMeteoResponse {
     static func forecast(from data: Data) throws -> WeatherForecast {
         // ponytail: 값 하나라도 null 이면 응답 전체가 실패한다. 실제 응답에서 null 이 보이면 옵셔널로 받고 그 시각만 건너뛴다.

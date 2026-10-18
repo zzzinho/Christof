@@ -1,11 +1,9 @@
 import SwiftUI
 
-/// 창밖 풍경: 먼 도시, 언덕, 나무. 계절에 따라 색이 바뀌고 밤엔 어두워지며 도시 창문에 불이 켜진다.
 struct LandscapeEffect: SceneLayerProvider {
     private struct Colors {
         let ground: RGB
         let hill: RGB
-        /// 비어 있으면 잎 없는 나무.
         let crowns: [RGB]
         let blossoms: Bool
     }

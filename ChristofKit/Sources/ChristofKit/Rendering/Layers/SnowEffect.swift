@@ -1,6 +1,5 @@
 import SwiftUI
 
-/// 내리는 눈과 창턱에 쌓인 눈.
 struct SnowEffect: SceneLayerProvider {
     @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
         guard let weather = context.weather, weather.condition == .snow else { return [] }

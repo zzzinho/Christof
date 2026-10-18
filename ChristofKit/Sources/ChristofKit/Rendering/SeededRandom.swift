@@ -1,4 +1,4 @@
-/// 시드 고정 의사난수(SplitMix64). 위젯은 정지 이미지라 같은 입력이면 같은 그림이어야 한다.
+/// SplitMix64. 위젯은 정지 이미지라 같은 입력이면 같은 그림이어야 한다.
 struct SeededRandom: RandomNumberGenerator {
     private var state: UInt64
 

@@ -1,6 +1,5 @@
 import Foundation
 
-/// 일출·일몰 앞뒤 `window` 초 동안 진행 중.
 public struct SunEventRule: OccasionRule {
     public enum Event: Sendable {
         case sunrise, sunset

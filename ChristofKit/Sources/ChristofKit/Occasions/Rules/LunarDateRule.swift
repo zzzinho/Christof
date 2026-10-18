@@ -1,6 +1,5 @@
 import Foundation
 
-/// 음력 기념일. 평달 (월,일) 기준이고, 지역 시간대의 하루 단위로 판정한다.
 /// 나라마다 음력이 하루씩 다를 수 있어(한국 .dangi, 중국 .chinese, 베트남 .vietnamese) 국가 프로필이 달력을 고른다.
 public struct LunarDateRule: OccasionRule {
     public let calendar: Calendar.Identifier
