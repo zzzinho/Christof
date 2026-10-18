@@ -1,6 +1,5 @@
 import ChristofKit
 import SwiftUI
-import WidgetKit
 
 struct PreviewScreen: View {
     @State private var settings = PreviewSettings()
@@ -29,10 +28,6 @@ struct PreviewScreen: View {
         }
         .onOpenURL { url in
             if url == AppLink.occasionPicker { showsOccasionPicker = true }
-        }
-        .onChange(of: occasionSelection) { _, selection in
-            OccasionSelectionStore().save(selection)
-            WidgetCenter.shared.reloadAllTimelines()
         }
         .task(id: settings.region) {
             realForecast = nil
