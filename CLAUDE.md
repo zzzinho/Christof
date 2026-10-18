@@ -18,6 +18,7 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 - 장면 스냅샷 PNG: `swift run --package-path ChristofKit ChristofSnapshots <출력 폴더>`. 실제 지역·날짜를 `SceneContextFactory` 에 넣고 날씨만 가짜로 준다. 그리기를 바꾸면 PNG를 직접 열어 확인한다.
 - 앱·위젯 빌드: `xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'generic/platform=iOS Simulator' build`, macOS는 `-destination 'platform=macOS'`. 개발 팀 없이 Sign to Run Locally로 서명하므로 서명 옵션을 덮어쓰지 않는다.
 - 시뮬레이터: 이 Mac에는 iOS 26.5 런타임만 있다(배포 타깃 26.0).
+- macOS 위젯은 LaunchServices에 등록된 앱 사본에서 뜬다. macOS 앱을 임시 `-derivedDataPath` 로 빌드하면 그 사본이 등록되어 데스크톱에 옛 위젯이 뜰 수 있다. macOS 빌드는 기본 DerivedData(Xcode와 같은 곳)로 하고, `pluginkit -m -v -p com.apple.widgetkit-extension` 으로 등록 경로를 확인한다.
 
 ## 코드 규칙: SRP·OCP
 
