@@ -7,10 +7,10 @@ struct PreviewSettings {
     var customDate = Date.now
     var forcedCondition: WeatherCondition?
 
-    func sceneContext(now: Date, realForecast: WeatherForecast?, factory: SceneContextFactory) -> SceneContext {
+    func sceneContext(now: Date, realForecast: WeatherForecast?, selection: OccasionSelection, factory: SceneContextFactory) -> SceneContext {
         let date = usesCurrentTime ? now : customDate
         let forecast = forcedCondition.map { WeatherForecast(samples: [.forced($0, at: date)]) } ?? realForecast
-        return factory.context(at: date, region: region, forecast: forecast)
+        return factory.context(at: date, region: region, forecast: forecast, selection: selection)
     }
 }
 

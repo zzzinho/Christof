@@ -1,25 +1,38 @@
 import ChristofKit
 import SwiftUI
+import WidgetKit
 
 struct PreviewScreen: View {
     @State private var settings = PreviewSettings()
     @State private var realForecast: Result<WeatherForecast, any Error>?
+    @State private var occasionSelection = OccasionSelectionStore().load()
+    @State private var showsOccasionPicker = false
     private let weather: any WeatherProviding = .standard
     private let factory = SceneContextFactory()
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                SettingsPanel(settings: $settings, forecastStatus: forecastStatus)
+                SettingsPanel(settings: $settings, forecastStatus: forecastStatus, occasionTitle: OccasionPicker.title(of: occasionSelection), showsOccasionPicker: $showsOccasionPicker)
                 TimelineView(.everyMinute) { timeline in
                     // 실패는 위 상태 문구로 보여주고, 장면은 날씨 없이 그린다.
-                    let context = settings.sceneContext(now: timeline.date, realForecast: try? realForecast?.get(), factory: factory)
+                    let context = settings.sceneContext(now: timeline.date, realForecast: try? realForecast?.get(), selection: occasionSelection, factory: factory)
                     WindowPreviews(context: context)
                 }
                 WidgetGuide()
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .sheet(isPresented: $showsOccasionPicker) {
+            OccasionPicker(selection: $occasionSelection)
+        }
+        .onOpenURL { url in
+            if url == AppLink.occasionPicker { showsOccasionPicker = true }
+        }
+        .onChange(of: occasionSelection) { _, selection in
+            OccasionSelectionStore().save(selection)
+            WidgetCenter.shared.reloadAllTimelines()
         }
         .task(id: settings.region) {
             realForecast = nil
@@ -54,9 +67,14 @@ struct PreviewScreen: View {
 private struct SettingsPanel: View {
     @Binding var settings: PreviewSettings
     let forecastStatus: String
+    let occasionTitle: String
+    @Binding var showsOccasionPicker: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            LabeledContent("이벤트") {
+                Button(occasionTitle) { showsOccasionPicker = true }
+            }
             LabeledContent("지역") {
                 Picker("지역", selection: $settings.region) {
                     ForEach(CountryRegistry.standard.regions) { Text($0.name).tag($0) }
@@ -140,9 +158,11 @@ private struct WidgetGuide: View {
             #if os(macOS)
             Text("바탕화면을 우클릭 → 위젯 편집 → Christof 를 찾아 바탕화면에 놓습니다.")
             Text("지역은 위젯을 우클릭 → 위젯 편집에서 고릅니다.")
+            Text("위젯을 누르면 이 앱에서 이벤트를 자동·수동으로 고를 수 있습니다.")
             #else
             Text("홈 화면을 길게 누르기 → 편집 → 위젯 추가 → Christof 를 고릅니다.")
             Text("지역은 위젯을 길게 눌러 위젯 편집에서 고릅니다.")
+            Text("위젯을 누르면 이 앱에서 이벤트를 자동·수동으로 고를 수 있습니다.")
             #endif
         }
         .font(.callout)

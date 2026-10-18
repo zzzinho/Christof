@@ -9,9 +9,9 @@ public struct SceneContextFactory: Sendable {
         self.universalOccasions = universalOccasions
     }
 
-    public func context(at date: Date, region: Region, forecast: WeatherForecast?) -> SceneContext {
+    /// 수동 선택은 국가 이벤트만 바꾸고, 해·달 이벤트는 늘 날짜로 판정한다.
+    public func context(at date: Date, region: Region, forecast: WeatherForecast?, selection: OccasionSelection = .automatic) -> SceneContext {
         let profile = countries.profile(for: region.countryCode)
-        let candidates = (profile?.occasions ?? []) + universalOccasions
         return SceneContext(
             date: date,
             region: region,
@@ -19,7 +19,8 @@ public struct SceneContextFactory: Sendable {
             sun: SolarCalculator.state(at: date, latitude: region.latitude, longitude: region.longitude, timeZone: region.timeZone),
             moon: MoonCalculator.state(at: date, latitude: region.latitude, longitude: region.longitude),
             season: profile?.season(at: date, in: region) ?? .meteorological(at: date, in: region),
-            occasions: candidates.filter { $0.isActive(at: date, in: region) }
+            occasions: selection.pick(from: profile?.occasions ?? [], at: date, in: region)
+                + universalOccasions.filter { $0.isActive(at: date, in: region) }
         )
     }
 }
