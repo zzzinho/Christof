@@ -163,6 +163,58 @@
   --dot-onggi: #5A3F30;
   --dot-onggi-light: #73513D;
   --dot-persimmon: #B8693F;
+
+  /* lofi 예시 (04-lofi-*): 남색·자주 바탕에 스탠드 호박색 빛 한 곳 */
+  --lofi-sky-1: #1A1C33;
+  --lofi-sky-2: #262845;
+  --lofi-sky-3: #3A3558;
+  --lofi-sky-4: #5A4566;
+  --lofi-star: #C8C3D6;
+  --lofi-star-dim: #6F6C88;
+  --lofi-moon: #EDE3C8;
+  --lofi-halo: #3E3B5A;
+  --lofi-city-far: #2A2842;
+  --lofi-city: #1C1C2E;
+  --lofi-window-lit: #E0A65E;
+  --lofi-snow: #8C8FA8;
+  --lofi-wall: #2C2F45;
+  --lofi-wall-dark: #23263A;
+  --lofi-wall-warm: #3E3646;
+  --lofi-wall-warmer: #57443F;
+  --lofi-wood: #4A3A3E;
+  --lofi-wood-dark: #2E242B;
+  --lofi-wood-light: #6B5148;
+  --lofi-desk-lit: #8A6650;
+  --lofi-curtain: #5E6585;
+  --lofi-curtain-dark: #4A5070;
+  --lofi-lamp: #C9784E;
+  --lofi-lamp-body: #2B2A35;
+  --lofi-lamp-light: #FFD9A0;
+  --lofi-hair: #2A2130;
+  --lofi-hair-rim: #6B4A45;
+  --lofi-skin: #B9876E;
+  --lofi-hoodie: #6E5A80;
+  --lofi-hoodie-dark: #54456A;
+  --lofi-hoodie-rim: #B88A72;
+  --lofi-headphone: #1F1E29;
+  --lofi-headphone-accent: #C46A5A;
+  --lofi-cat: #1E1A24;
+  --lofi-cat-rim: #5A4248;
+  --lofi-mug: #C9B9A6;
+  --lofi-mug-dark: #8F8070;
+  --lofi-steam: #6F6C88;
+  --lofi-book-1: #7A4E5A;
+  --lofi-book-2: #4F6A7A;
+  --lofi-book-3: #9A7A4E;
+  --lofi-plant: #4F6E5A;
+  --lofi-plant-dark: #3A5245;
+  --lofi-pot: #8A5A48;
+  --lofi-bulb-1: #E07A6A;
+  --lofi-bulb-2: #E8C070;
+  --lofi-bulb-3: #8DBF90;
+  --lofi-bulb-4: #7FA8D8;
+  --lofi-wire: #2F3A2F;
+  --lofi-caption: #EDE4D3;
 }
 
 body {

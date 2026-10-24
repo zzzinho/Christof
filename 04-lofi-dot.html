@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lofi 도트</title>
+<link rel="stylesheet" href="design.css">
+<style>
+  header {
+    padding: 32px 24px 8px;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+  }
+  header p {
+    margin: 0;
+    color: var(--page-muted);
+    font-size: 0.875rem;
+  }
+  main {
+    padding: 24px 24px 64px;
+  }
+  .sizes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--page-gap);
+  }
+  .widget {
+    background: var(--lofi-wood-dark);
+  }
+  .caption {
+    color: var(--lofi-caption);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>lofi 예시 1 · 도트</h1>
+  <p>방 한쪽 책상에 앉은 사람의 뒷모습, 뒤쪽 창은 배경. 남색 방에 스탠드 불빛 한 곳, 창턱에 고양이. 도트 3pt. 장면: 서울 12월 24일 오후 9:00, 맑음, 크리스마스 이브.</p>
+</header>
+<main>
+  <div class="sizes" id="sizes"></div>
+</main>
+
+<script>
+const DOT = 3;
+const SCENE = { region: '서울', time: '오후 9:00', temperature: -5, moon: [0.52, 39, 84], occasion: '크리스마스 이브' };
+const SIZES = { small: [170, 170], medium: [364, 170], large: [364, 382] };
+
+const rootStyle = getComputedStyle(document.documentElement);
+const colorCache = {};
+function color(name) {
+  if (colorCache[name]) return colorCache[name];
+  const value = rootStyle.getPropertyValue('--lofi-' + name).trim();
+  if (!/^#[0-9a-f]{6}$/i.test(value)) throw new Error(`design.css 에 --lofi-${name} (#RRGGBB) 이 없다`);
+  return (colorCache[name] = value);
+}
+
+// 시드 고정 난수 (Swift SeededRandom 과 같은 수열)
+const MASK64 = (1n << 64n) - 1n;
+class Rand {
+  constructor(seed) { this.state = BigInt(seed); }
+  next() {
+    this.state = (this.state + 0x9E3779B97F4A7C15n) & MASK64;
+    let z = this.state;
+    z = ((z ^ (z >> 30n)) * 0xBF58476D1CE4E5B9n) & MASK64;
+    z = ((z ^ (z >> 27n)) * 0x94D049BB133111EBn) & MASK64;
+    return z ^ (z >> 31n);
+  }
+  below(bound) {
+    let m = this.next() * bound;
+    if ((m & MASK64) < bound) {
+      const t = ((1n << 64n) - bound) % bound;
+      while ((m & MASK64) < t) m = this.next() * bound;
+    }
+    return m >> 64n;
+  }
+  range(lower, upper) {
+    const max = 1n << 53n;
+    const r = this.below(max + 1n);
+    if (r === max) return upper;
+    return (upper - lower) * (Number(r) * (Number.EPSILON / 2)) + lower;
+  }
+  int(lower, upper) { return Math.floor(this.range(lower, upper + 0.999)); }
+}
+
+const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+const bayer = (x, y) => (BAYER[((y % 4) + 4) % 4][((x % 4) + 4) % 4] + 0.5) / 16;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const pt = v => v / DOT;
+// f(0~1) 만큼 a 에서 b 로 넘어가는 자리. 띠 경계 30% 만 섞는다(B 스타일).
+const blend = (a, b, f, x, y) => (clamp((f - 0.5) / 0.3 + 0.5, 0, 1) > bayer(x, y) ? b : a);
+
+class Grid {
+  constructor(cols, rows) {
+    this.cols = cols;
+    this.rows = rows;
+    this.cells = new Array(cols * rows).fill(null);
+    this.ox = 0;
+    this.oy = 0;
+    this.bounds = [0, 0, cols, rows];
+  }
+  set(x, y, c) {
+    if (!c) return;
+    const ax = Math.floor(x) + this.ox, ay = Math.floor(y) + this.oy;
+    const [x0, y0, x1, y1] = this.bounds;
+    if (ax < x0 || ay < y0 || ax >= x1 || ay >= y1) return;
+    this.cells[ay * this.cols + ax] = c;
+  }
+  get(x, y) {
+    const ax = Math.floor(x) + this.ox, ay = Math.floor(y) + this.oy;
+    return this.cells[ay * this.cols + ax];
+  }
+  within(x, y, w, h, draw) {
+    const saved = [this.ox, this.oy, this.bounds];
+    const [x0, y0, x1, y1] = this.bounds;
+    this.ox += x;
+    this.oy += y;
+    this.bounds = [Math.max(x0, this.ox), Math.max(y0, this.oy), Math.min(x1, this.ox + w), Math.min(y1, this.oy + h)];
+    draw();
+    [this.ox, this.oy, this.bounds] = saved;
+  }
+  rect(x, y, w, h, c) {
+    for (let j = Math.round(y); j < Math.round(y + h); j++) for (let i = Math.round(x); i < Math.round(x + w); i++) this.set(i, j, c);
+  }
+  shape(x0, y0, x1, y1, inside, c) {
+    for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) {
+      for (let x = Math.floor(x0); x <= Math.ceil(x1); x++) {
+        if (inside(x + 0.5, y + 0.5)) this.set(x, y, typeof c === 'function' ? c(x, y) : c);
+      }
+    }
+  }
+  // rows: 문자열 줄 목록, map: 글자 → 색 이름. 아래 가운데를 (x, bottom) 에 맞춘다.
+  sprite(x, bottom, rows, map) {
+    const left = Math.round(x - rows[0].length / 2), top = bottom - rows.length;
+    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (map[ch]) this.set(left + i, top + j, color(map[ch])); }));
+  }
+  canvas() {
+    const canvas = document.createElement('canvas');
+    canvas.width = this.cols;
+    canvas.height = this.rows;
+    const ctx = canvas.getContext('2d');
+    this.cells.forEach((c, i) => {
+      if (!c) return;
+      ctx.fillStyle = c;
+      ctx.fillRect(i % this.cols, Math.floor(i / this.cols), 1, 1);
+    });
+    return canvas;
+  }
+}
+
+// ---- 스프라이트. 불빛(스탠드)이 오른쪽에 있어 오른쪽 가장자리에 따뜻한 테두리 빛이 진다 ----
+
+const SPRITES = {
+  person: [
+    '......hhh.......',
+    '.....hhhhh......',
+    '......hhhH......',
+    '....kkkkkkkk....',
+    '...khhhhhhhhk...',
+    '..khhhhhhhhhHk..',
+    '..khhhhhhhhhHk..',
+    '.KKhhhhhhhhhHKK.',
+    '.KKhhhhhhhhhHKK.',
+    '.KKhhhhhhhhhHKK.',
+    '...hhhhhhhhhH...',
+    '....hhhhhhhH....',
+    '.....hhhhhh.....',
+    '......sssS......',
+    '...dddddddddd...',
+    '.ooddddddddddoo.',
+    'ooooddddddddooor',
+    'oooooddddddoooor',
+    'ooooooddddooooor',
+    'oooooooooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+  ],
+  cat: [
+    '.c....c....',
+    '.cc..cc....',
+    '.ccccccR...',
+    '.ccccccR...',
+    '..ccccR....',
+    '..ccccc....',
+    '.cccccccR..',
+    'ccccccccR..',
+    'ccccccccR..',
+    'cccccccccR.',
+    'cccccccccRc',
+    '.cccccccccc',
+  ],
+  lamp: [
+    '...LLLL...',
+    '..LLLLLLb.',
+    '.LLLLLLLb.',
+    '..YYYY..b.',
+    '.........b',
+    '.........b',
+    '........b.',
+    '.......b..',
+    '......b...',
+    '.....b....',
+    '....b.....',
+    '..bbbbbb..',
+  ],
+  mug: ['.t.t...', 't.t....', '.t.t...', '.......', 'mmmmm..', 'mMMMmmm', 'mMMMm.m', 'mMMMmmm', '.mmm...'],
+  books: ['.11111111.', '2222222222', '.33333333.', '1111111111'],
+  plant: ['.l.l.', 'lLlLl', '.lLl.', 'ppppp', '.ppp.'],
+};
+const SPRITE_COLORS = {
+  h: 'hair', H: 'hair-rim', k: 'headphone', K: 'headphone-accent', s: 'skin', S: 'hoodie-rim',
+  o: 'hoodie', d: 'hoodie-dark', r: 'hoodie-rim', c: 'cat', R: 'cat-rim',
+  L: 'lamp', b: 'lamp-body', Y: 'lamp-light', m: 'mug-dark', M: 'mug', t: 'steam',
+  1: 'book-1', 2: 'book-2', 3: 'book-3', l: 'plant', p: 'pot',
+};
+
+// ---- 창밖. 좌표는 창 안쪽 기준 칸 ----
+
+function celestialPoint(altitude, azimuth) {
+  if (altitude <= -2) return null;
+  const d = ((azimuth % 360) + 360) % 360 - 180;
+  const base = 0.72 - 0.035;
+  return [clamp(0.5 + d / 135 * 0.45, 0.05, 0.95), base - Math.pow(clamp(altitude, 0, 75) / 75, 0.75) * (base - 0.1)];
+}
+
+function drawView(g, w, h) {
+  const bands = ['sky-1', 'sky-2', 'sky-3', 'sky-4'].map(color);
+  for (let y = 0; y < h; y++) {
+    const t = clamp((y + 0.5) / (h * 0.8), 0, 1) * (bands.length - 1);
+    const i = Math.min(bands.length - 2, Math.floor(t));
+    for (let x = 0; x < w; x++) g.set(x, y, blend(bands[i], bands[i + 1], t - i, x, y));
+  }
+
+  const stars = new Rand(3);
+  const count = Math.round(w * h * DOT * DOT * 0.001);
+  for (let i = 0; i < count; i++) {
+    g.set(Math.floor(stars.range(0, 1) * w), Math.floor(stars.range(0, 0.55) * h), color(stars.range(0, 1) < 0.3 ? 'star' : 'star-dim'));
+  }
+
+  const point = celestialPoint(SCENE.moon[1], SCENE.moon[2]);
+  if (point) {
+    const cx = Math.floor(point[0] * w) + 0.5, cy = Math.floor(point[1] * h) + 0.5, r = pt(10) + 0.3;
+    const dist = (x, y) => Math.hypot(x - cx, y - cy);
+    g.shape(cx - r - 2, cy - r - 2, cx + r + 2, cy + r + 2, (x, y) => dist(x, y) > r && dist(x, y) <= r + 2,
+      (x, y) => ((1 - (dist(x + 0.5, y + 0.5) - r) / 2.5) * 0.75 > bayer(x, y) ? color('halo') : null));
+    g.shape(cx - r, cy - r, cx + r, cy + r, (x, y) => dist(x, y) <= r, color('moon'));
+  }
+
+  // 먼 도시와 가까운 지붕들. 창마다 호박색 불빛.
+  const city = new Rand(7);
+  for (const [layer, bottomF, minH, maxH, lit] of [['city-far', 0.86, 14, 30, 0.12], ['city', 0.95, 8, 20, 0.25]]) {
+    let x = city.range(-3, 0);
+    while (x < w) {
+      const bw = city.int(Math.round(pt(14)), Math.round(pt(30)));
+      const bh = Math.round(pt(city.range(minH, maxH)) + h * 0.08);
+      const bottom = Math.round(h * bottomF), top = bottom - bh;
+      g.rect(x, top, bw, h - top, color(layer));
+      if (layer === 'city') g.rect(x, top, bw, 1, color('snow'));
+      for (let wy = top + 2; wy < h; wy += 2) {
+        for (let wx = Math.round(x) + 1; wx < x + bw - 1; wx += 2) if (city.range(0, 1) < lit) g.set(wx, wy, color('window-lit'));
+      }
+      x += bw + city.int(0, 2);
+    }
+  }
+}
+
+function drawGarland(g, left, right, y) {
+  const n = Math.max(2, Math.round((right - left) / pt(30)));
+  const palette = ['bulb-1', 'bulb-2', 'bulb-3', 'bulb-4'].map(color);
+  for (let i = 0; i < n; i++) {
+    const a = left + (right - left) * i / n, b = left + (right - left) * (i + 1) / n;
+    for (let x = Math.round(a); x <= Math.round(b); x++) {
+      const t = (x - a) / (b - a);
+      g.set(x, y + Math.round(Math.sin(t * Math.PI) * 2), color('wire'));
+    }
+    const bx = Math.round((a + b) / 2), by = y + 3, c = palette[i % palette.length];
+    g.shape(bx - 2, by - 2, bx + 3, by + 3, (x, yy) => Math.hypot(x - bx - 0.5, yy - by - 0.5) <= 2, (x, yy) => ((x + yy) % 2 === 0 ? c : null));
+    g.rect(bx, by, 1, 2, c);
+  }
+}
+
+// ---- 방 ----
+
+function compose(g, W, H, roomH) {
+  const deskTop = roomH - 7;
+  const lampX = Math.round(W * (W > H ? 0.92 : 0.95));
+  const bulb = [lampX - 2, deskTop - 9];
+
+  // 벽: 스탠드에서 멀어질수록 차가운 남색. 거친 질감은 성긴 어두운 점.
+  const grain = new Rand(41);
+  const reach = pt(W > H ? 110 : 90);
+  for (let y = 0; y < deskTop; y++) {
+    for (let x = 0; x < W; x++) {
+      const d = Math.hypot(x + 0.5 - bulb[0], (y + 0.5 - bulb[1]) * 1.2) / reach;
+      let c = d < 0.35 ? blend(color('wall-warmer'), color('wall-warm'), d / 0.35, x, y)
+        : d < 0.75 ? blend(color('wall-warm'), color('wall'), (d - 0.35) / 0.4, x, y)
+        : color('wall');
+      if (grain.range(0, 1) < 0.04) c = color('wall-dark');
+      g.set(x, y, c);
+    }
+  }
+
+  // 창: 왼쪽에 치우쳐 뒤쪽 벽에 난 창
+  const x0 = Math.round(W * (W > H ? 0.06 : 0.04)), x1 = x0 + Math.round(W * (W > H ? 0.5 : 0.6));
+  const y0 = Math.round(roomH * 0.1), sill = deskTop - 2;
+  g.within(x0 + 2, y0 + 2, x1 - x0 - 4, sill - y0 - 2, () => drawView(g, x1 - x0 - 4, sill - y0 - 2));
+  for (let y = y0; y < sill; y++) {
+    for (let x = x0; x < x1; x++) {
+      if (x >= x0 + 2 && x < x1 - 2 && y >= y0 + 2) continue;
+      g.set(x, y, color(y === y0 ? 'wood-light' : 'wood'));
+    }
+  }
+  const midX = Math.round((x0 + x1) / 2), midY = Math.round(y0 + (sill - y0) * 0.42);
+  g.rect(midX, y0 + 2, 1, sill - y0 - 2, color('wood'));
+  g.rect(x0 + 2, midY, x1 - x0 - 4, 1, color('wood'));
+  g.rect(x0 - 2, sill, x1 - x0 + 4, 2, color('wood-light'));
+
+  // 왼쪽 얇은 커튼
+  for (let y = y0 - 2; y < deskTop; y++) {
+    const right = x0 + 3 + Math.round(Math.sin(y * 0.4) * 0.7 + (y > roomH * 0.5 ? 1 : 0));
+    for (let x = Math.max(0, x0 - 4); x < right; x++) g.set(x, y, color((x + 1) % 3 === 0 ? 'curtain-dark' : 'curtain'));
+  }
+  drawGarland(g, x0, x1, y0 - 1);
+
+  // 창턱의 고양이와 화분
+  g.sprite(x0 + 9, sill, SPRITES.cat, SPRITE_COLORS);
+  g.sprite(x1 - 6, sill, SPRITES.plant, SPRITE_COLORS);
+
+  if (roomH > 80) drawShelf(g, x1 + 6, W - 6, Math.round(roomH * 0.38));
+
+  // 책상: 윗면은 스탠드 가까울수록 밝다.
+  for (let x = 0; x < W; x++) {
+    const near = Math.abs(x - bulb[0]) / (W * 0.5);
+    g.set(x, deskTop, blend(color('desk-lit'), color('wood-light'), near, x, deskTop));
+  }
+  g.rect(0, deskTop + 1, W, roomH - deskTop - 1, color('wood'));
+
+  // 책상 위 물건과 스탠드
+  const personX = Math.round(W * (W > H ? 0.74 : 0.72));
+  g.sprite(personX - pt(42), deskTop + 1, SPRITES.books, SPRITE_COLORS);
+  g.sprite(personX - pt(24), deskTop + 1, SPRITES.mug, SPRITE_COLORS);
+  g.sprite(lampX, deskTop + 1, SPRITES.lamp, SPRITE_COLORS);
+
+  // 사람은 책상 앞(카메라 쪽)에 앉아 창을 바라본다. 허리 아래는 캡션 띠(가장 앞의 어두운 가장자리)에 가린다.
+  g.sprite(personX, roomH, SPRITES.person, SPRITE_COLORS);
+  g.rect(0, roomH, W, H - roomH, color('wood-dark'));
+}
+
+// large 의 빈 벽에 둔 선반: 세워 둔 책과 늘어진 화분
+function drawShelf(g, x0, x1, y) {
+  g.rect(x0, y, x1 - x0, 1, color('wood-light'));
+  g.rect(x0 + 1, y + 1, x1 - x0 - 2, 1, color('wood-dark'));
+  const books = new Rand(19);
+  for (let i = 0, x = x0 + 2; i < 6; i++, x += 2) {
+    const h = books.int(5, 8);
+    g.rect(x, y - h, 2, h, color(`book-${i % 3 + 1}`));
+  }
+  const px = x1 - 5;
+  g.sprite(px, y, SPRITES.plant, SPRITE_COLORS);
+  for (const [dx, len] of [[-2, 9], [0, 15], [2, 6]]) {
+    for (let j = 0; j < len; j++) g.set(px + dx + (j % 4 === 3 ? 1 : 0), y + 2 + j, color(j % 2 ? 'plant-dark' : 'plant'));
+  }
+}
+
+function widget(sizeKey) {
+  const [w, h] = SIZES[sizeKey];
+  const cols = Math.ceil(w / DOT), rows = Math.ceil(h / DOT);
+  const offset = [Math.floor((cols * DOT - w) / 2), Math.floor((rows * DOT - h) / 2)];
+  const captionRows = Math.max(6, Math.round(Math.min(w, h) * 0.11 / DOT));
+  const room = rows - captionRows;
+  const g = new Grid(cols, rows);
+  compose(g, cols, rows, room);
+
+  const box = document.createElement('div');
+  box.className = `widget ${sizeKey}`;
+  box.style.width = `${w}px`;
+  box.style.height = `${h}px`;
+  const canvas = g.canvas();
+  canvas.className = 'dots';
+  canvas.setAttribute('aria-hidden', 'true');
+  Object.assign(canvas.style, { width: `${cols * DOT}px`, height: `${rows * DOT}px`, left: `${-offset[0]}px`, top: `${-offset[1]}px` });
+  box.append(canvas);
+
+  const captionTop = room * DOT - offset[1];
+  const details = sizeKey === 'small' ? SCENE.occasion : `${SCENE.region} · ${SCENE.occasion}`;
+  box.insertAdjacentHTML('beforeend',
+    `<div class="caption${sizeKey === 'large' ? ' large' : ''}" style="top:${captionTop}px;width:${w}px;height:${h - captionTop}px;padding:0 ${Math.round(Math.min(w, h) * 0.066)}px" role="img" aria-label="${SCENE.region}, ${SCENE.time}, ${SCENE.temperature}°, ${SCENE.occasion}">` +
+    `<div class="caption-line"><span class="time">${SCENE.time}</span><span class="temp">${SCENE.temperature}°</span><span class="spacer"></span><span class="details">${details}</span></div></div>`);
+  return box;
+}
+
+document.getElementById('sizes').append(...Object.keys(SIZES).map(widget));
+
+// Swift 캡션의 minimumScaleFactor(0.6) 처럼, 넘치면 글자를 줄여 끝까지 보여준다.
+for (const line of document.querySelectorAll('.caption-line')) {
+  const spans = [...line.children].filter(s => !s.classList.contains('spacer'));
+  const sizes = spans.map(s => parseFloat(getComputedStyle(s).fontSize));
+  for (let k = 1; k > 0.6 && spans.some(s => s.scrollWidth > s.clientWidth + 0.5); ) {
+    k -= 0.05;
+    spans.forEach((s, i) => { s.style.fontSize = `${sizes[i] * k}px`; });
+  }
+}
+</script>
+</body>
+</html>

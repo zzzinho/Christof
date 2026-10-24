@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lofi 회화풍</title>
+<link rel="stylesheet" href="design.css">
+<style>
+  header {
+    padding: 32px 24px 8px;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+  }
+  header p {
+    margin: 0;
+    color: var(--page-muted);
+    font-size: 0.875rem;
+  }
+  main {
+    padding: 24px 24px 64px;
+  }
+  .sizes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--page-gap);
+  }
+  .widget {
+    background: var(--lofi-wood-dark);
+  }
+  .caption {
+    color: var(--lofi-caption);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>lofi 예시 2 · 회화풍</h1>
+  <p>도트 예시와 같은 구도를 부드러운 색 번짐과 셀 셰이딩으로 그렸다. 장면 하나를 크기마다 다르게 잘라 보여준다. 흐림·노이즈 필터를 써서 DESIGN.md 의 "필터 금지"에서 벗어난다. SwiftUI 로 옮기려면 그레인은 노이즈 이미지 에셋으로 바꿔야 한다.</p>
+</header>
+<main>
+  <div class="sizes" id="sizes"></div>
+</main>
+
+<script>
+const SCENE = { region: '서울', time: '오후 9:00', temperature: -5, occasion: '크리스마스 이브' };
+// 480×400 원본 장면에서 크기마다 잘라 낼 영역 [x, y, w, h]. 캡션 띠는 원본 y 360 아래다.
+const CROPS = {
+  small: { size: [170, 170], view: [230, 160, 240, 240] },
+  medium: { size: [364, 170], view: [0, 160, 480, 224] },
+  large: { size: [364, 382], view: [50, 18, 364, 382] },
+};
+const CAPTION_Y = 360;
+
+const rootStyle = getComputedStyle(document.documentElement);
+const c = name => {
+  const value = rootStyle.getPropertyValue('--lofi-' + name).trim();
+  if (!value) throw new Error(`design.css 에 --lofi-${name} 이 없다`);
+  return value;
+};
+
+// 시드 고정 난수. 회화풍은 Swift 와 수열을 맞출 필요가 없어 짧은 mulberry32 를 쓴다.
+function rand(seed) {
+  return () => {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function scene(id) {
+  const r = rand(11);
+  const stars = Array.from({ length: 40 }, () =>
+    `<circle cx="${(60 + r() * 220).toFixed(1)}" cy="${(40 + r() * 140).toFixed(1)}" r="${(0.5 + r() * 0.9).toFixed(2)}" fill="${c(r() < 0.3 ? 'star' : 'star-dim')}"/>`).join('');
+
+  // 창밖 건물: 먼 줄과 가까운 줄. 불 켜진 창은 호박색.
+  const city = [];
+  for (const [fill, base, minH, maxH, lit] of [[c('city-far'), 250, 40, 80, 0.15], [c('city'), 290, 25, 60, 0.3]]) {
+    let x = 52;
+    while (x < 280) {
+      const w = 18 + r() * 26, h = minH + r() * (maxH - minH), top = base - h;
+      city.push(`<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${w.toFixed(1)}" height="${(300 - top).toFixed(1)}" fill="${fill}"/>`);
+      if (fill === c('city')) city.push(`<rect x="${x.toFixed(1)}" y="${(top - 1.5).toFixed(1)}" width="${w.toFixed(1)}" height="2.5" rx="1.2" fill="${c('snow')}"/>`);
+      for (let wy = top + 5; wy < 296; wy += 7) {
+        for (let wx = x + 3; wx < x + w - 4; wx += 6) {
+          if (r() < lit) city.push(`<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="3" height="3.5" fill="${c('window-lit')}" filter="url(#${id}-soft)"/>`);
+        }
+      }
+      x += w + r() * 4;
+    }
+  }
+
+  const bulbs = ['bulb-1', 'bulb-2', 'bulb-3', 'bulb-4'];
+  const garland = Array.from({ length: 8 }, (_, i) => {
+    const x = 62 + i * 29, y = 40 + Math.sin((i + 0.5) / 8 * Math.PI * 8) * 1.5 + 6;
+    return `<circle cx="${x}" cy="${y}" r="6" fill="${c(bulbs[i % 4])}" opacity="0.35" filter="url(#${id}-glow)"/><circle cx="${x}" cy="${y}" r="2.6" fill="${c(bulbs[i % 4])}"/>`;
+  }).join('');
+  const wire = Array.from({ length: 8 }, (_, i) => `Q ${62 + i * 29 + 14.5} ${50} ${62 + (i + 1) * 29} 44`).join(' ');
+
+  return `
+  <defs>
+    <linearGradient id="${id}-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${c('sky-1')}"/>
+      <stop offset="0.45" stop-color="${c('sky-2')}"/>
+      <stop offset="0.75" stop-color="${c('sky-3')}"/>
+      <stop offset="1" stop-color="${c('sky-4')}"/>
+    </linearGradient>
+    <radialGradient id="${id}-lamp" cx="310" cy="280" r="190" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="${c('wall-warmer')}"/>
+      <stop offset="0.35" stop-color="${c('wall-warm')}"/>
+      <stop offset="1" stop-color="${c('wall')}"/>
+    </radialGradient>
+    <radialGradient id="${id}-desk" cx="310" cy="318" r="160" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="${c('desk-lit')}"/>
+      <stop offset="1" stop-color="${c('wood-light')}"/>
+    </radialGradient>
+    <radialGradient id="${id}-pool" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="${c('lamp-light')}" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="${c('lamp-light')}" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="${id}-glass"><rect x="58" y="38" width="214" height="262"/></clipPath>
+    <filter id="${id}-soft"><feGaussianBlur stdDeviation="0.6"/></filter>
+    <filter id="${id}-glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="${id}-grain" x="0" y="0" width="1" height="1">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0.10 0" result="grain"/>
+      <feComposite in="grain" in2="SourceGraphic" operator="in"/>
+    </filter>
+  </defs>
+
+  <!-- 벽: 스탠드 쪽이 따뜻하다 -->
+  <rect width="480" height="400" fill="url(#${id}-lamp)"/>
+
+  <!-- 창밖 -->
+  <g clip-path="url(#${id}-glass)">
+    <rect x="58" y="38" width="214" height="262" fill="url(#${id}-sky)"/>
+    ${stars}
+    <circle cx="112" cy="104" r="26" fill="${c('halo')}" opacity="0.8" filter="url(#${id}-glow)"/>
+    <circle cx="112" cy="104" r="12" fill="${c('moon')}"/>
+    ${city.join('')}
+  </g>
+
+  <!-- 창틀과 창살 -->
+  <path d="M50 30 H280 V306 H50 Z M58 38 V300 H272 V38 Z" fill-rule="evenodd" fill="${c('wood')}"/>
+  <rect x="50" y="30" width="230" height="3" fill="${c('wood-light')}"/>
+  <rect x="163" y="38" width="4" height="262" fill="${c('wood')}"/>
+  <rect x="58" y="146" width="214" height="4" fill="${c('wood')}"/>
+  <rect x="44" y="298" width="242" height="8" rx="2" fill="${c('wood-light')}"/>
+
+  <!-- 커튼 -->
+  <path d="M30 22 C 46 22 62 24 66 30 C 60 110 70 200 62 304 L 30 304 Z" fill="${c('curtain')}"/>
+  <path d="M38 26 C 42 120 50 200 44 304" stroke="${c('curtain-dark')}" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M54 30 C 52 120 60 220 54 304" stroke="${c('curtain-dark')}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- 크리스마스 전구 -->
+  <path d="M62 44 ${wire}" stroke="${c('wire')}" stroke-width="1.2" fill="none"/>
+  ${garland}
+
+  <!-- 창턱의 고양이 뒷모습 -->
+  <g transform="translate(96 298)">
+    <path d="M-14 0 C -16 -12 -12 -22 -6 -24 L -9 -33 L -2 -27 C 1 -28 4 -28 6 -27 L 11 -34 L 10 -23 C 15 -18 16 -8 15 0 Z" fill="${c('cat')}"/>
+    <path d="M10 -23 C 15 -18 16 -8 15 0 L 12 0 C 13 -8 12 -16 9 -21 Z" fill="${c('cat-rim')}"/>
+    <path d="M15 -2 C 24 -2 28 -6 26 -12" stroke="${c('cat')}" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- 창턱 화분 -->
+  <g transform="translate(236 298)">
+    <path d="M-7 0 L -6 -9 H 6 L 7 0 Z" fill="${c('pot')}"/>
+    <ellipse cx="-4" cy="-13" rx="5" ry="3" fill="${c('plant')}" transform="rotate(-30 -4 -13)"/>
+    <ellipse cx="4" cy="-14" rx="5" ry="3" fill="${c('plant-dark')}" transform="rotate(25 4 -14)"/>
+    <ellipse cx="0" cy="-17" rx="3" ry="5" fill="${c('plant')}"/>
+  </g>
+
+  <!-- 선반. small·medium 은 위를 잘라서 large 에서만 보인다 -->
+  <g>
+    <rect x="300" y="128" width="104" height="4" fill="${c('wood-light')}"/>
+    <rect x="302" y="132" width="100" height="3" fill="${c('wood-dark')}"/>
+    <rect x="310" y="104" width="7" height="24" fill="${c('book-1')}"/>
+    <rect x="317" y="108" width="6" height="20" fill="${c('book-2')}"/>
+    <rect x="323" y="101" width="8" height="27" fill="${c('book-3')}"/>
+    <rect x="331" y="110" width="6" height="18" fill="${c('book-1')}" transform="rotate(12 337 128)"/>
+    <path d="M378 128 L 380 116 H 394 L 396 128 Z" fill="${c('pot')}"/>
+    <path d="M382 130 C 378 140 384 150 380 158 M387 130 C 388 140 392 148 390 156 M392 130 C 396 138 396 144 400 150" stroke="${c('plant-dark')}" stroke-width="2" fill="none"/>
+    <path d="M380 142 l -4 2 M 383 152 l -4 2 M 390 146 l 4 2 M 397 140 l 4 1" stroke="${c('plant')}" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="387" cy="113" rx="9" ry="5" fill="${c('plant')}"/>
+  </g>
+
+  <!-- 책상 -->
+  <rect x="0" y="306" width="480" height="8" fill="url(#${id}-desk)"/>
+  <rect x="0" y="314" width="480" height="${CAPTION_Y - 314}" fill="${c('wood')}"/>
+  <ellipse cx="312" cy="309" rx="60" ry="7" fill="url(#${id}-pool)"/>
+
+  <!-- 책, 머그 -->
+  <rect x="432" y="298" width="40" height="5" rx="1" fill="${c('book-1')}"/>
+  <rect x="436" y="293" width="34" height="5" rx="1" fill="${c('book-2')}"/>
+  <rect x="434" y="303" width="42" height="5" rx="1" fill="${c('book-3')}"/>
+  <g transform="translate(262 308)">
+    <path d="M0 0 V -16 H 14 V 0 Z" fill="${c('mug')}"/>
+    <rect x="0" y="-16" width="4" height="16" fill="${c('mug-dark')}"/>
+    <path d="M14 -12 C 20 -12 20 -4 14 -4" stroke="${c('mug')}" stroke-width="2.5" fill="none"/>
+    <path d="M4 -20 C 1 -25 8 -28 5 -34 M10 -20 C 7 -26 13 -29 10 -36" stroke="${c('steam')}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  </g>
+
+  <!-- 스탠드와 불빛 -->
+  <circle cx="306" cy="288" r="40" fill="${c('lamp-light')}" opacity="0.18" filter="url(#${id}-glow)"/>
+  <path d="M326 308 L 320 270 L 304 262" stroke="${c('lamp-body')}" stroke-width="3" fill="none" stroke-linejoin="round"/>
+  <rect x="312" y="304" width="24" height="5" rx="2" fill="${c('lamp-body')}"/>
+  <path d="M292 258 L 312 252 L 318 270 L 294 276 Z" fill="${c('lamp')}"/>
+  <ellipse cx="306" cy="274" rx="11" ry="3" fill="${c('lamp-light')}" transform="rotate(-14 306 274)"/>
+
+  <!-- 사람 뒷모습. 왼쪽(스탠드 쪽) 가장자리에 따뜻한 테두리 빛 -->
+  <g transform="translate(384 360)">
+    <path d="M-48 0 C -50 -40 -40 -66 -22 -72 L 22 -72 C 40 -66 50 -40 48 0 Z" fill="${c('hoodie')}"/>
+    <path d="M-20 -72 C -12 -60 12 -60 20 -72 C 14 -80 -14 -80 -20 -72 Z" fill="${c('hoodie-dark')}"/>
+    <path d="M4 -60 V -20" stroke="${c('hoodie-dark')}" stroke-width="2"/>
+    <path d="M-38 -62 C -46 -50 -50 -30 -48 0 L -42 0 C -44 -26 -42 -48 -34 -60 Z" fill="${c('hoodie-rim')}"/>
+    <rect x="-7" y="-82" width="14" height="10" fill="${c('skin')}"/>
+    <rect x="-7" y="-82" width="4" height="10" fill="${c('hoodie-rim')}"/>
+    <ellipse cx="0" cy="-104" rx="24" ry="27" fill="${c('hair')}"/>
+    <path d="M-14 -124 C -26 -112 -26 -94 -18 -82 L -14 -84 C -20 -96 -20 -110 -10 -122 Z" fill="${c('hair-rim')}"/>
+    <circle cx="2" cy="-136" r="10" fill="${c('hair')}"/>
+    <path d="M-4 -144 C -10 -140 -10 -132 -6 -128" stroke="${c('hair-rim')}" stroke-width="2.5" fill="none"/>
+    <path d="M-26 -104 C -26 -134 26 -134 26 -104" stroke="${c('headphone')}" stroke-width="5" fill="none"/>
+    <rect x="-31" y="-110" width="9" height="18" rx="4" fill="${c('headphone-accent')}"/>
+    <rect x="22" y="-110" width="9" height="18" rx="4" fill="${c('headphone-accent')}"/>
+  </g>
+
+  <!-- 캡션 띠: 가장 앞의 어두운 가장자리 -->
+  <rect x="0" y="${CAPTION_Y}" width="480" height="${400 - CAPTION_Y}" fill="${c('wood-dark')}"/>
+
+  <!-- 필름 그레인 -->
+  <rect width="480" height="400" fill="#808080" filter="url(#${id}-grain)" style="mix-blend-mode: overlay"/>`;
+}
+
+function widget(sizeKey) {
+  const { size: [w, h], view: [vx, vy, vw, vh] } = CROPS[sizeKey];
+  const scale = w / vw;
+  const box = document.createElement('div');
+  box.className = `widget ${sizeKey}`;
+  box.style.width = `${w}px`;
+  box.style.height = `${h}px`;
+  box.innerHTML = `<svg width="${w}" height="${h}" viewBox="${vx} ${vy} ${vw} ${vh}" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${scene(sizeKey)}</svg>`;
+
+  const captionTop = Math.round((CAPTION_Y - vy) * scale);
+  const details = sizeKey === 'small' ? SCENE.occasion : `${SCENE.region} · ${SCENE.occasion}`;
+  box.insertAdjacentHTML('beforeend',
+    `<div class="caption${sizeKey === 'large' ? ' large' : ''}" style="top:${captionTop}px;width:${w}px;height:${h - captionTop}px;padding:0 ${Math.round(Math.min(w, h) * 0.066)}px" role="img" aria-label="${SCENE.region}, ${SCENE.time}, ${SCENE.temperature}°, ${SCENE.occasion}">` +
+    `<div class="caption-line"><span class="time">${SCENE.time}</span><span class="temp">${SCENE.temperature}°</span><span class="spacer"></span><span class="details">${details}</span></div></div>`);
+  return box;
+}
+
+document.getElementById('sizes').append(...Object.keys(CROPS).map(widget));
+
+for (const line of document.querySelectorAll('.caption-line')) {
+  const spans = [...line.children].filter(s => !s.classList.contains('spacer'));
+  const sizes = spans.map(s => parseFloat(getComputedStyle(s).fontSize));
+  for (let k = 1; k > 0.6 && spans.some(s => s.scrollWidth > s.clientWidth + 0.5); ) {
+    k -= 0.05;
+    spans.forEach((s, i) => { s.style.fontSize = `${sizes[i] * k}px`; });
+  }
+}
+</script>
+</body>
+</html>
