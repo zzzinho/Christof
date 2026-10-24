@@ -97,6 +97,32 @@
   --pouch-light: #E23A52;
   --pouch-dark: #B01C36;
   --pouch-gold: #F2C14E;
+
+  /* 도트 시안 팔레트 (02-window-dot-*). 차분한 밤, 24색. 가장 밝은 것은 달과 전구다. */
+  --dot-sky-1: #161A2B;
+  --dot-sky-2: #1D2236;
+  --dot-sky-3: #262B42;
+  --dot-sky-4: #31344B;
+  --dot-star: #B9B6A8;
+  --dot-star-dim: #6E6F7D;
+  --dot-moon: #DDD5BB;
+  --dot-halo: #343A52;
+  --dot-cloud: #353A50;
+  --dot-city: #1F2333;
+  --dot-lamp: #A88D58;
+  --dot-snow: #6F7689;
+  --dot-snow-shade: #565D70;
+  --dot-pine: #233130;
+  --dot-frame-light: #B8AE9C;
+  --dot-frame: #A89E8D;
+  --dot-frame-shade: #8F8574;
+  --dot-glass-edge: #3A3536;
+  --dot-caption: #2A241F;
+  --dot-wire: #34402F;
+  --dot-bulb-red: #C0675C;
+  --dot-bulb-yellow: #D6B56A;
+  --dot-bulb-green: #86A77C;
+  --dot-bulb-blue: #7E98B5;
 }
 
 body {
@@ -117,6 +143,12 @@ body {
 
 .widget svg {
   display: block;
+}
+
+/* 도트 격자를 그린 작은 캔버스를 칸 크기만큼 키운다. */
+.widget canvas.dots {
+  position: absolute;
+  image-rendering: pixelated;
 }
 
 .caption {
