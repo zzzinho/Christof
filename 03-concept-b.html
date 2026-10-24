@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>창가 컨셉</title>
+<link rel="stylesheet" href="design.css">
+<style>
+  header {
+    padding: 32px 24px 8px;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+  }
+  header p {
+    margin: 0;
+    color: var(--page-muted);
+    font-size: 0.875rem;
+  }
+  main {
+    padding: 24px 24px 64px;
+  }
+  .sizes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--page-gap);
+  }
+  .widget {
+    background: var(--dot-wall-dark);
+  }
+  .caption {
+    color: var(--dot-caption-light);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title"></h1>
+  <p id="spec"></p>
+</header>
+<main>
+  <div class="sizes" id="sizes"></div>
+</main>
+
+<script>
+// 세 컨셉 파일(-a, -b, -c)은 이 CONCEPT 한 줄만 다르다.
+const CONCEPT = 'attic';
+
+const CONCEPTS = {
+  apartment: { key: 'A', name: '아파트 창가', about: '벽과 커튼 안의 미닫이 창. 창턱에 화분·머그컵. 창밖은 먼 산, 아파트, 지붕과 전봇대 세 겹.' },
+  attic: { key: 'B', name: '다락방 나무 창', about: '경사진 천장 아래 윗부분이 둥근 나무 창. 창턱에 고양이·촛불. 창밖은 눈 덮인 지붕 너머 마을 불빛.' },
+  hanok: { key: 'C', name: '한옥 창', about: '양쪽으로 연 띠살문과 마루. 창밖은 먼 산 두 겹, 기와 돌담, 감나무, 장독대.' },
+};
+
+// 02-window-dot-b 의 B 스타일: 한 칸 3pt, 외곽선 없음, 색 띠 경계만 디더링, 불빛 번짐 한 겹.
+const DOT = 3;
+const DITHER = 0.3;
+
+const SCENE = { region: '서울', time: '오후 9:00', temperature: -5, moon: [0.52, 39, 84], occasion: '크리스마스 이브' };
+const SIZES = { small: [170, 170], medium: [364, 170], large: [364, 382] };
+
+const rootStyle = getComputedStyle(document.documentElement);
+const colorCache = {};
+function color(name) {
+  if (colorCache[name]) return colorCache[name];
+  const value = rootStyle.getPropertyValue('--dot-' + name).trim();
+  if (!/^#[0-9a-f]{6}$/i.test(value)) throw new Error(`design.css 에 --dot-${name} (#RRGGBB) 이 없다`);
+  return (colorCache[name] = value);
+}
+
+// 시드 고정 난수 (Swift SeededRandom 과 같은 수열)
+const MASK64 = (1n << 64n) - 1n;
+class Rand {
+  constructor(seed) { this.state = BigInt(seed); }
+  next() {
+    this.state = (this.state + 0x9E3779B97F4A7C15n) & MASK64;
+    let z = this.state;
+    z = ((z ^ (z >> 30n)) * 0xBF58476D1CE4E5B9n) & MASK64;
+    z = ((z ^ (z >> 27n)) * 0x94D049BB133111EBn) & MASK64;
+    return z ^ (z >> 31n);
+  }
+  below(bound) {
+    let m = this.next() * bound;
+    if ((m & MASK64) < bound) {
+      const t = ((1n << 64n) - bound) % bound;
+      while ((m & MASK64) < t) m = this.next() * bound;
+    }
+    return m >> 64n;
+  }
+  range(lower, upper) {
+    const max = 1n << 53n;
+    const r = this.below(max + 1n);
+    if (r === max) return upper;
+    return (upper - lower) * (Number(r) * (Number.EPSILON / 2)) + lower;
+  }
+  int(lower, upper) { return Math.floor(this.range(lower, upper + 0.999)); }
+}
+
+// ---- 도트 격자 ----
+
+const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+const bayer = (x, y) => (BAYER[((y % 4) + 4) % 4][((x % 4) + 4) % 4] + 0.5) / 16;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const pt = v => v / DOT;
+
+function blend(a, b, f, x, y) {
+  const t = clamp((f - 0.5) / DITHER + 0.5, 0, 1);
+  return t > bayer(x, y) ? b : a;
+}
+
+class Grid {
+  constructor(cols, rows) {
+    this.cols = cols;
+    this.rows = rows;
+    this.cells = new Array(cols * rows).fill(null);
+    this.ox = 0;
+    this.oy = 0;
+    this.bounds = [0, 0, cols, rows];
+  }
+  set(x, y, c) {
+    if (!c) return;
+    const ax = Math.floor(x) + this.ox, ay = Math.floor(y) + this.oy;
+    const [x0, y0, x1, y1] = this.bounds;
+    if (ax < x0 || ay < y0 || ax >= x1 || ay >= y1) return;
+    this.cells[ay * this.cols + ax] = c;
+  }
+  within(x, y, w, h, draw) {
+    const saved = [this.ox, this.oy, this.bounds];
+    const [x0, y0, x1, y1] = this.bounds;
+    this.ox += x;
+    this.oy += y;
+    this.bounds = [Math.max(x0, this.ox), Math.max(y0, this.oy), Math.min(x1, this.ox + w), Math.min(y1, this.oy + h)];
+    draw();
+    [this.ox, this.oy, this.bounds] = saved;
+  }
+  rect(x, y, w, h, c) {
+    for (let j = Math.round(y); j < Math.round(y + h); j++) for (let i = Math.round(x); i < Math.round(x + w); i++) this.set(i, j, c);
+  }
+  // 칸 가운데가 inside 를 만족하는 칸을 칠한다. c 는 색 또는 (x, y) => 색.
+  shape(x0, y0, x1, y1, inside, c) {
+    for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) {
+      for (let x = Math.floor(x0); x <= Math.ceil(x1); x++) {
+        if (!inside(x + 0.5, y + 0.5)) continue;
+        this.set(x, y, typeof c === 'function' ? c(x, y) : c);
+      }
+    }
+  }
+  line(x0, y0, x1, y1, c) {
+    [x0, y0, x1, y1] = [x0, y0, x1, y1].map(Math.round);
+    const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx + dy;
+    for (;;) {
+      this.set(x0, y0, c);
+      if (x0 === x1 && y0 === y1) return;
+      const e2 = 2 * err;
+      if (e2 >= dy) { err += dy; x0 += sx; }
+      if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+  }
+  // rows: 문자열 줄 목록, map: 글자 → 색 이름. 아래 가운데를 (x, bottom) 에 맞춘다.
+  sprite(x, bottom, rows, map) {
+    const left = Math.round(x - rows[0].length / 2), top = bottom - rows.length;
+    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (map[ch]) this.set(left + i, top + j, color(map[ch])); }));
+  }
+  canvas() {
+    const canvas = document.createElement('canvas');
+    canvas.width = this.cols;
+    canvas.height = this.rows;
+    const ctx = canvas.getContext('2d');
+    this.cells.forEach((c, i) => {
+      if (!c) return;
+      ctx.fillStyle = c;
+      ctx.fillRect(i % this.cols, Math.floor(i / this.cols), 1, 1);
+    });
+    return canvas;
+  }
+}
+
+// ---- 창밖 공용 그림. 좌표는 창 안쪽 기준 칸 ----
+
+function celestialPoint(altitude, azimuth) {
+  if (altitude <= -2) return null;
+  const d = ((azimuth % 360) + 360) % 360 - 180;
+  const base = 0.72 - 0.035;
+  return [clamp(0.5 + d / 135 * 0.45, 0.05, 0.95), base - Math.pow(clamp(altitude, 0, 75) / 75, 0.75) * (base - 0.1)];
+}
+
+function drawSky(g, w, h, horizon) {
+  const bands = ['sky-1', 'sky-2', 'sky-3', 'sky-4'].map(color);
+  for (let y = 0; y < h; y++) {
+    const t = clamp((y + 0.5) / (h * horizon), 0, 1) * (bands.length - 1);
+    const i = Math.min(bands.length - 2, Math.floor(t));
+    for (let x = 0; x < w; x++) g.set(x, y, blend(bands[i], bands[i + 1], t - i, x, y));
+  }
+}
+
+function drawStars(g, w, h, bottom) {
+  const random = new Rand(3);
+  const count = Math.round(w * h * DOT * DOT * 0.0012);
+  for (let i = 0; i < count; i++) {
+    const x = Math.floor(random.range(0, 1) * w), y = Math.floor(random.range(0, bottom) * h);
+    g.set(x, y, color(random.range(0, 1) < 0.3 ? 'star' : 'star-dim'));
+  }
+}
+
+function drawMoon(g, w, h) {
+  const point = celestialPoint(SCENE.moon[1], SCENE.moon[2]);
+  if (!point) return;
+  const cx = Math.floor(point[0] * w) + 0.5, cy = Math.floor(point[1] * h) + 0.5;
+  const r = pt(10) + 0.3;
+  const dist = (x, y) => Math.hypot(x - cx, y - cy);
+  g.shape(cx - r - 2, cy - r - 2, cx + r + 2, cy + r + 2, (x, y) => dist(x, y) > r && dist(x, y) <= r + 2,
+    (x, y) => (1 - (dist(x + 0.5, y + 0.5) - r) / 2.5) * 0.75 > bayer(x, y) ? color('halo') : null);
+  const phase = SCENE.moon[0], k = Math.cos(phase * 2 * Math.PI);
+  g.shape(cx - r, cy - r, cx + r, cy + r, (x, y) => dist(x, y) <= r, (x, y) => {
+    const dx = (x + 0.5 - cx) / r, dy = (y + 0.5 - cy) / r, s = Math.sqrt(Math.max(0, 1 - dy * dy));
+    return (phase < 0.5 ? dx >= k * s : dx <= -k * s) ? color('moon') : color('halo');
+  });
+}
+
+// 능선. base 는 평균 높이(칸), amp 는 오르내림 폭(칸).
+function drawRidge(g, w, h, base, amp, waves, phase, c) {
+  const top = x => base - amp * (0.6 + 0.4 * Math.sin(x / w * 2 * Math.PI * waves + phase) + 0.25 * Math.sin(x / w * 2 * Math.PI * waves * 2.7 + phase * 1.9));
+  g.shape(0, base - amp * 1.4, w, h, (x, y) => y >= top(x), c);
+}
+
+// ---- 크리스마스 전구: 고리 사이에 처진 줄, 줄 가운데에 전구 하나 ----
+
+function drawGarland(g, hooks, sag) {
+  const palette = ['bulb-red', 'bulb-yellow', 'bulb-green', 'bulb-blue'].map(color);
+  const quad = (a, c, b, t) => [0, 1].map(k => (1 - t) ** 2 * a[k] + 2 * (1 - t) * t * c[k] + t * t * b[k]);
+  const wire = [], bulbs = [];
+  for (let i = 0; i + 1 < hooks.length; i++) {
+    const a = hooks[i], b = hooks[i + 1];
+    const control = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + sag * 2];
+    const steps = Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * 3);
+    for (let s = 0; s <= steps; s++) wire.push(quad(a, control, b, s / steps));
+    bulbs.push(quad(a, control, b, 0.5));
+  }
+  const spots = bulbs.map(([x, y], i) => ({ x: Math.floor(x), y: Math.floor(y) + 1, c: palette[i % palette.length] }));
+  for (const s of spots) {
+    g.shape(s.x - 2, s.y - 2, s.x + 3, s.y + 4, (x, y) => Math.hypot(x - s.x - 0.5, y - s.y - 1) <= 2, (x, y) => ((x + y) % 2 === 0 ? s.c : null));
+  }
+  for (const [x, y] of wire) g.set(x, y, color('wire'));
+  for (const s of spots) g.rect(s.x, s.y, 1, 2, s.c);
+}
+
+// 고리를 left~right 사이에 spacing(pt) 간격으로 둔다.
+function hooksAcross(left, right, y) {
+  const n = Math.max(2, Math.round((right - left) / pt(30)));
+  return Array.from({ length: n + 1 }, (_, i) => [left + (right - left) * i / n, y]);
+}
+
+// ---- 컨셉 A: 아파트 창가 ----
+
+const SPRITES = {
+  plant: ['...l.l...', '..lLl.l..', '.l.lLlLl.', 'lLl.Ll.lL', '.lLlLlLl.', '..lLlLl..', '...lLl...', '.PPPPPPP.', '.pPPPPPp.', '..pPPPp..', '..ppppp..'],
+  mug: ['mmmmm..', 'mMMMmmm', 'mMMMm.m', 'mMMMmmm', '.mmm...'],
+  cat: ['..c...c....', '..cc.cc....', '..ccccc....', '..ccccc....', '...ccc.....', '..ccccc....', '.ccccccc...', '.ccccccc...', 'ccccccccc..', 'ccccccccc..', 'ccccccccccc', '.cccccccccc'],
+  candle: ['..f..', '..F..', '..w..', '.www.', '.www.', '.www.', '.www.', 'hhhhh'],
+  bigJar: ['..sssss..', '.kkkkkkk.', '..jjjjj..', '.jJJjjjj.', 'jJJjjjjjj', 'jJJjjjjjj', 'jJjjjjjjj', '.jjjjjjj.', '..jjjjj..'],
+  smallJar: ['.sss.', 'kkkkk', '.jjj.', 'jJjjj', 'jJjjj', '.jjj.'],
+};
+const PROP_COLORS = {
+  l: 'leaf', L: 'leaf-dark', P: 'pot', p: 'pot-dark', m: 'mug-dark', M: 'mug', c: 'cat',
+  f: 'flame', F: 'flame-dark', w: 'candle', h: 'wood-dark', s: 'snow', k: 'onggi-light', j: 'onggi', J: 'onggi-light',
+};
+
+function apartmentView(g, w, h) {
+  drawSky(g, w, h, 0.75);
+  drawStars(g, w, h, 0.5);
+  drawMoon(g, w, h);
+  drawRidge(g, w, h, h * 0.62, pt(12), 1.1, 0.6, color('mountain'));
+
+  const apartments = new Rand(7);
+  let x = apartments.range(-4, 2);
+  while (x < w) {
+    const bw = apartments.int(Math.round(pt(30)), Math.round(pt(45)));
+    // 높이 떠 있는 달과 먼 산을 가리지 않게 창 높이의 40% 를 넘지 않는다.
+    const bh = Math.min(apartments.int(Math.round(pt(40)), Math.round(pt(70))), Math.round(h * 0.4));
+    const bottom = Math.round(h * 0.82), top = bottom - bh;
+    g.rect(x, top, bw, bh, color('apartment'));
+    for (let wy = top + 2; wy < bottom - 1; wy += 2) {
+      for (let wx = Math.round(x) + 1; wx < x + bw - 1; wx += 2) {
+        if (apartments.range(0, 1) < 0.22) g.set(wx, wy, color('lamp'));
+      }
+    }
+    x += bw + apartments.int(Math.round(pt(9)), Math.round(pt(24)));
+  }
+
+  // 가까운 낮은 집들: 눈 얹힌 지붕과 벽
+  const houses = new Rand(9);
+  x = houses.range(-6, 0);
+  while (x < w) {
+    const hw = houses.int(Math.round(pt(24)), Math.round(pt(36)));
+    const roofY = Math.round(h * houses.range(0.8, 0.86));
+    g.rect(x, roofY + 2, hw, h - roofY, color('house'));
+    g.rect(x - 1, roofY, hw + 2, 2, color('roof'));
+    g.rect(x - 1, roofY, hw + 2, 1, color('snow'));
+    if (houses.range(0, 1) < 0.6) g.rect(x + Math.round(hw * houses.range(0.2, 0.6)), roofY + 4, 2, 2, color('lamp'));
+    x += hw + 1;
+  }
+
+  // 전봇대와 전깃줄
+  const px = Math.round(w * 0.8), ptop = Math.round(h * 0.22);
+  g.rect(px, ptop, 1, h - ptop, color('pole'));
+  g.rect(px - 3, ptop + 2, 7, 1, color('pole'));
+  // 왼쪽 전깃줄은 달 아래로 지나가게 창 가운데 높이에서 시작한다.
+  for (const [dx, drop] of [[-3, 0], [3, 2]]) {
+    const ax = px + dx, ay = ptop + 2;
+    const leftY = h * 0.55 + drop;
+    for (let xx = 0; xx < ax; xx++) {
+      const t = xx / ax;
+      g.set(xx, Math.round(leftY + (ay - leftY) * t + Math.sin(t * Math.PI) * pt(6)), color('pole'));
+    }
+    for (let xx = ax + 1; xx < w; xx++) {
+      const t = (xx - ax) / Math.max(1, w - ax);
+      g.set(xx, Math.round(ay + drop + Math.sin(t * Math.PI) * pt(5)), color('pole'));
+    }
+  }
+}
+
+function apartment(g, C, Rr) {
+  g.rect(0, 0, C, Rr, color('wall'));
+  for (let y = 0; y < 4; y++) for (let x = 0; x < C; x++) g.set(x, y, blend(color('wall-dark'), color('wall'), y / 4, x, y));
+
+  const x0 = Math.round(C * 0.07), x1 = C - Math.round(C * 0.2);
+  const y0 = Math.round(Rr * 0.16), sillY = Rr - 3;
+  const ft = 2;
+  const ox = x0 + ft, oy = y0 + ft, ow = x1 - x0 - ft * 2, oh = sillY - oy;
+  g.within(ox, oy, ow, oh, () => apartmentView(g, ow, oh));
+
+  // 알루미늄 미닫이 창틀: 바깥틀과 가운데 겹치는 두 짝
+  for (let y = y0; y < sillY; y++) {
+    for (let x = x0; x < x1; x++) {
+      if (x >= ox && x < ox + ow && y >= oy) continue;
+      g.set(x, y, y === y0 ? color('metal') : x === x1 - 1 ? color('metal-dark') : color('metal'));
+    }
+  }
+  g.rect(ox, oy, ow, 1, color('metal-dark'));
+  const mid = ox + Math.floor(ow / 2);
+  g.rect(mid - 1, oy, 2, oh, color('metal'));
+  g.rect(mid + 1, oy, 1, oh, color('metal-dark'));
+
+  // 창턱
+  g.rect(x0 - 2, sillY, x1 - x0 + 4, 1, color('wood-light'));
+  g.rect(x0 - 2, sillY + 1, x1 - x0 + 4, 2, color('wood'));
+
+  // 커튼: 막대와 주름진 천 한 폭
+  const rodY = y0 - 3;
+  const cx0 = x1 - 2, cx1 = C - Math.round(C * 0.04);
+  g.rect(x0 - 3, rodY, cx1 - x0 + 5, 1, color('wood-dark'));
+  for (let y = rodY + 1; y < Rr; y++) {
+    const left = cx0 + Math.round(Math.sin(y * 0.45) * 0.8 + (y > Rr * 0.55 ? (y - Rr * 0.55) * 0.12 : 0));
+    for (let x = left; x < cx1; x++) {
+      const fold = (x - cx0 + 8) % 4;
+      g.set(x, y, color(fold === 0 ? 'curtain-light' : fold === 3 ? 'curtain-dark' : 'curtain'));
+    }
+  }
+
+  g.sprite(x0 + 6, sillY, SPRITES.plant, PROP_COLORS);
+  g.sprite(x1 - 8, sillY, SPRITES.mug, PROP_COLORS);
+  drawGarland(g, hooksAcross(x0, x1, rodY + 1), 1.5);
+}
+
+// ---- 컨셉 B: 다락방 나무 창 ----
+
+function atticView(g, w, h) {
+  drawSky(g, w, h, 0.65);
+  drawStars(g, w, h, 0.5);
+  drawMoon(g, w, h);
+  drawRidge(g, w, h, h * 0.6, pt(6), 1.4, 2.0, color('mountain'));
+
+  // 먼 마을: 작은 집과 불 켜진 창
+  const town = new Rand(21);
+  let x = 0;
+  while (x < w) {
+    const hw = town.int(4, 7), hh = town.int(2, 4), bottom = Math.round(h * 0.66);
+    g.rect(x, bottom - hh, hw, hh + 4, color('house'));
+    g.shape(x - 0.5, bottom - hh - hw / 2, x + hw + 0.5, bottom - hh, (px, py) => py >= bottom - hh - (hw / 2 - Math.abs(px - x - hw / 2)) * 0.8, color('house'));
+    if (town.range(0, 1) < 0.5) g.set(x + town.int(1, hw - 2), bottom - hh + 1, color('lamp'));
+    x += hw + town.int(0, 2);
+  }
+
+  // 가까운 집들: 위에서 내려다본 눈 덮인 지붕(사다리꼴)과 그 아래 벽. 먼 집(처마가 높은 집)부터 그린다.
+  const houses = [[0.86, 0.75, 0.36], [0.12, 0.78, 0.4], [0.52, 0.85, 0.46]];
+  houses.forEach(([cxf, eavef, widthf], i) => {
+    const cx = w * cxf, eave = Math.round(h * eavef), half = w * widthf / 2;
+    const roofH = Math.max(3, Math.round(half * 0.4)), ridge = eave - roofH;
+    g.rect(cx - half, eave, half * 2, h - eave, color('house'));
+    g.shape(cx - half - 1, ridge, cx + half + 1, eave, (px, py) => py >= ridge && py < eave && Math.abs(px - cx) <= half * 0.75 + (py - ridge) / roofH * (half * 0.25 + 1),
+      (px, py) => (py === eave - 1 ? color('roof') : blend(color('snow'), color('snow-shade'), (py - ridge) / roofH * 0.8, px, py)));
+    g.rect(Math.round(cx - half * 0.4), eave + Math.round(pt(8)), 2, 2, color('lamp'));
+    if (i === 2) {
+      const chx = Math.round(cx + half * 0.4), chy = ridge - Math.round(pt(8));
+      g.rect(chx, chy, 3, Math.round(pt(10)), color('stone-dark'));
+      g.rect(chx - 1, chy - 1, 5, 1, color('snow'));
+    }
+  });
+}
+
+function attic(g, C, Rr) {
+  const ww = Math.round(C * (C > Rr * 1.5 ? 0.5 : 0.62));
+  const wx0 = Math.round((C - ww) / 2), wy0 = Math.round(Rr * 0.14), sillY = Rr - 4;
+  const archH = Math.round(Math.min(ww / 2, (sillY - wy0) * 0.4));
+  const archBase = wy0 + archH, cx = wx0 + ww / 2;
+  const insideWith = pad => (x, y) => x >= wx0 - pad && x < wx0 + ww + pad && y < sillY + pad &&
+    (y >= archBase || ((x - cx) / (ww / 2 + pad)) ** 2 + ((y - archBase) / (archH + pad)) ** 2 <= 1);
+  const glass = insideWith(0), frame = insideWith(2);
+
+  g.within(wx0, wy0, ww, sillY - wy0, () => atticView(g, ww, sillY - wy0));
+
+  // 방: 가운데가 높은 경사 천장 아래 회벽
+  const peak = C / 2;
+  const slopeY = x => Rr * 0.55 * Math.abs(x - peak) / (C / 2) - 2;
+  for (let y = 0; y < Rr; y++) {
+    for (let x = 0; x < C; x++) {
+      if (frame(x + 0.5, y + 0.5)) continue;
+      const below = y + 0.5 - slopeY(x + 0.5);
+      let c;
+      if (below < -1) c = Math.floor(-below) % 4 === 0 ? 'wall-dark' : 'wood-dark';
+      else if (below < 1) c = 'wood-light';
+      else c = 'wall';
+      g.set(x, y, color(c));
+    }
+  }
+  g.shape(wx0 - 2, wy0 - 2, wx0 + ww + 2, sillY, (x, y) => frame(x, y) && !glass(x, y), color('wood'));
+  g.shape(wx0, wy0, wx0 + ww, sillY, (x, y) => glass(x, y) && !glass(x, y - 1), color('wood-dark'));
+  g.rect(Math.floor(cx) - 1, wy0, 2, sillY - wy0, color('wood'));
+  g.rect(wx0, archBase, ww, 1, color('wood'));
+
+  // 창턱, 고양이, 촛불과 벽에 번진 불빛
+  g.rect(wx0 - 4, sillY, ww + 8, 1, color('wood-light'));
+  g.rect(wx0 - 4, sillY + 1, ww + 8, 2, color('wood'));
+  g.rect(wx0 - 4, sillY + 3, ww + 8, 1, color('wood-dark'));
+  const candleX = wx0 + ww - 6;
+  const flame = [candleX, sillY - 7.5];
+  g.shape(flame[0] - 5, flame[1] - 5, flame[0] + 5, flame[1] + 5, (x, y) => Math.hypot(x - flame[0], y - flame[1]) <= 4.5 && Math.hypot(x - flame[0], y - flame[1]) > 1.5,
+    (x, y) => ((x + y) % 2 === 0 && !glass(x + 0.5, y + 0.5) ? color('glow') : null));
+  g.sprite(wx0 + 7, sillY, SPRITES.cat, PROP_COLORS);
+  g.sprite(candleX, sillY, SPRITES.candle, PROP_COLORS);
+
+  const hooks = [];
+  for (let i = 0; i <= 8; i++) {
+    const a = Math.PI * (1 - i / 8);
+    hooks.push([cx + Math.cos(a) * (ww / 2 + 1), archBase - Math.sin(a) * (archH + 1)]);
+  }
+  drawGarland(g, hooks, 0.8);
+}
+
+// ---- 컨셉 C: 한옥 창 ----
+
+function hanokView(g, w, h) {
+  drawSky(g, w, h, 0.62);
+  drawStars(g, w, h, 0.45);
+  drawMoon(g, w, h);
+  drawRidge(g, w, h, h * 0.5, pt(15), 0.9, 1.2, color('mountain-far'));
+  drawRidge(g, w, h, h * 0.6, pt(9), 1.3, 3.4, color('mountain'));
+
+  // 담장 뒤 감나무: 앙상한 가지 끝에 남은 감(까치밥)
+  const tree = new Rand(17);
+  const tx = Math.round(w * 0.74), base = Math.round(h * 0.8), top = Math.round(h * 0.28);
+  g.rect(tx, top + 4, 2, base - top - 4, color('tile'));
+  const tips = [];
+  const grow = (x, y, angle, length, depth) => {
+    const ex = x + Math.sin(angle) * length, ey = y - Math.cos(angle) * length;
+    g.line(x, y, ex, ey, color('tile'));
+    if (depth === 0) { tips.push([ex, ey]); return; }
+    grow(ex, ey, angle - tree.range(0.3, 0.6), length * 0.68, depth - 1);
+    grow(ex, ey, angle + tree.range(0.3, 0.6), length * 0.68, depth - 1);
+  };
+  grow(tx + 1, top + 6, -0.5, pt(22), 3);
+  grow(tx + 1, top + 4, 0.55, pt(24), 3);
+  tips.forEach(([x, y], i) => { if (i % 3 !== 1) g.set(x, y + 1, color('persimmon')); });
+
+  // 기와 돌담
+  const wallTop = Math.round(h * 0.62), wallBottom = Math.round(h * 0.8);
+  g.rect(0, wallTop - 1, w, 1, color('snow'));
+  g.rect(0, wallTop, w, 2, color('tile'));
+  for (let x = 0; x < w; x += 2) g.set(x, wallTop + 2, color('tile'));
+  for (let y = wallTop + 3; y < wallBottom; y++) {
+    const row = Math.floor((y - wallTop - 3) / 2);
+    for (let x = 0; x < w; x++) {
+      const seam = (y - wallTop - 3) % 2 === 1 || (x + row * 3) % 6 === 0;
+      g.set(x, y, color(seam ? 'stone-dark' : 'stone'));
+    }
+  }
+
+  // 마당 눈밭과 장독대
+  for (let y = wallBottom; y < h; y++) {
+    for (let x = 0; x < w; x++) g.set(x, y, blend(color('snow-shade'), color('snow'), (y - wallBottom) / 3, x, y));
+  }
+  const jx = Math.round(w * 0.16);
+  g.rect(jx - 9, h - 3, 19, 3, color('stone'));
+  g.sprite(jx - 3, h - 3, SPRITES.bigJar, PROP_COLORS);
+  g.sprite(jx + 5, h - 3, SPRITES.smallJar, PROP_COLORS);
+}
+
+// 띠살문 한 짝: 촘촘한 세로살, 위·가운데·아래에 가로살 묶음
+function drawDoor(g, x0, y0, w, h) {
+  g.rect(x0, y0, w, h, color('lattice'));
+  for (let y = y0 + 1; y < y0 + h - 1; y++) {
+    const ly = (y - y0) / h;
+    const band = (ly < 0.2) || (ly > 0.42 && ly < 0.55) || (ly > 0.8);
+    for (let x = x0 + 1; x < x0 + w - 1; x++) {
+      const bar = (x - x0) % 2 === 0 || (band && (y - y0) % 2 === 0);
+      g.set(x, y, color(bar ? 'lattice' : (x - x0) % 4 === 1 ? 'hanji' : 'hanji-dark'));
+    }
+  }
+}
+
+function hanok(g, C, Rr) {
+  const lintelH = Math.max(3, Math.round(Rr * 0.1));
+  const floorTop = Rr - 3;
+  const pw = Math.round(C * (C > Rr * 1.5 ? 0.17 : 0.2));
+  g.within(pw, lintelH, C - pw * 2, floorTop - lintelH, () => hanokView(g, C - pw * 2, floorTop - lintelH));
+
+  g.rect(0, 0, C, lintelH, color('lattice'));
+  g.rect(0, lintelH - 1, C, 1, color('wood-dark'));
+  drawDoor(g, 0, lintelH, pw, floorTop - lintelH);
+  drawDoor(g, C - pw, lintelH, pw, floorTop - lintelH);
+
+  // 마루: 앞에서 본 널판
+  g.rect(0, floorTop, C, 1, color('wood-light'));
+  g.rect(0, floorTop + 1, C, 2, color('wood'));
+  for (let x = 4; x < C; x += 9) g.rect(x, floorTop + 1, 1, 2, color('wood-dark'));
+
+  drawGarland(g, hooksAcross(pw - 1, C - pw + 1, lintelH), 1.2);
+}
+
+const COMPOSERS = { apartment, attic, hanok };
+
+// ---- 조립 ----
+
+function widget(sizeKey) {
+  const [w, h] = SIZES[sizeKey];
+  const cols = Math.ceil(w / DOT), rows = Math.ceil(h / DOT);
+  const offset = [Math.floor((cols * DOT - w) / 2), Math.floor((rows * DOT - h) / 2)];
+  const captionRows = Math.max(6, Math.round(Math.min(w, h) * 0.11 / DOT));
+  const room = rows - captionRows;
+  const g = new Grid(cols, rows);
+  COMPOSERS[CONCEPT](g, cols, room);
+  g.rect(0, room, cols, captionRows, color(CONCEPT === 'hanok' ? 'wood-dark' : 'wall-dark'));
+
+  const box = document.createElement('div');
+  box.className = `widget ${sizeKey}`;
+  box.style.width = `${w}px`;
+  box.style.height = `${h}px`;
+  const canvas = g.canvas();
+  canvas.className = 'dots';
+  canvas.setAttribute('aria-hidden', 'true');
+  Object.assign(canvas.style, { width: `${cols * DOT}px`, height: `${rows * DOT}px`, left: `${-offset[0]}px`, top: `${-offset[1]}px` });
+  box.append(canvas);
+
+  const captionTop = room * DOT - offset[1];
+  const details = sizeKey === 'small' ? SCENE.occasion : `${SCENE.region} · ${SCENE.occasion}`;
+  box.insertAdjacentHTML('beforeend',
+    `<div class="caption${sizeKey === 'large' ? ' large' : ''}" style="top:${captionTop}px;width:${w}px;height:${h - captionTop}px;padding:0 ${Math.round(Math.min(w, h) * 0.066)}px" role="img" aria-label="${SCENE.region}, ${SCENE.time}, ${SCENE.temperature}°, ${SCENE.occasion}">` +
+    `<div class="caption-line"><span class="time">${SCENE.time}</span><span class="temp">${SCENE.temperature}°</span><span class="spacer"></span><span class="details">${details}</span></div></div>`);
+  return box;
+}
+
+const concept = CONCEPTS[CONCEPT];
+document.getElementById('title').textContent = `컨셉 ${concept.key} · ${concept.name}`;
+document.getElementById('spec').textContent = `${concept.about} 도트 3pt(B 스타일). 장면: 서울 12월 24일 오후 9:00, 맑음, 크리스마스 이브.`;
+document.getElementById('sizes').append(...Object.keys(SIZES).map(widget));
+
+// Swift 캡션의 minimumScaleFactor(0.6) 처럼, 넘치면 글자를 줄여 끝까지 보여준다.
+for (const line of document.querySelectorAll('.caption-line')) {
+  const spans = [...line.children].filter(s => !s.classList.contains('spacer'));
+  const sizes = spans.map(s => parseFloat(getComputedStyle(s).fontSize));
+  for (let k = 1; k > 0.6 && spans.some(s => s.scrollWidth > s.clientWidth + 0.5); ) {
+    k -= 0.05;
+    spans.forEach((s, i) => { s.style.fontSize = `${sizes[i] * k}px`; });
+  }
+}
+</script>
+</body>
+</html>

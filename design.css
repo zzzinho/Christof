@@ -123,6 +123,46 @@
   --dot-bulb-yellow: #D6B56A;
   --dot-bulb-green: #86A77C;
   --dot-bulb-blue: #7E98B5;
+
+  /* 컨셉 시안 (03-concept-*): 방 안은 늘 같은 어두운 난색, 창밖은 장면 색 */
+  --dot-wall: #4B4038;
+  --dot-wall-dark: #3B322C;
+  --dot-wall-light: #5A4C42;
+  --dot-caption-light: #E6DCC8;
+  --dot-wood: #6B5040;
+  --dot-wood-dark: #4E3A2F;
+  --dot-wood-light: #82644F;
+  --dot-glow: #6E5440;
+  --dot-mountain: #23273A;
+  --dot-mountain-far: #2A2E44;
+  --dot-roof: #2B2A33;
+  --dot-house: #262435;
+  --dot-apartment: #1B1F2E;
+  --dot-pole: #17181F;
+  --dot-metal: #8C8579;
+  --dot-metal-dark: #6E685E;
+  --dot-curtain: #7A5E55;
+  --dot-curtain-dark: #614A43;
+  --dot-curtain-light: #8E7066;
+  --dot-pot: #8A5A45;
+  --dot-pot-dark: #6E4637;
+  --dot-leaf: #55704D;
+  --dot-leaf-dark: #3D5439;
+  --dot-mug: #A3ACAE;
+  --dot-mug-dark: #7F878A;
+  --dot-cat: #221D21;
+  --dot-candle: #CFC3A6;
+  --dot-flame: #E8C77A;
+  --dot-flame-dark: #C98F4E;
+  --dot-lattice: #3A2C24;
+  --dot-hanji: #8C7A5E;
+  --dot-hanji-dark: #7A6950;
+  --dot-stone: #3A3944;
+  --dot-stone-dark: #2C2B34;
+  --dot-tile: #1F2029;
+  --dot-onggi: #5A3F30;
+  --dot-onggi-light: #73513D;
+  --dot-persimmon: #B8693F;
 }
 
 body {
