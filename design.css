@@ -215,6 +215,8 @@
   --lofi-bulb-4: #7FA8D8;
   --lofi-wire: #2F3A2F;
   --lofi-caption: #EDE4D3;
+  --lofi-tree: #3A5646;
+  --lofi-tree-dark: #2A4036;
 }
 
 body {
