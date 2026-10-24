@@ -46,3 +46,4 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
   - `Countries/`: 국가 프로필과 레지스트리. 국가와 무관한 하늘 이벤트는 `CelestialOccasions`.
   - `Rendering/Layers`, `Rendering/Decorations`: 기본 효과와 이벤트 장식 레이어.
 - `Christof/`: 컨테이너 앱. `ChristofWidget/`: 위젯 익스텐션. 둘 다 iOS·macOS 멀티플랫폼 타깃이다.
+- 루트의 `DESIGN.md`, `design.css`, `*.html`: hunsu(저장소 루트에서 `hunsu` 실행)로 만드는 위젯 시안. 그리기 코드를 SVG로 옮긴 것이라 `Rendering/` 을 바꾸면 시안도 맞춰 고치고, 시안을 고르면 `Rendering/` 에 옮긴다.

@@ -8,3 +8,6 @@
 DerivedData/
 xcuserdata/
 *.xcuserstate
+
+# hunsu (대화·되돌리기 스냅샷)
+.hunsu/

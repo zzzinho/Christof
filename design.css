@@ -1,0 +1,156 @@
+:root {
+  /* 페이지 */
+  --page-bg: #E6E2DC;
+  --page-text: #2B2722;
+  --page-muted: #6F675D;
+  --page-gap: 24px;
+
+  /* 창틀·창턱. 장면과 무관하게 고정한다(캡션 대비). */
+  --frame-light: #F8F4EE;
+  --frame-paint: #F3EEE6;
+  --frame-dark: #E7E0D4;
+  --frame-edge: #C9BEAD;
+  --sill-top: #FBF8F3;
+  --sill-face-top: #E2D8C7;
+  --sill-face-bottom: #ECE5D9;
+  --caption: #4A4036;
+
+  /* 맑은 하늘. 이름의 숫자는 해 고도(도), n 은 음수. */
+  --sky-n18-zenith: #0A0F24;
+  --sky-n18-horizon: #18203D;
+  --sky-n10-zenith: #111A3D;
+  --sky-n10-horizon: #2B3463;
+  --sky-n5-zenith: #1F2C63;
+  --sky-n5-horizon: #6A4C7E;
+  --sky-n1-zenith: #34508F;
+  --sky-n1-horizon: #E0785A;
+  --sky-3-zenith: #4C74B3;
+  --sky-3-horizon: #F2A65E;
+  --sky-10-zenith: #5A93D6;
+  --sky-10-horizon: #F3D9AE;
+  --sky-25-zenith: #3D86DB;
+  --sky-25-horizon: #A8D3F2;
+  --sky-60-zenith: #2E7AD9;
+  --sky-60-horizon: #C0E2F8;
+  --night-shade: #0B1022;
+
+  /* 해·달·날씨 */
+  --sun-low: #FF7A3D;
+  --sun-high: #FFF4D6;
+  --moon-light: #F6F1DC;
+  --cloud-day: #F7F8FA;
+  --cloud-night: #2A3047;
+  --snow-night: #C9D3E6;
+  --snow-day: #FAFCFF;
+  --lightning-glow: #FFF6C8;
+
+  /* 풍경 */
+  --city-wall: #7D8BA3;
+  --city-lamp: #FFD27A;
+  --bark: #6B4A34;
+  --blossom: #FFF3F7;
+  --spring-ground: #8CC56B;
+  --spring-hill: #7FAE6A;
+  --spring-crown-1: #F6B9CC;
+  --spring-crown-2: #F2A3BC;
+  --summer-ground: #5DA548;
+  --summer-hill: #4E8F4A;
+  --summer-crown-1: #3E8E41;
+  --summer-crown-2: #2F7D3A;
+  --summer-crown-3: #4C9A3C;
+  --autumn-ground: #B9A04C;
+  --autumn-hill: #9E7B45;
+  --autumn-crown-1: #E0662C;
+  --autumn-crown-2: #C8402A;
+  --autumn-crown-3: #E8A33A;
+  --winter-ground: #A79E7E;
+  --winter-hill: #8C8670;
+  --snowfield-ground: #EEF2F7;
+  --snowfield-hill: #D5DEE9;
+
+  /* 이벤트 장식 */
+  --fullmoon-halo: #FFD98A;
+  --lights-wire: #2E4A2E;
+  --lights-1: #FF4D4D;
+  --lights-2: #FFD24D;
+  --lights-3: #4DD07A;
+  --lights-4: #4DA6FF;
+  --lights-5: #FF8AD8;
+  --pumpkin-skin: #F28C28;
+  --pumpkin-stem: #5B6B2F;
+  --pumpkin-carved-dark: #4A2208;
+  --pumpkin-carved-lit: #FFE27A;
+  --pumpkin-candle: #FFC93C;
+  --lantern-string: #3B2F2A;
+  --lantern-leaf: #4F9A55;
+  --lantern-glow: #FFE9A8;
+  --lantern-lit: #FFF3C4;
+  --lantern-1: #F06292;
+  --lantern-2: #FFD54F;
+  --lantern-3: #E53935;
+  --lantern-4: #81C784;
+  --lantern-5: #FF8A65;
+  --lantern-6: #64B5F6;
+  --pouch-cord: #B51E35;
+  --pouch-knot: #2E5AAC;
+  --pouch-ruffle: #EC5A72;
+  --pouch-light: #E23A52;
+  --pouch-dark: #B01C36;
+  --pouch-gold: #F2C14E;
+}
+
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--page-text);
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+/* 위젯 한 개. 크기는 그리기 코드가 정한다. */
+.widget {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12), 0 6px 18px rgb(0 0 0 / 0.10);
+}
+
+.widget svg {
+  display: block;
+}
+
+.caption {
+  position: absolute;
+  left: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  color: var(--caption);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.caption-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.caption .spacer {
+  flex: 1;
+  min-width: 4px;
+}
+
+.caption .details {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.caption .time { font-size: 13px; font-weight: 600; }
+.caption .temp { font-size: 13px; }
+.caption .details { font-size: 12px; }
+.caption.large .time { font-size: 22px; font-weight: 600; }
+.caption.large .temp { font-size: 20px; }
+.caption.large .details { font-size: 15px; }
