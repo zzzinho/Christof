@@ -98,89 +98,12 @@
   --pouch-dark: #B01C36;
   --pouch-gold: #F2C14E;
 
-  /* 도트 시안 팔레트 (02-window-dot-*). 차분한 밤, 24색. 가장 밝은 것은 달과 전구다. */
-  --dot-sky-1: #161A2B;
-  --dot-sky-2: #1D2236;
-  --dot-sky-3: #262B42;
-  --dot-sky-4: #31344B;
-  --dot-star: #B9B6A8;
-  --dot-star-dim: #6E6F7D;
-  --dot-moon: #DDD5BB;
-  --dot-halo: #343A52;
-  --dot-cloud: #353A50;
-  --dot-city: #1F2333;
-  --dot-lamp: #A88D58;
-  --dot-snow: #6F7689;
-  --dot-snow-shade: #565D70;
-  --dot-pine: #233130;
-  --dot-frame-light: #B8AE9C;
-  --dot-frame: #A89E8D;
-  --dot-frame-shade: #8F8574;
-  --dot-glass-edge: #3A3536;
-  --dot-caption: #2A241F;
-  --dot-wire: #34402F;
-  --dot-bulb-red: #C0675C;
-  --dot-bulb-yellow: #D6B56A;
-  --dot-bulb-green: #86A77C;
-  --dot-bulb-blue: #7E98B5;
-
-  /* 컨셉 시안 (03-concept-*): 방 안은 늘 같은 어두운 난색, 창밖은 장면 색 */
-  --dot-wall: #4B4038;
-  --dot-wall-dark: #3B322C;
-  --dot-wall-light: #5A4C42;
-  --dot-caption-light: #E6DCC8;
-  --dot-wood: #6B5040;
-  --dot-wood-dark: #4E3A2F;
-  --dot-wood-light: #82644F;
-  --dot-glow: #6E5440;
-  --dot-mountain: #23273A;
-  --dot-mountain-far: #2A2E44;
-  --dot-roof: #2B2A33;
-  --dot-house: #262435;
-  --dot-apartment: #1B1F2E;
-  --dot-pole: #17181F;
-  --dot-metal: #8C8579;
-  --dot-metal-dark: #6E685E;
-  --dot-curtain: #7A5E55;
-  --dot-curtain-dark: #614A43;
-  --dot-curtain-light: #8E7066;
-  --dot-pot: #8A5A45;
-  --dot-pot-dark: #6E4637;
-  --dot-leaf: #55704D;
-  --dot-leaf-dark: #3D5439;
-  --dot-mug: #A3ACAE;
-  --dot-mug-dark: #7F878A;
-  --dot-cat: #221D21;
-  --dot-candle: #CFC3A6;
-  --dot-flame: #E8C77A;
-  --dot-flame-dark: #C98F4E;
-  --dot-lattice: #3A2C24;
-  --dot-hanji: #8C7A5E;
-  --dot-hanji-dark: #7A6950;
-  --dot-stone: #3A3944;
-  --dot-stone-dark: #2C2B34;
-  --dot-tile: #1F2029;
-  --dot-onggi: #5A3F30;
-  --dot-onggi-light: #73513D;
-  --dot-persimmon: #B8693F;
-
-  /* lofi 예시 (04-lofi-*): 남색·자주 바탕에 스탠드 호박색 빛 한 곳 */
-  --lofi-sky-1: #1A1C33;
-  --lofi-sky-2: #262845;
-  --lofi-sky-3: #3A3558;
-  --lofi-sky-4: #5A4566;
+  /* lofi 방 (06-lofi). 방 안 물건·인물·장식은 때와 관계없이 같은 색이다. */
   --lofi-star: #C8C3D6;
   --lofi-star-dim: #6F6C88;
   --lofi-moon: #EDE3C8;
   --lofi-halo: #3E3B5A;
-  --lofi-city-far: #2A2842;
-  --lofi-city: #1C1C2E;
   --lofi-window-lit: #E0A65E;
-  --lofi-snow: #8C8FA8;
-  --lofi-wall: #2C2F45;
-  --lofi-wall-dark: #23263A;
-  --lofi-wall-warm: #3E3646;
-  --lofi-wall-warmer: #57443F;
   --lofi-wood: #4A3A3E;
   --lofi-wood-dark: #2E242B;
   --lofi-wood-light: #6B5148;
@@ -214,9 +137,93 @@
   --lofi-bulb-3: #8DBF90;
   --lofi-bulb-4: #7FA8D8;
   --lofi-wire: #2F3A2F;
-  --lofi-caption: #EDE4D3;
   --lofi-tree: #3A5646;
   --lofi-tree-dark: #2A4036;
+
+  /* lofi 장면 (06-lofi). 창밖과 벽은 때마다 바뀌고, 방 안 물건은 늘 같은 색이다.
+     때: night(해 -6° 아래), dusk(-6~6°), day(6° 위), grey(흐리거나 비·눈·안개인 낮).
+     비·눈·안개·구름 덮개는 night 와 grey 에만 나온다. day 는 불을 켜지 않아 벽 불빛 색이 없다. */
+  --lofi-night-sky-1: #1A1C33;
+  --lofi-night-sky-2: #262845;
+  --lofi-night-sky-3: #3A3558;
+  --lofi-night-sky-4: #5A4566;
+  --lofi-night-city-far: #2A2842;
+  --lofi-night-city: #1C1C2E;
+  --lofi-night-cloud: #34354F;
+  --lofi-night-cloud-dark: #2A2B42;
+  --lofi-night-wall: #2C2F45;
+  --lofi-night-wall-dark: #23263A;
+  --lofi-night-wall-warm: #3E3646;
+  --lofi-night-wall-warmer: #57443F;
+  --lofi-night-snow: #8C8FA8;
+  --lofi-night-rain: #4F5570;
+  --lofi-night-fog: #3E4058;
+
+  --lofi-dusk-sky-1: #2C2E52;
+  --lofi-dusk-sky-2: #4C4068;
+  --lofi-dusk-sky-3: #87586C;
+  --lofi-dusk-sky-4: #B97C66;
+  --lofi-dusk-city-far: #4A3C5C;
+  --lofi-dusk-city: #30293F;
+  --lofi-dusk-cloud: #7A5C70;
+  --lofi-dusk-cloud-dark: #5E4760;
+  --lofi-dusk-wall: #383250;
+  --lofi-dusk-wall-dark: #2F2A44;
+  --lofi-dusk-wall-warm: #4A3C4C;
+  --lofi-dusk-wall-warmer: #62484A;
+  --lofi-dusk-snow: #9C8FA4;
+
+  --lofi-day-sky-1: #6F87A0;
+  --lofi-day-sky-2: #8097AD;
+  --lofi-day-sky-3: #95A6B6;
+  --lofi-day-sky-4: #AAB4BC;
+  --lofi-day-city-far: #8A93A2;
+  --lofi-day-city: #6E7888;
+  --lofi-day-cloud: #B3B9C1;
+  --lofi-day-cloud-dark: #9AA2AE;
+  --lofi-day-wall: #5B5F72;
+  --lofi-day-wall-dark: #515567;
+  --lofi-day-snow: #C4C8D0;
+
+  --lofi-grey-sky-1: #59606E;
+  --lofi-grey-sky-2: #666C79;
+  --lofi-grey-sky-3: #737985;
+  --lofi-grey-sky-4: #80858E;
+  --lofi-grey-city-far: #5F6573;
+  --lofi-grey-city: #4C5262;
+  --lofi-grey-cloud: #707682;
+  --lofi-grey-cloud-dark: #60666F;
+  --lofi-grey-wall: #41455A;
+  --lofi-grey-wall-dark: #383C4F;
+  --lofi-grey-wall-warm: #4E4A56;
+  --lofi-grey-wall-warmer: #66554F;
+  --lofi-grey-snow: #B4B8C2;
+  --lofi-grey-rain: #8F96A3;
+  --lofi-grey-fog: #868B94;
+
+  --lofi-sun-low: #D8915E;
+  --lofi-sun-high: #E9DFC6;
+  --lofi-moon-glow-1: #6E6258;
+  --lofi-moon-glow-2: #4B4459;
+  --lofi-bolt: #E2D9B5;
+  --lofi-bolt-glow: #8D8F9B;
+  --lofi-spring-1: #B58E9C;
+  --lofi-spring-2: #977383;
+  --lofi-summer-1: #577557;
+  --lofi-summer-2: #435E45;
+  --lofi-autumn-1: #A8653F;
+  --lofi-autumn-2: #86503A;
+  --lofi-autumn-3: #B38A4A;
+  --lofi-branch: #5A4E58;
+  --lofi-pumpkin: #B0693D;
+  --lofi-pumpkin-dark: #874E33;
+  --lofi-pouch: #9E4550;
+  --lofi-pouch-light: #B85E66;
+  --lofi-pouch-gold: #C4A060;
+  --lofi-pouch-knot: #4E6888;
+  --lofi-clock-rim: #5A4440;
+  --lofi-clock-face: #B8AD98;
+  --lofi-clock-hand: #2A2430;
 }
 
 body {

@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lofi 장면</title>
+<link rel="stylesheet" href="design.css">
+<style>
+  header {
+    padding: 32px 24px 8px;
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+  }
+  header p {
+    margin: 0;
+    color: var(--page-muted);
+    font-size: 0.875rem;
+  }
+  main {
+    display: grid;
+    gap: 40px;
+    padding: 24px 24px 64px;
+  }
+  .scene h2 {
+    margin: 0 0 2px;
+    font-size: 1rem;
+  }
+  .scene .meta {
+    margin: 0 0 12px;
+    color: var(--page-muted);
+    font-size: 0.8125rem;
+  }
+  .sizes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--page-gap);
+  }
+  .widget {
+    background: var(--lofi-wood-dark);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>lofi 장면</h1>
+  <p>방 안 책상에 앉은 사람의 뒷모습, 뒤쪽 창은 배경. 위젯에 글자는 없다: 시각은 벽시계, 날씨는 창밖, 이벤트는 방 안 장식으로 보인다. 창밖과 벽은 때(밤·해 질 녘·낮·흐린 낮)를 따르고, 해가 진 뒤나 흐린 날은 스탠드를 켠다. 도트 3pt. 장면 목록은 01-window 와 같다.</p>
+</header>
+<main id="scenes"></main>
+
+<script>
+const DOT = 3;
+
+// 01-window 와 같은 장면. sun: [고도, 방위각], moon: [위상, 고도, 방위각], weather: [종류, 강도, 구름양, 기온] 또는 null(오프라인)
+const SCENES = [
+  { title: '여름 낮 · 맑음', region: '서울', date: '7월 15일', time: '오후 1:00', hour: 13, season: 'summer', sun: [73, 198], moon: [0.03, 73, 160], weather: ['clear', 0, 0.1, 31], occasions: [] },
+  { title: '봄 낮 · 벚꽃', region: '대구', date: '4월 5일', time: '오전 11:00', hour: 11, season: 'spring', sun: [54, 141], moon: [0.59, -42, 271], weather: ['partlyCloudy', 0, 0.3, 17], occasions: [] },
+  { title: '일출', region: '서울', date: '10월 18일', time: '오전 6:42', hour: 6, season: 'autumn', sun: [-1, 101], moon: [0.23, -75, 42], weather: ['clear', 0, 0.2, 9], occasions: ['sky.sunrise'] },
+  { title: '일몰', region: '부산', date: '6월 21일', time: '오후 7:41', hour: 19, season: 'summer', sun: [-1, 300], moon: [0.23, 48, 219], weather: ['partlyCloudy', 0, 0.35, 24], occasions: ['sky.sunset'] },
+  { title: '초승달 밤', region: '서울', date: '3월 22일', time: '오후 8:00', hour: 20, season: 'spring', sun: [-15, 283], moon: [0.13, 29, 276], weather: ['clear', 0, 0, 5], occasions: [] },
+  { title: '추석 보름달', region: '서울', date: '9월 25일', time: '오후 9:00', hour: 21, season: 'autumn', sun: [-31, 296], moon: [0.46, 37, 132], weather: ['clear', 0, 0.05, 19], occasions: ['KR.chuseok', 'sky.fullMoon'] },
+  { title: '비 오는 오후', region: '광주', date: '7월 10일', time: '오후 3:00', hour: 15, season: 'summer', sun: [56, 257], moon: [0.84, 6, 294], weather: ['rain', 0.6, 0.95, 24], occasions: [] },
+  { title: '뇌우', region: '대전', date: '8월 5일', time: '오후 5:00', hour: 17, season: 'summer', sun: [29, 270], moon: [0.72, -36, 351], weather: ['thunderstorm', 0.8, 1, 27], occasions: [] },
+  { title: '안개 낀 아침', region: '춘천', date: '11월 5일', time: '오전 7:30', hour: 7, season: 'autumn', sun: [5, 114], moon: [0.86, 49, 146], weather: ['fog', 0.7, 0.6, 6], occasions: [] },
+  { title: '눈 오는 크리스마스', region: '서울', date: '12월 25일', time: '오전 10:00', hour: 10, season: 'winter', sun: [19, 143], moon: [0.54, -10, 313], weather: ['snow', 0.6, 0.9, -2], occasions: ['KR.christmas'] },
+  { title: '크리스마스 이브 밤', region: '서울', date: '12월 24일', time: '오후 9:00', hour: 21, season: 'winter', sun: [-43, 272], moon: [0.52, 39, 84], weather: ['clear', 0, 0.1, -5], occasions: ['KR.christmasEve', 'sky.fullMoon'] },
+  { title: '할로윈 밤', region: '서울', date: '10월 31일', time: '오후 8:00', hour: 20, season: 'autumn', sun: [-29, 274], moon: [0.7, -17, 37], weather: ['partlyCloudy', 0, 0.4, 12], occasions: ['KR.halloween'] },
+  { title: '설날 아침', region: '서울', date: '2월 17일', time: '오전 8:00', hour: 8, season: 'winter', sun: [7, 111], moon: [0.98, 8, 118], weather: ['clear', 0, 0.1, -3], occasions: ['KR.seollal'] },
+  { title: '부처님오신날 해 질 녘', region: '서울', date: '5월 24일', time: '오후 7:41', hour: 19, season: 'spring', sun: [-1, 297], moon: [0.28, 57, 186], weather: ['clear', 0, 0.1, 20], occasions: ['KR.buddhasBirthday', 'sky.sunset'] },
+  { title: '가을 단풍 낮', region: '전주', date: '10월 25일', time: '오후 2:00', hour: 14, season: 'autumn', sun: [36, 212], moon: [0.46, -30, 47], weather: ['clear', 0, 0.15, 16], occasions: [] },
+  { title: '날씨 없음 (오프라인) 밤', region: '제주', date: '1월 10일', time: '오후 11:00', hour: 23, season: 'winter', sun: [-65, 291], moon: [0.75, -23, 88], weather: null, occasions: [] },
+  { title: '정월대보름 밤', region: '서울', date: '3월 3일', time: '오후 9:00', hour: 21, season: 'spring', sun: [-31, 287], moon: [0.5, 30, 107], weather: ['clear', 0, 0.05, 2], occasions: ['KR.jeongwolDaeboreum', 'sky.fullMoon'] },
+  { title: '새해 첫 일출', region: '강릉', date: '1월 1일', time: '오전 7:39', hour: 7, season: 'winter', sun: [-1, 119], moon: [0.4, -19, 328], weather: ['clear', 0, 0.1, -6], occasions: ['KR.newYearsDay', 'sky.sunrise'] },
+  { title: '따뜻한 겨울 낮', region: '부산', date: '1월 15일', time: '오후 2:00', hour: 14, season: 'winter', sun: [30, 204], moon: [0.89, 2, 234], weather: ['clear', 0, 0.1, 8], occasions: [] },
+];
+
+// 이름·순서는 KoreaOccasions·CelestialOccasions 와 같다. 크리스마스 장식은 앱의 창 전구(christmasLights) 대신 방 안 트리다.
+const OCCASIONS = {
+  'KR.seollal': { name: '설날', decorations: ['luckyPouch'] },
+  'KR.jeongwolDaeboreum': { name: '정월대보름', decorations: ['fullMoon'] },
+  'KR.buddhasBirthday': { name: '부처님오신날', decorations: ['lotusLantern'] },
+  'KR.chuseok': { name: '추석', decorations: ['fullMoon'] },
+  'KR.newYearsDay': { name: '새해 첫날', decorations: ['luckyPouch'] },
+  'KR.halloween': { name: '할로윈', decorations: ['jackOLantern'] },
+  'KR.christmasEve': { name: '크리스마스 이브', decorations: ['christmasTree'] },
+  'KR.christmas': { name: '크리스마스', decorations: ['christmasTree'] },
+  'sky.sunrise': { name: '일출', decorations: [] },
+  'sky.sunset': { name: '일몰', decorations: [] },
+  'sky.fullMoon': { name: '보름달', decorations: [] },
+};
+
+const SIZES = { small: [170, 170], medium: [364, 170], large: [364, 382] };
+
+const rootStyle = getComputedStyle(document.documentElement);
+const colorCache = {};
+function color(name) {
+  if (colorCache[name]) return colorCache[name];
+  const value = rootStyle.getPropertyValue('--lofi-' + name).trim();
+  if (!/^#[0-9a-f]{6}$/i.test(value)) throw new Error(`design.css 에 --lofi-${name} (#RRGGBB) 이 없다`);
+  return (colorCache[name] = value);
+}
+// 때(phase)마다 다른 색: --lofi-<때>-<이름>
+const pc = (s, name) => color(`${s.phase}-${name}`);
+
+// 시드 고정 난수 (Swift SeededRandom 과 같은 수열)
+const MASK64 = (1n << 64n) - 1n;
+class Rand {
+  constructor(seed) { this.state = BigInt(seed); }
+  next() {
+    this.state = (this.state + 0x9E3779B97F4A7C15n) & MASK64;
+    let z = this.state;
+    z = ((z ^ (z >> 30n)) * 0xBF58476D1CE4E5B9n) & MASK64;
+    z = ((z ^ (z >> 27n)) * 0x94D049BB133111EBn) & MASK64;
+    return z ^ (z >> 31n);
+  }
+  below(bound) {
+    let m = this.next() * bound;
+    if ((m & MASK64) < bound) {
+      const t = ((1n << 64n) - bound) % bound;
+      while ((m & MASK64) < t) m = this.next() * bound;
+    }
+    return m >> 64n;
+  }
+  range(lower, upper) {
+    const max = 1n << 53n;
+    const r = this.below(max + 1n);
+    if (r === max) return upper;
+    return (upper - lower) * (Number(r) * (Number.EPSILON / 2)) + lower;
+  }
+  int(lower, upper) { return Math.floor(this.range(lower, upper + 0.999)); }
+}
+
+const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
+const bayer = (x, y) => (BAYER[((y % 4) + 4) % 4][((x % 4) + 4) % 4] + 0.5) / 16;
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const pt = v => v / DOT;
+// f(0~1) 만큼 a 에서 b 로 넘어가는 자리. 띠 경계 30% 만 섞는다.
+const blend = (a, b, f, x, y) => (clamp((f - 0.5) / 0.3 + 0.5, 0, 1) > bayer(x, y) ? b : a);
+
+class Grid {
+  constructor(cols, rows) {
+    this.cols = cols;
+    this.rows = rows;
+    this.cells = new Array(cols * rows).fill(null);
+    this.ox = 0;
+    this.oy = 0;
+    this.bounds = [0, 0, cols, rows];
+  }
+  set(x, y, c) {
+    if (!c) return;
+    const ax = Math.floor(x) + this.ox, ay = Math.floor(y) + this.oy;
+    const [x0, y0, x1, y1] = this.bounds;
+    if (ax < x0 || ay < y0 || ax >= x1 || ay >= y1) return;
+    this.cells[ay * this.cols + ax] = c;
+  }
+  within(x, y, w, h, draw) {
+    const saved = [this.ox, this.oy, this.bounds];
+    const [x0, y0, x1, y1] = this.bounds;
+    this.ox += x;
+    this.oy += y;
+    this.bounds = [Math.max(x0, this.ox), Math.max(y0, this.oy), Math.min(x1, this.ox + w), Math.min(y1, this.oy + h)];
+    draw();
+    [this.ox, this.oy, this.bounds] = saved;
+  }
+  rect(x, y, w, h, c) {
+    for (let j = Math.round(y); j < Math.round(y + h); j++) for (let i = Math.round(x); i < Math.round(x + w); i++) this.set(i, j, c);
+  }
+  shape(x0, y0, x1, y1, inside, c) {
+    for (let y = Math.floor(y0); y <= Math.ceil(y1); y++) {
+      for (let x = Math.floor(x0); x <= Math.ceil(x1); x++) {
+        if (inside(x + 0.5, y + 0.5)) this.set(x, y, typeof c === 'function' ? c(x, y) : c);
+      }
+    }
+  }
+  // rows: 문자열 줄 목록, map: 글자 → 색 이름. 아래 가운데를 (x, bottom) 에 맞춘다.
+  sprite(x, bottom, rows, map) {
+    const left = Math.round(x - rows[0].length / 2), top = bottom - rows.length;
+    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (map[ch]) this.set(left + i, top + j, color(map[ch])); }));
+  }
+  canvas() {
+    const canvas = document.createElement('canvas');
+    canvas.width = this.cols;
+    canvas.height = this.rows;
+    const ctx = canvas.getContext('2d');
+    this.cells.forEach((c, i) => {
+      if (!c) return;
+      ctx.fillStyle = c;
+      ctx.fillRect(i % this.cols, Math.floor(i / this.cols), 1, 1);
+    });
+    return canvas;
+  }
+}
+
+function disc(g, cx, cy, r, c) {
+  g.shape(cx - r, cy - r, cx + r, cy + r, (x, y) => Math.hypot(x - cx, y - cy) <= r, c);
+}
+
+// 원 바깥 thickness 칸을 바깥으로 갈수록 성기게 찍는 빛 번짐
+function ring(g, cx, cy, r, thickness, c) {
+  const dist = (x, y) => Math.hypot(x - cx, y - cy);
+  g.shape(cx - r - thickness, cy - r - thickness, cx + r + thickness, cy + r + thickness,
+    (x, y) => dist(x, y) > r && dist(x, y) <= r + thickness,
+    (x, y) => ((1 - (dist(x + 0.5, y + 0.5) - r) / (thickness + 0.5)) * 0.75 > bayer(x, y) ? c : null));
+}
+
+// ---- 장면 값 ----
+
+const CLOUD_DECK = new Set(['overcast', 'drizzle', 'rain', 'snow', 'thunderstorm']);
+const RAIN = new Set(['drizzle', 'rain', 'thunderstorm']);
+const STARS = new Set(['clear', 'partlyCloudy']);
+
+// 창은 남쪽을 바라본다. 결과는 유리 기준 0~1 좌표.
+function celestialPoint(altitude, azimuth) {
+  if (altitude <= -2) return null;
+  const d = ((azimuth % 360) + 360) % 360 - 180;
+  const base = 0.72 - 0.035;
+  return [clamp(0.5 + d / 135 * 0.45, 0.05, 0.95), base - Math.pow(clamp(altitude, 0, 75) / 75, 0.75) * (base - 0.1)];
+}
+
+function sceneContext(scene) {
+  const weather = scene.weather && {
+    condition: scene.weather[0], intensity: scene.weather[1], cloudCover: scene.weather[2], temperature: scene.weather[3],
+  };
+  const [sunAltitude, sunAzimuth] = scene.sun;
+  const gloomy = !!weather && (CLOUD_DECK.has(weather.condition) || weather.condition === 'fog');
+  // 흐린 날은 해 질 녘도 회색 하늘로 둔다. 비·눈·안개 색은 night 와 grey 에만 있다.
+  const phase = sunAltitude < -6 ? 'night' : gloomy ? 'grey' : sunAltitude < 6 ? 'dusk' : 'day';
+  return {
+    ...scene,
+    weather,
+    phase,
+    lightOn: phase !== 'day',
+    decorations: new Set(scene.occasions.flatMap(id => OCCASIONS[id].decorations)),
+    sunPoint: gloomy ? null : celestialPoint(sunAltitude, sunAzimuth),
+    moonPoint: gloomy || sunAltitude >= 0 ? null : celestialPoint(scene.moon[1], scene.moon[2]),
+    // 따뜻한 겨울(부산·제주)은 마른 풍경으로 두고, 눈이 오거나 영하일 때만 지붕에 눈을 얹는다.
+    snowCovered: !!weather && (weather.condition === 'snow' || (scene.season === 'winter' && weather.temperature <= 0)),
+  };
+}
+
+// ---- 스프라이트. 불빛(스탠드·트리)이 오른쪽에 있어 오른쪽 가장자리에 따뜻한 테두리 빛이 진다 ----
+
+const SPRITES = {
+  person: [
+    '......hhh.......',
+    '.....hhhhh......',
+    '......hhhH......',
+    '....kkkkkkkk....',
+    '...khhhhhhhhk...',
+    '..khhhhhhhhhHk..',
+    '..khhhhhhhhhHk..',
+    '.KKhhhhhhhhhHKK.',
+    '.KKhhhhhhhhhHKK.',
+    '.KKhhhhhhhhhHKK.',
+    '...hhhhhhhhhH...',
+    '....hhhhhhhH....',
+    '.....hhhhhh.....',
+    '......sssS......',
+    '...dddddddddd...',
+    '.ooddddddddddoo.',
+    'ooooddddddddooor',
+    'oooooddddddoooor',
+    'ooooooddddooooor',
+    'oooooooooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+    'oooooodooooooorr',
+  ],
+  cat: [
+    '.c....c....',
+    '.cc..cc....',
+    '.ccccccR...',
+    '.ccccccR...',
+    '..ccccR....',
+    '..ccccc....',
+    '.cccccccR..',
+    'ccccccccR..',
+    'ccccccccR..',
+    'cccccccccR.',
+    'cccccccccRc',
+    '.cccccccccc',
+  ],
+  lamp: [
+    '...LLLL...',
+    '..LLLLLLb.',
+    '.LLLLLLLb.',
+    '..YYYY..b.',
+    '.........b',
+    '.........b',
+    '........b.',
+    '.......b..',
+    '......b...',
+    '.....b....',
+    '....b.....',
+    '..bbbbbb..',
+  ],
+  mug: ['.t.t...', 't.t....', '.t.t...', '.......', 'mmmmm..', 'mMMMmmm', 'mMMMm.m', 'mMMMmmm', '.mmm...'],
+  books: ['.11111111.', '2222222222', '.33333333.', '1111111111'],
+  plant: ['.l.l.', 'lLlLl', '.lLl.', 'ppppp', '.ppp.'],
+  pumpkin: [
+    '....s....',
+    '.ooosooo.',
+    'oOYoooYOo',
+    'oOYYoYYOo',
+    'oOooYooOo',
+    'oOYYYYYOo',
+    '.ooooooo.',
+  ],
+  lantern: ['.p.p.', 'ppPpp', 'pPPPp', 'ppPpp', '.lll.', '..p..'],
+  pouch: [
+    '...c...',
+    '...c...',
+    '..kck..',
+    '.RrRrR.',
+    '..ggg..',
+    '.rrrrr.',
+    'rrrgrrr',
+    'rrgggrr',
+    'rrrgrrr',
+    '.rrrrr.',
+  ],
+};
+const SPRITE_COLORS = {
+  h: 'hair', H: 'hair-rim', k: 'headphone', K: 'headphone-accent', s: 'skin', S: 'hoodie-rim',
+  o: 'hoodie', d: 'hoodie-dark', r: 'hoodie-rim', c: 'cat', R: 'cat-rim',
+  L: 'lamp', b: 'lamp-body', Y: 'lamp-light', m: 'mug-dark', M: 'mug', t: 'steam',
+  1: 'book-1', 2: 'book-2', 3: 'book-3', l: 'plant', p: 'pot',
+};
+// 불을 끈 낮에는 테두리 빛 자리를 바탕색으로 칠한다.
+const UNLIT_COLORS = { ...SPRITE_COLORS, H: 'hair', S: 'skin', r: 'hoodie', R: 'cat', Y: 'lamp' };
+
+// ---- 창밖. 좌표는 창 안쪽 기준 칸 ----
+
+function drawView(g, w, h, s) {
+  const bands = [1, 2, 3, 4].map(i => pc(s, `sky-${i}`));
+  for (let y = 0; y < h; y++) {
+    const t = clamp((y + 0.5) / (h * 0.8), 0, 1) * (bands.length - 1);
+    const i = Math.min(bands.length - 2, Math.floor(t));
+    for (let x = 0; x < w; x++) g.set(x, y, blend(bands[i], bands[i + 1], t - i, x, y));
+  }
+  if (s.phase === 'night' && (!s.weather || STARS.has(s.weather.condition))) drawStars(g, w, h);
+  // 조각구름이 달을 가리면 보름달도 초승달처럼 보여서, 해·달을 구름 앞에 그린다. 구름층이 덮는 날은 해·달을 그리지 않는다.
+  if (s.weather) drawClouds(g, w, h, s);
+  if (s.sunPoint) drawSun(g, w, h, s);
+  if (s.moonPoint) drawMoon(g, w, h, s);
+  if (s.weather?.condition === 'thunderstorm') drawLightning(g, w, h, s);
+  drawCity(g, w, h, s);
+  drawStreetTrees(g, w, h, s);
+  if (s.weather && RAIN.has(s.weather.condition)) drawRain(g, w, h, s);
+  if (s.weather?.condition === 'snow') drawSnow(g, w, h, s);
+  if (s.weather?.condition === 'fog') drawFog(g, w, h, s);
+}
+
+function drawStars(g, w, h) {
+  const stars = new Rand(3);
+  const count = Math.round(w * h * DOT * DOT * 0.001);
+  for (let i = 0; i < count; i++) {
+    g.set(Math.floor(stars.range(0, 1) * w), Math.floor(stars.range(0, 0.55) * h), color(stars.range(0, 1) < 0.3 ? 'star' : 'star-dim'));
+  }
+}
+
+function drawSun(g, w, h, s) {
+  const cx = Math.floor(s.sunPoint[0] * w) + 0.5, cy = Math.floor(s.sunPoint[1] * h) + 0.5, r = pt(9) + 0.3;
+  ring(g, cx, cy, r, 2, pc(s, 'sky-4'));
+  disc(g, cx, cy, r, color(s.sun[0] < 10 ? 'sun-low' : 'sun-high'));
+}
+
+function drawMoon(g, w, h, s) {
+  const cx = Math.floor(s.moonPoint[0] * w) + 0.5, cy = Math.floor(s.moonPoint[1] * h) + 0.5, r = pt(10) + 0.3;
+  if (s.decorations.has('fullMoon')) {
+    ring(g, cx, cy, r + 2, 3, color('moon-glow-2'));
+    ring(g, cx, cy, r, 2, color('moon-glow-1'));
+  } else {
+    ring(g, cx, cy, r, 2, color('halo'));
+  }
+  // 차는 달(위상 < 0.5)은 오른쪽이 밝다. 밝은 면 경계는 x 반지름이 cos(2π·위상)인 반타원.
+  const phase = s.moon[0], k = Math.cos(phase * 2 * Math.PI);
+  disc(g, cx, cy, r, (x, y) => {
+    const dy = y + 0.5 - cy, half = Math.sqrt(Math.max(0, r * r - dy * dy));
+    const u = half ? (x + 0.5 - cx) / half : 0;
+    return color((phase < 0.5 ? u >= k : u <= -k) ? 'moon' : 'halo');
+  });
+}
+
+function drawClouds(g, w, h, s) {
+  const light = pc(s, 'cloud'), dark = pc(s, 'cloud-dark');
+  if (CLOUD_DECK.has(s.weather.condition)) {
+    // 하늘 위쪽을 덮고 아래로 갈수록 성겨지는 구름층
+    const depth = h * 0.55;
+    for (let y = 0; y < depth; y++) {
+      const t = y / depth;
+      for (let x = 0; x < w; x++) if ((1 - t) * 1.5 > bayer(x, y)) g.set(x, y, t < 0.5 ? light : dark);
+    }
+  }
+  const random = new Rand(5);
+  const count = Math.round(s.weather.cloudCover * 5);
+  for (let i = 0; i < count; i++) {
+    const cx = random.range(-0.05, 1.05) * w, cy = random.range(0.1, 0.4) * h, size = random.range(3, 5);
+    const puffs = [[-size, 0, size * 0.7], [0, -size * 0.4, size], [size, 0, size * 0.75]];
+    g.shape(cx - size * 2, cy - size * 1.5, cx + size * 2, cy + size,
+      (x, y) => y <= cy + size * 0.5 && puffs.some(([dx, dy, r]) => Math.hypot(x - cx - dx, y - cy - dy) <= r),
+      (x, y) => (y + 0.5 > cy + size * 0.1 ? dark : light));
+  }
+}
+
+function drawLightning(g, w, h, s) {
+  const random = new Rand(101 + s.hour);
+  let x = Math.round(random.range(0.25, 0.75) * w), y = Math.round(h * 0.15);
+  // 번개가 시작하는 구름 속만 밝힌다. 하늘 전체를 밝히면 뇌우가 비보다 밝아 보인다.
+  ring(g, x + 0.5, y + 0.5, 0, pt(15), color('bolt-glow'));
+  while (y < h * 0.7) {
+    const step = random.int(2, 4);
+    for (let i = 0; i < step; i++) g.set(x, y++, color('bolt'));
+    x += random.int(-1, 1);
+  }
+}
+
+// 먼 도시와 가까운 지붕들. 해가 진 뒤와 흐린 날은 창에 호박색 불이 켜진다.
+function drawCity(g, w, h, s) {
+  const city = new Rand(7);
+  const lit = s.phase === 'day' ? 0 : s.phase === 'grey' ? 0.4 : 1;
+  for (const [layer, bottomF, minH, maxH, density] of [['city-far', 0.86, 14, 30, 0.12], ['city', 0.95, 8, 20, 0.25]]) {
+    let x = city.range(-3, 0);
+    while (x < w) {
+      const bw = city.int(Math.round(pt(14)), Math.round(pt(30)));
+      const bh = Math.round(pt(city.range(minH, maxH)) + h * 0.08);
+      const bottom = Math.round(h * bottomF), top = bottom - bh;
+      g.rect(x, top, bw, h - top, pc(s, layer));
+      if (layer === 'city' && s.snowCovered) g.rect(x, top, bw, 1, pc(s, 'snow'));
+      for (let wy = top + 2; wy < h; wy += 2) {
+        for (let wx = Math.round(x) + 1; wx < x + bw - 1; wx += 2) if (city.range(0, 1) < density * lit) g.set(wx, wy, color('window-lit'));
+      }
+      x += bw + city.int(0, 2);
+    }
+  }
+}
+
+const CROWNS = { spring: ['spring-1', 'spring-2'], summer: ['summer-1', 'summer-2'], autumn: ['autumn-1', 'autumn-2', 'autumn-3'] };
+
+// 창 아래쪽 가로수로 계절을 보인다. 해가 진 뒤에는 실루엣이고, 겨울은 잎 없는 가지다.
+function drawStreetTrees(g, w, h, s) {
+  const random = new Rand(13);
+  const dark = s.phase === 'night' || s.phase === 'dusk';
+  const crowns = CROWNS[s.season];
+  const bark = dark ? pc(s, 'city') : color('branch');
+  for (let x = random.range(1, 4), i = 0; x < w + 4; i++) {
+    const r = random.range(3, 4.6), cx = Math.round(x), top = h - random.int(7, 10);
+    g.rect(cx, top, 1, h - top, bark);
+    if (crowns) {
+      const main = dark ? bark : color(crowns[i % 3 === 2 && crowns[2] ? 2 : 0]);
+      const shade = dark ? bark : color(crowns[1]);
+      g.shape(cx - r, top - r, cx + r + 1, top + r, (px, py) => Math.hypot(px - cx - 0.5, py - top) <= r,
+        (px, py) => (px - cx + py - top > r * 0.6 ? shade : main));
+    } else {
+      for (let k = 1; k <= 3; k++) {
+        g.set(cx - k, top + 3 - k, bark);
+        g.set(cx + k, top + 4 - k, bark);
+      }
+      g.rect(cx, top - 3, 1, 3, bark);
+    }
+    x += r * 2 + random.range(1, 4);
+  }
+}
+
+function drawRain(g, w, h, s) {
+  const drizzle = s.weather.condition === 'drizzle';
+  const count = Math.round(w * h * (drizzle ? 0.012 : 0.02) * (0.5 + s.weather.intensity));
+  const length = drizzle ? 2 : 3, random = new Rand(17);
+  for (let i = 0; i < count; i++) {
+    const x = Math.floor(random.range(0, w + 2)), y = Math.floor(random.range(-2, h));
+    for (let k = 0; k < length; k++) g.set(x - Math.floor(k / 2), y + k, pc(s, 'rain'));
+  }
+}
+
+function drawSnow(g, w, h, s) {
+  const count = Math.round(w * h * 0.02 * (0.5 + s.weather.intensity)), random = new Rand(23);
+  for (let i = 0; i < count; i++) g.set(Math.floor(random.range(0, w)), Math.floor(random.range(0, h)), pc(s, 'snow'));
+}
+
+function drawFog(g, w, h, s) {
+  const density = 0.45 + 0.4 * s.weather.intensity;
+  for (let y = 0; y < h; y++) {
+    const f = density * (0.35 + 0.65 * y / h);
+    for (let x = 0; x < w; x++) if (f > bayer(x, y)) g.set(x, y, pc(s, 'fog'));
+  }
+}
+
+// ---- 방 ----
+
+function compose(g, W, H, roomH, s) {
+  const deskTop = roomH - 7;
+  const tree = s.decorations.has('christmasTree');
+  const treeX = W - 9, lampX = Math.round(W * (W > H ? 0.92 : 0.95));
+  const source = tree ? [treeX, roomH - 20] : [lampX - 2, deskTop - 9];
+  const x0 = Math.round(W * (W > H ? 0.06 : 0.04)), x1 = x0 + Math.round(W * (W > H ? 0.5 : 0.6));
+  const y0 = Math.round(roomH * 0.1), sill = deskTop - 2;
+
+  // 벽: 불을 켰으면 불빛에서 멀어질수록 차가운 색. 거친 질감은 성긴 어두운 점.
+  const grain = new Rand(41);
+  const reach = pt(W > H ? 110 : 90);
+  for (let y = 0; y < roomH; y++) {
+    for (let x = 0; x < W; x++) {
+      let c = pc(s, 'wall');
+      if (s.lightOn) {
+        const d = Math.hypot(x + 0.5 - source[0], (y + 0.5 - source[1]) * 1.2) / reach;
+        if (d < 0.35) c = blend(pc(s, 'wall-warmer'), pc(s, 'wall-warm'), d / 0.35, x, y);
+        else if (d < 0.75) c = blend(pc(s, 'wall-warm'), c, (d - 0.35) / 0.4, x, y);
+      }
+      if (grain.range(0, 1) < 0.04) c = pc(s, 'wall-dark');
+      g.set(x, y, c);
+    }
+  }
+
+  // 창: 왼쪽에 치우쳐 뒤쪽 벽에 난 창
+  g.within(x0 + 2, y0 + 2, x1 - x0 - 4, sill - y0 - 2, () => drawView(g, x1 - x0 - 4, sill - y0 - 2, s));
+  for (let y = y0; y < sill; y++) {
+    for (let x = x0; x < x1; x++) {
+      if (x >= x0 + 2 && x < x1 - 2 && y >= y0 + 2) continue;
+      g.set(x, y, color(y === y0 ? 'wood-light' : 'wood'));
+    }
+  }
+  const midX = Math.round((x0 + x1) / 2), midY = Math.round(y0 + (sill - y0) * 0.42);
+  g.rect(midX, y0 + 2, 1, sill - y0 - 2, color('wood'));
+  g.rect(x0 + 2, midY, x1 - x0 - 4, 1, color('wood'));
+  g.rect(x0 - 2, sill, x1 - x0 + 4, 2, color('wood-light'));
+
+  // 왼쪽 얇은 커튼
+  for (let y = y0 - 2; y < deskTop; y++) {
+    const right = x0 + 3 + Math.round(Math.sin(y * 0.4) * 0.7 + (y > roomH * 0.5 ? 1 : 0));
+    for (let x = Math.max(0, x0 - 4); x < right; x++) g.set(x, y, color((x + 1) % 3 === 0 ? 'curtain-dark' : 'curtain'));
+  }
+
+  drawClock(g, x1 + 7, y0 + 4, s.hour, Number(s.time.split(':')[1]));
+
+  const colors = s.lightOn ? SPRITE_COLORS : UNLIT_COLORS;
+  if (s.decorations.has('lotusLantern')) drawLanterns(g, x0, x1, y0 - 1, s.lightOn);
+  if (s.decorations.has('luckyPouch')) g.sprite(x0 + 1, y0 + 12, SPRITES.pouch, { c: 'pouch', k: 'pouch-knot', R: 'pouch-light', r: 'pouch', g: 'pouch-gold' });
+
+  // 창턱의 고양이와 화분. 할로윈에는 화분 자리에 호박 등.
+  g.sprite(x0 + 9, sill, SPRITES.cat, colors);
+  if (s.decorations.has('jackOLantern')) {
+    g.sprite(x1 - 8, sill, SPRITES.pumpkin, { s: 'plant-dark', o: 'pumpkin', O: 'pumpkin-dark', Y: s.lightOn ? 'lamp-light' : 'pumpkin-dark' });
+  } else {
+    g.sprite(x1 - 6, sill, SPRITES.plant, colors);
+  }
+
+  if (roomH > 80) drawShelf(g, x1 + 6, W - 6, Math.round(roomH * 0.38));
+
+  // 책상: 윗면은 불빛(낮에는 창) 가까울수록 밝다. 트리가 있으면 그 앞에서 끝난다.
+  const deskRight = tree ? treeX - 11 : W;
+  const litX = s.lightOn ? source[0] : (x0 + x1) / 2;
+  for (let x = 0; x < deskRight; x++) {
+    g.set(x, deskTop, blend(color('desk-lit'), color('wood-light'), Math.abs(x - litX) / (W * 0.5), x, deskTop));
+  }
+  g.rect(0, deskTop + 1, deskRight, roomH - deskTop - 1, color('wood'));
+
+  const personX = Math.round(W * (W > H ? (tree ? 0.72 : 0.74) : (tree ? 0.6 : 0.72)));
+  g.sprite(personX - pt(42), deskTop + 1, SPRITES.books, colors);
+  g.sprite(personX - pt(24), deskTop + 1, SPRITES.mug, colors);
+  if (tree) drawTree(g, treeX, roomH);
+  else g.sprite(lampX, deskTop + 1, SPRITES.lamp, colors);
+
+  // 사람은 책상 앞(카메라 쪽)에 앉아 창을 바라본다. 허리 아래는 위젯 아래 끝에서 잘린다.
+  g.sprite(personX, roomH, SPRITES.person, colors);
+}
+
+// 글자 대신 벽시계로 시각을 보인다. 바늘은 시·분 각도대로 계단 선으로 긋는다.
+// 13칸보다 작으면 시침과 분침이 한두 칸 차이라 구분되지 않는다. 시침은 두 칸 두께로 그린다.
+function drawClock(g, cx, cy, hour, minute) {
+  disc(g, cx + 0.5, cy + 0.5, 6.5, color('clock-rim'));
+  disc(g, cx + 0.5, cy + 0.5, 5.5, color('clock-face'));
+  for (const [dx, dy] of [[0, -5], [5, 0], [0, 5], [-5, 0]]) g.set(cx + dx, cy + dy, color('clock-rim'));
+  const hand = (turns, length, width) => {
+    const a = turns * 2 * Math.PI, [dx, dy] = [Math.sin(a), -Math.cos(a)];
+    for (let t = 0; t <= length; t += 0.5) {
+      for (let k = 0; k < width; k++) g.set(cx + Math.round(dx * t - dy * k * 0.7), cy + Math.round(dy * t + dx * k * 0.7), color('clock-hand'));
+    }
+  };
+  hand(minute / 60, 5, 1);
+  hand((hour % 12 + minute / 60) / 12, 3, 2);
+}
+
+// 방 구석의 트리. 크기와 관계없이 높이 40칸이다. 층마다 아래로 넓어지고, 층 아래 끝과 왼쪽은 그늘이다.
+function drawTree(g, cx, bottom) {
+  const top = bottom - 40, rows = 37;
+  const halfAt = r => {
+    const tier = Math.min(2, Math.floor(r / 12));
+    return Math.round(1 + tier * 2 + (r - tier * 12) * 0.45);
+  };
+  for (let r = 0; r < rows; r++) {
+    const half = halfAt(r), tierEnd = r % 12 === 11 || r === rows - 1;
+    for (let x = cx - half; x <= cx + half; x++) g.set(x, top + r, color(tierEnd || x < cx - half / 3 ? 'tree-dark' : 'tree'));
+  }
+  const lights = new Rand(23), palette = ['bulb-1', 'bulb-2', 'bulb-3', 'bulb-4', 'lamp-light'];
+  for (let i = 0; i < 18; i++) {
+    const r = lights.int(3, rows - 2), half = halfAt(r);
+    g.set(cx + Math.round(lights.range(-0.8, 0.8) * half), top + r, color(palette[lights.int(0, palette.length - 1)]));
+  }
+  g.rect(cx, top - 2, 1, 3, color('lamp-light'));
+  g.rect(cx - 1, top - 1, 3, 1, color('lamp-light'));
+  g.rect(cx - 3, top + rows, 7, bottom - top - rows, color('pot'));
+}
+
+// 창 위에 건 연등 줄. 해가 진 뒤에는 연등 속이 밝다.
+function drawLanterns(g, left, right, y, lit) {
+  const sag = x => y + Math.round(Math.sin((x - left) / (right - left) * Math.PI) * 3);
+  for (let x = left; x <= right; x++) g.set(x, sag(x), color('wire'));
+  const n = Math.max(3, Math.round((right - left) / pt(28)));
+  for (let i = 0; i < n; i++) {
+    const bx = Math.round(left + (right - left) * (i + 0.5) / n), shade = `bulb-${i % 4 + 1}`;
+    g.set(bx, sag(bx) + 1, color('wire'));
+    g.sprite(bx, sag(bx) + 2 + SPRITES.lantern.length, SPRITES.lantern, { p: shade, P: lit ? 'lamp-light' : shade, l: 'plant' });
+  }
+}
+
+// large 의 빈 벽에 둔 선반: 세워 둔 책과 늘어진 화분
+function drawShelf(g, x0, x1, y) {
+  g.rect(x0, y, x1 - x0, 1, color('wood-light'));
+  g.rect(x0 + 1, y + 1, x1 - x0 - 2, 1, color('wood-dark'));
+  const books = new Rand(19);
+  for (let i = 0, x = x0 + 2; i < 6; i++, x += 2) {
+    const h = books.int(5, 8);
+    g.rect(x, y - h, 2, h, color(`book-${i % 3 + 1}`));
+  }
+  const px = x1 - 5;
+  g.sprite(px, y, SPRITES.plant, SPRITE_COLORS);
+  for (const [dx, len] of [[-2, 9], [0, 15], [2, 6]]) {
+    for (let j = 0; j < len; j++) g.set(px + dx + (j % 4 === 3 ? 1 : 0), y + 2 + j, color(j % 2 ? 'plant-dark' : 'plant'));
+  }
+}
+
+// ---- 위젯 ----
+
+// 위젯에 글자를 쓰지 않는다. 시각·날씨·이벤트는 그림으로 보이고, 같은 내용을 접근성 라벨로만 둔다.
+function accessibilityLabel(s) {
+  return [s.region, s.time, s.weather?.condition, ...s.occasions.map(id => OCCASIONS[id].name)].filter(Boolean).join(', ');
+}
+
+function widget(scene, sizeKey) {
+  const s = sceneContext(scene);
+  const [w, h] = SIZES[sizeKey];
+  const cols = Math.ceil(w / DOT), rows = Math.ceil(h / DOT);
+  const offset = [Math.floor((cols * DOT - w) / 2), Math.floor((rows * DOT - h) / 2)];
+  const g = new Grid(cols, rows);
+  compose(g, cols, rows, rows, s);
+
+  const box = document.createElement('div');
+  box.className = `widget ${sizeKey}`;
+  box.style.width = `${w}px`;
+  box.style.height = `${h}px`;
+  box.setAttribute('role', 'img');
+  box.setAttribute('aria-label', accessibilityLabel(s));
+  const canvas = g.canvas();
+  canvas.className = 'dots';
+  Object.assign(canvas.style, { width: `${cols * DOT}px`, height: `${rows * DOT}px`, left: `${-offset[0]}px`, top: `${-offset[1]}px` });
+  box.append(canvas);
+  return { box, colors: new Set(g.cells.filter(Boolean)).size };
+}
+
+document.getElementById('scenes').append(...SCENES.map(scene => {
+  const widgets = Object.keys(SIZES).map(size => widget(scene, size));
+  const weather = scene.weather ? `${scene.weather[0]} · 기온 ${scene.weather[3]}°` : '날씨 없음';
+  const section = document.createElement('section');
+  section.className = 'scene';
+  section.innerHTML = `<h2>${scene.title}</h2><p class="meta">${scene.region} ${scene.date} ${scene.time} · 해 ${scene.sun[0]}° · ${weather} · 색 ${widgets.map(w => w.colors).join('/')}</p><div class="sizes"></div>`;
+  section.querySelector('.sizes').append(...widgets.map(w => w.box));
+  return section;
+}));
+</script>
+</body>
+</html>
