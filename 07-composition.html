@@ -32,15 +32,13 @@
 </header>
 <main>
   <section>
-    <h2>언더테일 예시</h2>
-    <p class="note">E 정면 medium. 왼쪽은 지금 그대로다. 오른쪽은 장면 전체를 언더테일 비율(도트 2.5pt)로 그렸다. 벽 말고 모든 것(사람, 고양이, 시계, 창, 커튼, 트리, 책상, 선물, 머그)에 검은 윤곽선을 두르고, 사람은 빛·그늘 없는 평평한 색에 갈색 머리다. 배경은 디더링과 벽 잡티, 벽 불빛 번짐을 빼고 색을 단계로 끊었다. 사람 크기(폭 48pt)는 같다.</p>
-    <div id="undertale" class="row"></div>
+    <h2>윤곽선 예시</h2>
+    <p class="note">E 정면 medium, 도트 3pt. 왼쪽은 지금 그대로다. 오른쪽은 벽 말고 모든 것(사람, 고양이, 시계, 창, 커튼, 트리, 책상, 선물, 머그)에 검은 윤곽선을 두르고, 배경은 디더링과 벽 잡티, 벽 불빛 번짐을 빼고 색을 단계로 끊었다.</p>
+    <div id="outline" class="row"></div>
   </section>
   <section>
-    <h2>사람 · 도트 해상도</h2>
-    <p class="note">E 정면, 크리스마스 이브 밤, medium 실제 크기다. hunsu 확대를 100% 로 두고 본다. 사람 크기는 셋 다 지금과 같고 도트만 촘촘해진다. 2·3·4는 같은 도형을 해상도만 달리 그렸고, 늘어난 칸은 윤곽(둥근 머리, 앞머리, 어깨선)에만 쓴다. 얼굴은 감은 눈 두 줄뿐이다. 4는 언더테일 주인공 스프라이트(약 19×29칸)의 폭 19칸을 지금 사람 폭에 맞춘 도트 크기다. 5는 4에 언더테일 그림체(검은 윤곽선, 빛·그늘 없는 평평한 색)를 더한 예시다.</p>
-    <div id="resolution" class="row"></div>
-    <p class="note">같은 사람 4배 확대</p>
+    <h2>사람 · 확정</h2>
+    <p class="note">해상도 비교에서 1번(도트 3pt, 정면 16×22칸)을 골랐다. 목은 4칸에서 3칸으로 줄였고, 윤곽선에 묻히지 않게 머리를 갈색으로 바꿨다. 윤곽선을 두른 정면을 4배로 키웠다.</p>
     <div id="close-up" class="row"></div>
   </section>
   <section>
@@ -59,7 +57,7 @@
 // 구도 비교 페이지. hunsu 가 페이지와 design.css 만 서빙해서 스크립트를 페이지 안에 담는다.
 // ponytail: 06-lofi.html 그리기 코드에서 크리스마스 모양만 남겨 복사했다. 구도를 고르면 06 에 옮기고 이 페이지는 지운다.
 
-let DOT = 3;
+const DOT = 3;
 // 언더테일 예시: 디더링·잡티 없이 색을 단계로 끊어 칠한다.
 let FLAT = false;
 
@@ -423,7 +421,7 @@ const PEOPLE = {
     body: 14,
     neck: ['..KK........KK..', '..KK........KK..'],
     neckBottom: 16,
-    bare: { k: 'hair', K: null },
+    bare: { k: 'hair-brown', K: null },
     fall: { start: 13, cols: [[4, 11]], rows: 10 },
   },
   // 책상 앞 의자에 앉아 왼쪽 책상에 팔을 올렸다. 18번 줄(손 아래)이 책상 윗면이다.
@@ -453,7 +451,7 @@ const PEOPLE = {
     side: true,
     neck: SIDE_NECK,
     neckBottom: 13,
-    bare: { k: 'hair', K: 'skin' },
+    bare: { k: 'hair-brown', K: 'skin' },
     fall: { start: 10, cols: [[8, 11]], rows: 9 },
   },
   // 창가 벤치에 무릎을 세우고 앉아 두 손으로 머그를 든다.
@@ -476,7 +474,7 @@ const PEOPLE = {
     side: true,
     neck: SIDE_NECK,
     neckBottom: 13,
-    bare: { k: 'hair', K: 'skin' },
+    bare: { k: 'hair-brown', K: 'skin' },
     fall: { start: 10, cols: [[8, 11]], rows: 9 },
   },
   // 이쪽을 본다. 눈은 감은 듯한 점 하나씩.
@@ -494,7 +492,7 @@ const PEOPLE = {
       '.KKhssssssshHKK.',
       '...hssssssshH...',
       '...hhssssshhH...',
-      '......ssss......',
+      '......sss.......',
       '...oooooooooor..',
       '..ooooooooooorr.',
       '.ooooooooooooorr',
@@ -518,7 +516,7 @@ const PEOPLE = {
     body: 13,
     neck: ['....KK....KK....', '....KK....KK....'],
     neckBottom: 14,
-    bare: { k: 'hair', K: null },
+    bare: { k: 'hair-brown', K: null },
     fall: { start: 12, cols: [[2, 3], [12, 13]], rows: 8 },
   },
 };
@@ -618,7 +616,7 @@ const SPRITES = {
   plant: ['.l.l.', 'lLlLl', '.lLl.', 'ppppp', '.ppp.'],
 };
 const SPRITE_COLORS = {
-  h: 'hair', H: 'hair-rim', k: 'headphone', K: 'headphone-accent', s: 'skin', S: 'hoodie-rim', e: 'hair',
+  h: 'hair-brown', H: 'hair-brown-rim', k: 'headphone', K: 'headphone-accent', s: 'skin', S: 'hoodie-rim', e: 'outline',
   o: 'hoodie', d: 'hoodie-dark', r: 'hoodie-rim', j: 'curtain-dark', f: 'wood-dark',
   c: 'cheese', R: 'cheese-rim', T: 'cheese-dark',
   L: 'lamp', m: 'mug-dark', M: 'mug', t: 'steam',
@@ -691,7 +689,7 @@ function drawPerson(g, pose, x, bottom, { headwear, hair, outfit = 'mustard', ha
   const length = Math.round(hair * p.fall.rows), right = Math.max(...p.fall.cols.flat());
   for (const [i0, i1] of p.fall.cols) {
     for (let i = i0; i <= i1; i++) {
-      for (let j = 0; j < length - (i === i0 || i === i1 ? 1 : 0); j++) g.set(left + i, top + p.fall.start + j, color(i === right ? 'hair-rim' : 'hair'));
+      for (let j = 0; j < length - (i === i0 || i === i1 ? 1 : 0); j++) g.set(left + i, top + p.fall.start + j, color(i === right ? 'hair-brown-rim' : 'hair-brown'));
     }
   }
   if (hat) g.sprite(x, top + p.hatBottom, p.hat, { R: 'santa', w: 'santa-trim' });
@@ -993,7 +991,7 @@ function composeFront(g, W, H, s, v) {
     pet: { pose: 'side', x: personX - 15, bottom: deskTop + 1, front: true, arm: [[personX - 6, top + 15], [personX - 12, deskTop - 10]] },
     shoulder: { pose: 'curled', x: personX + 11, bottom: top + 16, front: true },
   }[v.cat];
-  // v.outline: 벽 말고 모두 윤곽선을 두른다. v.k: 사람을 frontFigure 해상도로 그린다(언더테일 예시).
+  // v.outline: 벽 말고 모두 윤곽선을 두른다.
   const ink = draw => {
     if (!v.outline) return draw(g);
     const layer = new Grid(W, H);
@@ -1008,20 +1006,13 @@ function composeFront(g, W, H, s, v) {
   ink(t => drawCurtain(t, x1, y0 - 2, deskTop, 1));
   ink(t => drawTree(t, treeX, H, treeHeight));
   if (!cat.front) ink(t => drawCat(t, cat, v));
-  if (v.person !== false) {
-    ink(t => (v.k
-      ? stamp(t, frontFigure(v.k, v, v.outline), personX - Math.round(8 * v.k), deskTop + Math.round(3 * v.k) - Math.round(22 * v.k))
-      : drawPerson(t, 'front', personX, deskTop + 3, v)));
-  }
+  ink(t => drawPerson(t, 'front', personX, deskTop + 3, v));
   ink(t => drawDesk(t, 0, W, deskTop, H, treeX));
   ink(t => drawGifts(t, treeX, deskTop + 1));
-  if (v.person !== false) {
-    // 김은 성긴 점이라 윤곽선을 두르면 검은 덩어리가 된다. 잔만 두른다.
-    ink(t => t.sprite(personX + 10, deskTop + 1, SPRITES.mug.slice(4), SPRITE_COLORS));
-    g.sprite(personX + 10, deskTop - 4, SPRITES.mug.slice(0, 4), SPRITE_COLORS);
-  }
+  // 김은 성긴 점이라 윤곽선을 두르면 검은 덩어리가 된다. 잔만 두른다.
+  ink(t => t.sprite(personX + 10, deskTop + 1, SPRITES.mug.slice(4), SPRITE_COLORS));
+  g.sprite(personX + 10, deskTop - 4, SPRITES.mug.slice(0, 4), SPRITE_COLORS);
   if (cat.front) ink(t => drawCat(t, cat, v));
-  return { personX, deskTop };
 }
 
 // ---- 페이지 ----
@@ -1046,7 +1037,7 @@ function widget(compose, scene, sizeKey, v) {
   const [w, h] = SIZES[sizeKey];
   const s = sceneContext(scene);
   const g = new Grid(Math.ceil(w / DOT), Math.ceil(h / DOT));
-  const layout = compose(g, g.cols, g.rows, s, { ...v, hair: hairLength(scene.date), outfit: outfitFor(scene) });
+  compose(g, g.cols, g.rows, s, { ...v, hair: hairLength(scene.date), outfit: outfitFor(scene) });
   const canvas = g.canvas();
   const offset = [Math.floor((g.cols * DOT - w) / 2), Math.floor((g.rows * DOT - h) / 2)];
   const box = document.createElement('div');
@@ -1058,7 +1049,7 @@ function widget(compose, scene, sizeKey, v) {
   canvas.className = 'dots';
   Object.assign(canvas.style, { width: `${g.cols * DOT}px`, height: `${g.rows * DOT}px`, left: `${-offset[0]}px`, top: `${-offset[1]}px` });
   box.append(canvas);
-  return { box, layout, offset };
+  return box;
 }
 
 function figure(box, caption) {
@@ -1073,9 +1064,9 @@ document.getElementById('compositions').append(...COMPOSITIONS.map(({ name, note
   section.className = 'composition';
   section.innerHTML = `<h2>${name}</h2><p class="note">${note}</p><div class="row sizes"></div><div class="row variations"></div>`;
   section.querySelector('.sizes').append(...Object.keys(SIZES).map(size =>
-    figure(widget(compose, SCENES[0], size, BASE).box, `${size} · ${SCENES[0].title} · ${HEADWEAR[BASE.headwear]} · ${CAT_STATES[BASE.cat]}`)));
+    figure(widget(compose, SCENES[0], size, BASE), `${size} · ${SCENES[0].title} · ${HEADWEAR[BASE.headwear]} · ${CAT_STATES[BASE.cat]}`)));
   section.querySelector('.variations').append(...VARIATIONS.map(v =>
-    figure(widget(compose, SCENES[v.scene], 'medium', v).box, `${SCENES[v.scene].title} · ${HEADWEAR[v.headwear]} · ${CAT_STATES[v.cat]}`)));
+    figure(widget(compose, SCENES[v.scene], 'medium', v), `${SCENES[v.scene].title} · ${HEADWEAR[v.headwear]} · ${CAT_STATES[v.cat]}`)));
   return section;
 }));
 
@@ -1112,127 +1103,41 @@ function personTable(columns, scale) {
   return table;
 }
 
-// ---- 사람 도트 해상도 시험 ----
-// 크기는 지금 사람(48×66pt) 그대로 두고 도트만 촘촘하게 한다. 늘어난 칸은 윤곽(둥근 머리, 앞머리, 어깨선)을
-// 매끄럽게 하는 데만 쓰고, 얼굴은 감은 눈 두 줄만 둔다. 볼·입·눈동자 빛 같은 잔디테일은 도트 맛을 없애서 넣지 않는다.
+// ---- 확정 사람, 윤곽선 예시 ----
 
-const RESOLUTION_TESTS = [
-  { label: '1 지금', k: 1 },
-  { label: '2 조금 촘촘하게', k: 1.5 },
-  { label: '3 두 배 촘촘하게', k: 2 },
-  // 언더테일 Frisk 스프라이트 폭(19칸, 팬 측정값)을 지금 사람 폭 48pt 에 맞춘 값
-  { label: '4 언더테일 크기', k: 1.2 },
-  { label: '5 언더테일 느낌', k: 1.2, outline: true },
-];
-
-// 정면 사람을 도형으로 그린다. 좌표는 지금 스프라이트(16×22칸) 단위이고, k 는 그 한 칸을 몇 칸으로 나눌지다.
-function frontFigure(k, look, flat) {
-  const g = new Grid(Math.round(16 * k), Math.round(22 * k)), wear = OUTFITS[look.outfit];
-  const row = y => Math.floor(y * k);
-  const at = (x, y, j) => {
-    const dx = x - 8;
-    if (look.hat !== false) {
-      if (Math.hypot(x - 13.2, y - 1.3) <= 0.8) return 'santa-trim';
-      if (y >= 4.8 && y < 6.6 && Math.abs(dx) <= 5.8) return 'santa-trim';
-      const t = (4.8 - y) / 3.8;
-      if (t >= 0 && t <= 1 && x >= 3.3 + t * 7.7 && x <= 12.7 + t * 0.3) return 'santa';
-    }
-    for (const cx of [2.7, 13.3]) {
-      if (Math.abs(x - cx) <= 0.85 && Math.abs(y - 8.6) <= 1.6) return Math.abs(x - cx) > 0.4 || Math.abs(y - 8.6) > 1.1 ? 'headphone' : 'headphone-accent';
-    }
-    // 얼굴은 갸름한 달걀꼴: 아래로 갈수록 좁아져 턱이 좁다.
-    const v = (y - 9.3) / 3, half = 3.5 * (v > 0 ? 1 - 0.2 * v : 1) * Math.sqrt(Math.max(0, 1 - v * v));
-    if (y >= 6.7 + 0.3 * Math.sin(x * 2.4) && Math.abs(dx) <= half) {
-      return j === row(9) && (Math.abs(dx + 1.7) <= 0.5 || Math.abs(dx - 1.7) <= 0.5) ? (flat ? 'outline' : 'hair') : 'skin';
-    }
-    if ((dx / 5.2) ** 2 + ((y - 7.4) / 5.5) ** 2 <= 1 || (y >= 7.4 && y <= 12.2 && Math.abs(dx) <= 5)) return 'hair';
-    if (y > 12.2 && y <= 12.2 + look.hair * 5 && Math.abs(dx) >= 3 && Math.abs(dx) <= 5) return 'hair';
-    if (Math.abs(dx) <= 1.5 && y >= 11.6 && y < 13.4) return j === row(11.9) ? 'skin-dark' : 'skin';
-    if (y >= 12.7 && Math.abs(dx) <= Math.min(7.4, 1.6 + Math.sqrt(y - 12.6) * 4.6)) {
-      if (look.outfit !== 'christmas') return wear.o;
-      if ((y >= 15.4 && y < 16.2) || (y >= 17 && y < 17.8)) return 'santa-trim';
-      if (y >= 16.2 && y < 17) return Math.floor(x * k) % 3 === 1 ? 'summer-2' : 'santa-trim';
-      return wear.o;
-    }
-    return null;
-  };
-  const names = [];
-  for (let j = 0; j < g.rows; j++) for (let i = 0; i < g.cols; i++) names.push(at((i + 0.5) / k, (j + 0.5) / k, j));
-  // 오른쪽(불빛 쪽) 끝 한 칸은 테두리 빛, 옷 왼쪽 끝 한 칸은 그늘.
-  // flat 이면 언더테일처럼 빛·그늘 없이 칠한다. 검은 머리는 윤곽선에 묻혀서 갈색으로 칠한다.
-  names.forEach((name, n) => {
-    const i = n % g.cols, right = i + 1 < g.cols ? names[n + 1] : null, left = i > 0 ? names[n - 1] : null;
-    let c = name;
-    if (flat) {
-      g.set(i, Math.floor(n / g.cols), name && color(name === 'hair' ? 'hair-rim' : name));
-      return;
-    }
-    if (name === 'hair' && !right) c = 'hair-rim';
-    if (name === wear.o && !right) c = wear.rim ?? 'hoodie-rim';
-    if (name === wear.o && !left) c = wear.d;
-    g.set(i, Math.floor(n / g.cols), c && color(c));
-  });
-  return g;
-}
-
-function resolutionWidget({ k, outline }) {
-  const scene = SCENES[0], look = { headwear: 'headphones', cat: 'sleep', hair: hairLength(scene.date), outfit: outfitFor(scene) };
-  const { box, layout: { personX, deskTop }, offset } = widget(composeFront, scene, 'medium', { ...look, person: false });
-  const rows = PEOPLE.front.rows;
-  let person = new Grid(rows[0].length, rows.length);
-  if (k === 1) drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
-  else person = outline ? withOutline(frontFigure(k, look, true)) : frontFigure(k, look);
-  // 지금 사람과 같은 자리·크기. 아래 세 줄(지금 기준)은 책상 뒤에 가려진다.
-  const width = rows[0].length * DOT, height = rows.length * DOT;
-  const clip = document.createElement('div');
-  Object.assign(clip.style, { position: 'absolute', left: 0, top: 0, width: '100%', height: `${deskTop * DOT - offset[1]}px`, overflow: 'hidden' });
-  const canvas = person.canvas();
-  canvas.className = 'dots';
-  Object.assign(canvas.style, {
-    width: `${width}px`, height: `${height}px`,
-    left: `${personX * DOT - width / 2 - offset[0]}px`, top: `${(deskTop + 3) * DOT - height - offset[1]}px`,
-  });
-  clip.append(canvas);
-  box.append(clip);
-  return box;
-}
-
-// 같은 사람을 4배로 키워 윤곽을 본다
-function resolutionCloseUp({ k, outline }) {
-  const scene = SCENES[0], look = { headwear: 'headphones', hair: hairLength(scene.date), outfit: outfitFor(scene) };
-  const rows = PEOPLE.front.rows;
-  let person = new Grid(rows[0].length, rows.length);
-  if (k === 1) drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
-  else person = outline ? withOutline(frontFigure(k, look, true)) : frontFigure(k, look);
-  const g = new Grid(person.cols, person.rows);
+// 정면 사람에 윤곽선을 둘러 4배로 키운다. 윤곽선 자리로 위·양옆에 한 칸씩 둔다.
+function personCloseUp(look) {
+  const rows = PEOPLE.front.rows, g = new Grid(rows[0].length + 2, rows.length + 1), person = new Grid(g.cols, g.rows);
   g.rect(0, 0, g.cols, g.rows, color('night-wall'));
-  person.cells.forEach((c, n) => g.set(n % g.cols, Math.floor(n / g.cols), c));
+  drawPerson(person, 'front', g.cols / 2, g.rows, look);
+  stamp(g, withOutline(person), 0, 0);
   const canvas = g.canvas();
-  Object.assign(canvas.style, { width: `${rows[0].length * DOT * 4}px`, height: `${rows.length * DOT * 4}px` });
+  Object.assign(canvas.style, { width: `${g.cols * DOT * 4}px`, height: `${g.rows * DOT * 4}px` });
   canvas.className = 'close-up';
   canvas.setAttribute('role', 'img');
-  canvas.setAttribute('aria-label', '사람 4배 확대');
+  canvas.setAttribute('aria-label', '확정한 사람 4배 확대');
   return canvas;
 }
 
-// ponytail: 장면 전체를 다른 도트 크기로 그리려고 전역 DOT 를 잠시 바꾼다. 도트 크기를 고르면 상수 하나로 돌아간다.
-function undertaleWidget(scene, v) {
-  [DOT, FLAT] = [2.5, true];
+// ponytail: 평평한 배경을 시험하려고 전역 FLAT 을 잠시 켠다. 정해지면 상수로 바꾸거나 지운다.
+function outlineWidget(scene, v) {
+  FLAT = true;
   try {
-    return widget(composeFront, scene, 'medium', { ...v, outline: true, k: 1.2 }).box;
+    return widget(composeFront, scene, 'medium', { ...v, outline: true });
   } finally {
-    [DOT, FLAT] = [3, false];
+    FLAT = false;
   }
 }
 
-document.getElementById('undertale').append(...[[0, 'sleep'], [1, 'walk']].flatMap(([i, cat]) => {
+document.getElementById('outline').append(...[[0, 'sleep'], [1, 'walk']].flatMap(([i, cat]) => {
   const scene = SCENES[i], v = { headwear: 'headphones', cat };
-  return [figure(widget(composeFront, scene, 'medium', v).box, `지금 · 도트 3pt · ${scene.title}`),
-    figure(undertaleWidget(scene, v), `언더테일 · 도트 2.5pt · ${scene.title}`)];
+  return [figure(widget(composeFront, scene, 'medium', v), `지금 · ${scene.title}`),
+    figure(outlineWidget(scene, v), `윤곽선 · 평평한 배경 · ${scene.title}`)];
 }));
-document.getElementById('resolution').append(...RESOLUTION_TESTS.map(test =>
-  figure(resolutionWidget(test), `${test.label} · 도트 ${DOT / test.k}pt · ${Math.round(16 * test.k)}×${Math.round(22 * test.k)}칸`)));
-document.getElementById('close-up').append(...RESOLUTION_TESTS.map(test => figure(resolutionCloseUp(test), test.label)));
+const CONFIRMED = { headwear: 'headphones', hair: hairLength(SCENES[0].date), outfit: outfitFor(SCENES[0]) };
+document.getElementById('close-up').append(
+  figure(personCloseUp(CONFIRMED), '크리스마스'),
+  figure(personCloseUp({ ...CONFIRMED, outfit: 'mustard', hat: false, hair: 0.2 }), '평소'));
 document.getElementById('outfits').append(personTable(Object.entries(OUTFITS).map(([id, wear]) =>
   ({ head: `${wear.event}<br>${wear.name}`, look: { outfit: id, hair: hairLength(OUTFIT_DATES[id]) } })), 3));
 document.getElementById('hair').append(personTable(HAIR_DATES.map(date => ({ head: date, look: { hair: hairLength(date) } })), 4));

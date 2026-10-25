@@ -115,6 +115,8 @@
   --lofi-lamp-light: #FFD9A0;
   --lofi-hair: #2A2130;
   --lofi-hair-rim: #6B4A45;
+  --lofi-hair-brown: #5C3B30;
+  --lofi-hair-brown-rim: #8A5A45;
   --lofi-skin: #B9876E;
   --lofi-hoodie: #6E5A80;
   --lofi-hoodie-dark: #54456A;
@@ -251,7 +253,6 @@
   --lofi-knit-coral-dark: #9E6254;
   --lofi-knit-coral-rim: #DDA08A;
   --lofi-santa-dark: #86393E;
-  --lofi-skin-dark: #94664F;
 }
 
 body {
