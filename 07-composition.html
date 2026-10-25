@@ -32,6 +32,11 @@
 </header>
 <main>
   <section>
+    <h2>언더테일 예시</h2>
+    <p class="note">E 정면 medium. 왼쪽은 지금 그대로다. 오른쪽은 장면 전체를 언더테일 비율(도트 2.5pt)로 그리고, 사람·고양이에 검은 윤곽선과 빛·그늘 없는 평평한 색, 갈색 머리를 넣었다. 사람 크기(폭 48pt)는 같다. 방·창문·나무에는 윤곽선을 넣지 않았다.</p>
+    <div id="undertale" class="row"></div>
+  </section>
+  <section>
     <h2>사람 · 도트 해상도</h2>
     <p class="note">E 정면, 크리스마스 이브 밤, medium 실제 크기다. hunsu 확대를 100% 로 두고 본다. 사람 크기는 셋 다 지금과 같고 도트만 촘촘해진다. 2·3·4는 같은 도형을 해상도만 달리 그렸고, 늘어난 칸은 윤곽(둥근 머리, 앞머리, 어깨선)에만 쓴다. 얼굴은 감은 눈 두 줄뿐이다. 4는 언더테일 주인공 스프라이트(약 19×29칸)의 폭 19칸을 지금 사람 폭에 맞춘 도트 크기다. 5는 4에 언더테일 그림체(검은 윤곽선, 빛·그늘 없는 평평한 색)를 더한 예시다.</p>
     <div id="resolution" class="row"></div>
@@ -54,7 +59,7 @@
 // 구도 비교 페이지. hunsu 가 페이지와 design.css 만 서빙해서 스크립트를 페이지 안에 담는다.
 // ponytail: 06-lofi.html 그리기 코드에서 크리스마스 모양만 남겨 복사했다. 구도를 고르면 06 에 옮기고 이 페이지는 지운다.
 
-const DOT = 3;
+let DOT = 3;
 
 // 06-lofi 의 크리스마스 장면 둘. 둘 다 방 불을 켠 때(night, grey)라 불 끈 색은 두지 않았다.
 const SCENES = [
@@ -161,6 +166,21 @@ class Grid {
     });
     return canvas;
   }
+}
+
+// 언더테일처럼 칠한 칸 바깥 한 칸을 검게 두른 새 Grid
+function withOutline(src) {
+  const g = new Grid(src.cols, src.rows);
+  const filled = (i, j) => i >= 0 && j >= 0 && i < src.cols && j < src.rows && src.cells[j * src.cols + i];
+  src.cells.forEach((c, n) => {
+    const i = n % src.cols, j = Math.floor(n / src.cols);
+    g.set(i, j, c ?? ((filled(i - 1, j) || filled(i + 1, j) || filled(i, j - 1) || filled(i, j + 1)) && color('outline')));
+  });
+  return g;
+}
+
+function stamp(g, src, x, y) {
+  src.cells.forEach((c, n) => g.set(x + n % src.cols, y + Math.floor(n / src.cols), c));
 }
 
 function disc(g, cx, cy, r, c) {
@@ -973,12 +993,23 @@ function composeFront(g, W, H, s, v) {
   drawCurtain(g, x0, y0 - 2, deskTop, -1);
   drawCurtain(g, x1, y0 - 2, deskTop, 1);
   drawTree(g, treeX, H, treeHeight);
-  if (!cat.front) drawCat(g, cat, v);
-  if (v.person !== false) drawPerson(g, 'front', personX, deskTop + 3, v);
+  // v.outline: 사람·고양이에 윤곽선. v.k: 사람을 frontFigure 해상도로 그린다(언더테일 예시).
+  const ink = draw => {
+    if (!v.outline) return draw(g);
+    const layer = new Grid(W, H);
+    draw(layer);
+    stamp(g, withOutline(layer), 0, 0);
+  };
+  if (!cat.front) ink(t => drawCat(t, cat, v));
+  if (v.person !== false) {
+    ink(t => (v.k
+      ? stamp(t, frontFigure(v.k, v, v.outline), personX - Math.round(8 * v.k), deskTop + Math.round(3 * v.k) - Math.round(22 * v.k))
+      : drawPerson(t, 'front', personX, deskTop + 3, v)));
+  }
   drawDesk(g, 0, W, deskTop, H, treeX);
   drawGifts(g, treeX, deskTop + 1);
   if (v.person !== false) g.sprite(personX + 10, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
-  if (cat.front) drawCat(g, cat, v);
+  if (cat.front) ink(t => drawCat(t, cat, v));
   return { personX, deskTop };
 }
 
@@ -1084,7 +1115,7 @@ const RESOLUTION_TESTS = [
 ];
 
 // 정면 사람을 도형으로 그린다. 좌표는 지금 스프라이트(16×22칸) 단위이고, k 는 그 한 칸을 몇 칸으로 나눌지다.
-function frontFigure(k, look, outline) {
+function frontFigure(k, look, flat) {
   const g = new Grid(Math.round(16 * k), Math.round(22 * k)), wear = OUTFITS[look.outfit];
   const row = y => Math.floor(y * k);
   const at = (x, y, j) => {
@@ -1101,7 +1132,7 @@ function frontFigure(k, look, outline) {
     // 얼굴은 갸름한 달걀꼴: 아래로 갈수록 좁아져 턱이 좁다.
     const v = (y - 9.3) / 3, half = 3.5 * (v > 0 ? 1 - 0.2 * v : 1) * Math.sqrt(Math.max(0, 1 - v * v));
     if (y >= 6.7 + 0.3 * Math.sin(x * 2.4) && Math.abs(dx) <= half) {
-      return j === row(9) && (Math.abs(dx + 1.7) <= 0.5 || Math.abs(dx - 1.7) <= 0.5) ? 'hair' : 'skin';
+      return j === row(9) && (Math.abs(dx + 1.7) <= 0.5 || Math.abs(dx - 1.7) <= 0.5) ? (flat ? 'outline' : 'hair') : 'skin';
     }
     if ((dx / 5.2) ** 2 + ((y - 7.4) / 5.5) ** 2 <= 1 || (y >= 7.4 && y <= 12.2 && Math.abs(dx) <= 5)) return 'hair';
     if (y > 12.2 && y <= 12.2 + look.hair * 5 && Math.abs(dx) >= 3 && Math.abs(dx) <= 5) return 'hair';
@@ -1117,13 +1148,12 @@ function frontFigure(k, look, outline) {
   const names = [];
   for (let j = 0; j < g.rows; j++) for (let i = 0; i < g.cols; i++) names.push(at((i + 0.5) / k, (j + 0.5) / k, j));
   // 오른쪽(불빛 쪽) 끝 한 칸은 테두리 빛, 옷 왼쪽 끝 한 칸은 그늘.
-  // outline 이면 언더테일처럼 빛·그늘 없이 평평하게 칠하고 윤곽 바깥 한 칸을 검게 두른다.
+  // flat 이면 언더테일처럼 빛·그늘 없이 칠한다. 검은 머리는 윤곽선에 묻혀서 갈색으로 칠한다.
   names.forEach((name, n) => {
     const i = n % g.cols, right = i + 1 < g.cols ? names[n + 1] : null, left = i > 0 ? names[n - 1] : null;
     let c = name;
-    if (outline) {
-      const near = [i > 0 && left, i + 1 < g.cols && right, names[n - g.cols], names[n + g.cols]].some(Boolean);
-      g.set(i, Math.floor(n / g.cols), name ? color(name) : near ? color('outline') : null);
+    if (flat) {
+      g.set(i, Math.floor(n / g.cols), name && color(name === 'hair' ? 'hair-rim' : name));
       return;
     }
     if (name === 'hair' && !right) c = 'hair-rim';
@@ -1140,7 +1170,7 @@ function resolutionWidget({ k, outline }) {
   const rows = PEOPLE.front.rows;
   let person = new Grid(rows[0].length, rows.length);
   if (k === 1) drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
-  else person = frontFigure(k, look, outline);
+  else person = outline ? withOutline(frontFigure(k, look, true)) : frontFigure(k, look);
   // 지금 사람과 같은 자리·크기. 아래 세 줄(지금 기준)은 책상 뒤에 가려진다.
   const width = rows[0].length * DOT, height = rows.length * DOT;
   const clip = document.createElement('div');
@@ -1162,7 +1192,7 @@ function resolutionCloseUp({ k, outline }) {
   const rows = PEOPLE.front.rows;
   let person = new Grid(rows[0].length, rows.length);
   if (k === 1) drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
-  else person = frontFigure(k, look, outline);
+  else person = outline ? withOutline(frontFigure(k, look, true)) : frontFigure(k, look);
   const g = new Grid(person.cols, person.rows);
   g.rect(0, 0, g.cols, g.rows, color('night-wall'));
   person.cells.forEach((c, n) => g.set(n % g.cols, Math.floor(n / g.cols), c));
@@ -1174,6 +1204,21 @@ function resolutionCloseUp({ k, outline }) {
   return canvas;
 }
 
+// ponytail: 장면 전체를 다른 도트 크기로 그리려고 전역 DOT 를 잠시 바꾼다. 도트 크기를 고르면 상수 하나로 돌아간다.
+function undertaleWidget(scene, v) {
+  DOT = 2.5;
+  try {
+    return widget(composeFront, scene, 'medium', { ...v, outline: true, k: 1.2 }).box;
+  } finally {
+    DOT = 3;
+  }
+}
+
+document.getElementById('undertale').append(...[[0, 'sleep'], [1, 'walk']].flatMap(([i, cat]) => {
+  const scene = SCENES[i], v = { headwear: 'headphones', cat };
+  return [figure(widget(composeFront, scene, 'medium', v).box, `지금 · 도트 3pt · ${scene.title}`),
+    figure(undertaleWidget(scene, v), `언더테일 · 도트 2.5pt · ${scene.title}`)];
+}));
 document.getElementById('resolution').append(...RESOLUTION_TESTS.map(test =>
   figure(resolutionWidget(test), `${test.label} · 도트 ${DOT / test.k}pt · ${Math.round(16 * test.k)}×${Math.round(22 * test.k)}칸`)));
 document.getElementById('close-up').append(...RESOLUTION_TESTS.map(test => figure(resolutionCloseUp(test), test.label)));
