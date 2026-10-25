@@ -20,6 +20,10 @@
   .people { display: grid; gap: 10px 12px; align-items: center; }
   .people .head { color: var(--page-muted); font-size: 0.75rem; }
   .people .label { font-size: 0.875rem; font-weight: 600; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; }
+  .controls .group { display: inline-flex; gap: 4px; }
+  .controls button { font: inherit; font-size: 0.8125rem; padding: 4px 10px; border: 1px solid var(--page-muted); border-radius: 6px; background: transparent; color: var(--page-text); cursor: pointer; }
+  .controls button[aria-pressed="true"] { background: var(--page-text); color: var(--page-bg); }
   .people canvas, canvas.close-up { display: block; border-radius: 6px; image-rendering: pixelated; }
 </style>
 </head>
@@ -32,9 +36,15 @@
 </header>
 <main>
   <section>
-    <h2>윤곽선 예시</h2>
-    <p class="note">E 정면 medium, 도트 3pt. 왼쪽은 지금 그대로다. 오른쪽은 벽 말고 모든 것(사람, 고양이, 시계, 창, 커튼, 트리, 책상, 선물, 머그)에 검은 윤곽선을 두르고, 배경은 디더링과 벽 잡티, 벽 불빛 번짐을 빼고 색을 단계로 끊었다.</p>
-    <div id="outline" class="row"></div>
+    <h2>구도 나란히 비교</h2>
+    <p class="note">구도 다섯을 같은 장면·크기로 나란히 둔다. 사람은 헤드폰을 쓰고 고양이는 창밖을 본다. 장면과 크기는 위 단추로 바꾼다.</p>
+    <div id="compare-controls" class="controls"></div>
+    <div id="compare" class="row"></div>
+  </section>
+  <section>
+    <h2>배경 비교</h2>
+    <p class="note">E 정면 medium. 둘 다 사람·고양이·소품에 윤곽선을 둘렀다. 왼쪽은 지금 배경(디더링, 벽 잡티, 벽 불빛 번짐)이고, 오른쪽은 그것들을 빼고 색을 단계로 끊은 평평한 배경이다.</p>
+    <div id="background" class="row"></div>
   </section>
   <section>
     <h2>사람 · 확정</h2>
@@ -181,6 +191,13 @@ function withOutline(src) {
 
 function stamp(g, src, x, y) {
   src.cells.forEach((c, n) => g.set(x + n % src.cols, y + Math.floor(n / src.cols), c));
+}
+
+// 사람·고양이·소품은 따로 한 겹에 그려 바깥에 윤곽선을 두르고 얹는다. 벽·바닥·창밖은 g 에 바로 그린다.
+function ink(g, draw) {
+  const layer = new Grid(g.cols, g.rows);
+  draw(layer);
+  stamp(g, withOutline(layer), 0, 0);
 }
 
 function disc(g, cx, cy, r, c) {
@@ -615,8 +632,14 @@ const SPRITES = {
   books: ['.11111111.', '2222222222', '.33333333.', '1111111111'],
   plant: ['.l.l.', 'lLlLl', '.lLl.', 'ppppp', '.ppp.'],
 };
+// 김은 성긴 점이라 윤곽선을 두르면 검은 덩어리가 된다. 잔만 두른다.
+function drawMug(g, x, bottom) {
+  ink(g, t => t.sprite(x, bottom, SPRITES.mug.slice(4), SPRITE_COLORS));
+  g.sprite(x, bottom - 5, SPRITES.mug.slice(0, 4), SPRITE_COLORS);
+}
+
 const SPRITE_COLORS = {
-  h: 'hair-brown', H: 'hair-brown-rim', k: 'headphone', K: 'headphone-accent', s: 'skin', S: 'hoodie-rim', e: 'outline',
+  h: 'hair-brown', H: 'hair-brown-rim', k: 'headphone-band', K: 'headphone-accent', s: 'skin', S: 'hoodie-rim', e: 'outline',
   o: 'hoodie', d: 'hoodie-dark', r: 'hoodie-rim', j: 'curtain-dark', f: 'wood-dark',
   c: 'cheese', R: 'cheese-rim', T: 'cheese-dark',
   L: 'lamp', m: 'mug-dark', M: 'mug', t: 'steam',
@@ -850,19 +873,19 @@ function composeBack(g, W, H, s, v) {
     shoulder: { pose: 'curled', x: personX + 1, bottom: top + 18, front: true },
   }[v.cat];
   drawWall(g, W, H, s, [treeX, H - 20]);
-  drawClock(g, x1 + 7, y0 + 4, s);
-  drawWindow(g, x0, y0, x1, sill, s);
-  drawCurtain(g, x0, y0 - 2, deskTop, -1);
-  if (!cat.front) drawCat(g, cat, v);
-  g.sprite(x1 - 6, sill, SPRITES.plant, SPRITE_COLORS);
-  if (H > 80) drawShelf(g, x1 + 6, W - 6, Math.round(H * 0.38));
-  drawDesk(g, 0, treeX - 11, deskTop, H, treeX);
-  g.sprite(personX - pt(42), deskTop + 1, SPRITES.books, SPRITE_COLORS);
-  g.sprite(personX - pt(24), deskTop + 1, SPRITES.mug, SPRITE_COLORS);
-  drawTree(g, treeX, H);
-  drawGifts(g, treeX, H);
-  drawPerson(g, 'back', personX, H, v);
-  if (cat.front) drawCat(g, cat, v);
+  ink(g, t => drawClock(t, x1 + 7, y0 + 4, s));
+  ink(g, t => drawWindow(t, x0, y0, x1, sill, s));
+  ink(g, t => drawCurtain(t, x0, y0 - 2, deskTop, -1));
+  if (!cat.front) ink(g, t => drawCat(t, cat, v));
+  ink(g, t => t.sprite(x1 - 6, sill, SPRITES.plant, SPRITE_COLORS));
+  if (H > 80) ink(g, t => drawShelf(t, x1 + 6, W - 6, Math.round(H * 0.38)));
+  ink(g, t => drawDesk(t, 0, treeX - 11, deskTop, H, treeX));
+  ink(g, t => t.sprite(personX - pt(42), deskTop + 1, SPRITES.books, SPRITE_COLORS));
+  drawMug(g, personX - pt(24), deskTop + 1);
+  ink(g, t => drawTree(t, treeX, H));
+  ink(g, t => drawGifts(t, treeX, H));
+  ink(g, t => drawPerson(t, 'back', personX, H, v));
+  if (cat.front) ink(g, t => drawCat(t, cat, v));
 }
 
 // B. 창 아래 책상에서 창 쪽(왼쪽)을 보고 앉은 옆모습. 책상·의자·바닥이 보인다.
@@ -882,26 +905,30 @@ function composeDesk(g, W, H, s, v) {
   }[v.cat];
   drawWall(g, W, H, s, [treeX, floor - 20]);
   drawFloor(g, floor, W, H);
-  drawClock(g, Math.round((x1 + treeX - 10) / 2), y0 + 5, s);
-  drawWindow(g, x0, y0, x1, deskTop - 3, s);
-  drawCurtain(g, x0, y0 - 2, deskTop, -1);
-  if (big) drawShelf(g, x1 + 6, W - 6, Math.round(H * 0.38));
-  drawTree(g, treeX, floor + 1, treeHeight);
-  drawGifts(g, treeX, floor + 1);
+  ink(g, t => drawClock(t, Math.round((x1 + treeX - 10) / 2), y0 + 5, s));
+  ink(g, t => drawWindow(t, x0, y0, x1, deskTop - 3, s));
+  ink(g, t => drawCurtain(t, x0, y0 - 2, deskTop, -1));
+  if (big) ink(g, t => drawShelf(t, x1 + 6, W - 6, Math.round(H * 0.38)));
+  ink(g, t => drawTree(t, treeX, floor + 1, treeHeight));
+  ink(g, t => drawGifts(t, treeX, floor + 1));
   // 책상은 창 아래 벽에 붙은 판과 다리 둘이다. 판 오른쪽 끝에 사람 손이 닿는다.
   const deskRight = left + 4;
-  drawDesk(g, 0, deskRight, deskTop, deskTop + 2, treeX);
-  for (const x of [2, deskRight - 2]) g.rect(x, deskTop + 2, 1, floor - deskTop - 2, color('wood-dark'));
-  g.sprite(Math.round((x0 + 9 + left) / 2) + 2, deskTop + 1, SPRITES.books, SPRITE_COLORS);
-  g.sprite(left - 3, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
-  if (!cat.front) drawCat(g, cat, v);
+  ink(g, t => {
+    drawDesk(t, 0, deskRight, deskTop, deskTop + 2, treeX);
+    for (const x of [2, deskRight - 2]) t.rect(x, deskTop + 2, 1, floor - deskTop - 2, color('wood-dark'));
+  });
+  ink(g, t => t.sprite(Math.round((x0 + 9 + left) / 2) + 2, deskTop + 1, SPRITES.books, SPRITE_COLORS));
+  drawMug(g, left - 3, deskTop + 1);
+  if (!cat.front) ink(g, t => drawCat(t, cat, v));
   // 의자: 등받이, 앉는 판, 다리 둘
-  const chair = color('wood-dark');
-  g.rect(left + 13, top + 12, 2, 12, chair);
-  g.rect(left + 3, top + 23, 12, 1, chair);
-  for (const x of [left + 4, left + 13]) g.rect(x, top + 24, 1, floor - top - 24, chair);
-  drawPerson(g, 'desk', personX, floor, v);
-  if (cat.front) drawCat(g, cat, v);
+  ink(g, t => {
+    const chair = color('wood-dark');
+    t.rect(left + 13, top + 12, 2, 12, chair);
+    t.rect(left + 3, top + 23, 12, 1, chair);
+    for (const x of [left + 4, left + 13]) t.rect(x, top + 24, 1, floor - top - 24, chair);
+  });
+  ink(g, t => drawPerson(t, 'desk', personX, floor, v));
+  if (cat.front) ink(g, t => drawCat(t, cat, v));
 }
 
 // C. 큰 창 아래 벤치에 무릎을 세우고 앉아 창밖을 보는 옆모습
@@ -919,21 +946,23 @@ function composeSeat(g, W, H, s, v) {
     shoulder: { pose: 'curled', x: personX + 6, bottom: top + 16, flip: true, front: true },
   }[v.cat];
   drawWall(g, W, H, s, [treeX, H - 20]);
-  drawClock(g, Math.round((x1 + 4 + W) / 2), big ? y0 + 6 : 8, s);
-  if (big) drawShelf(g, x0 + 6, x1 - 6, y0 - 10);
-  drawWindow(g, x0, y0, x1, seat, s);
-  drawCurtain(g, x0, y0 - 2, seat, -1);
-  drawCurtain(g, x1, y0 - 2, seat, 1);
+  ink(g, t => drawClock(t, Math.round((x1 + 4 + W) / 2), big ? y0 + 6 : 8, s));
+  if (big) ink(g, t => drawShelf(t, x0 + 6, x1 - 6, y0 - 10));
+  ink(g, t => drawWindow(t, x0, y0, x1, seat, s));
+  ink(g, t => drawCurtain(t, x0, y0 - 2, seat, -1));
+  ink(g, t => drawCurtain(t, x1, y0 - 2, seat, 1));
   // 벤치: 방석과 앞판
-  g.rect(x0 - 4, seat, x1 - x0 + 8, 2, color('beanie'));
-  g.rect(x0 - 4, seat + 2, x1 - x0 + 8, 1, color('beanie-dark'));
-  g.rect(x0 - 4, seat + 3, x1 - x0 + 8, 1, color('wood-light'));
-  g.rect(x0 - 4, seat + 4, x1 - x0 + 8, H - seat - 4, color('wood'));
-  drawTree(g, treeX, H, treeHeight);
-  drawGifts(g, treeX, H);
-  if (!cat.front) drawCat(g, cat, v);
-  drawPerson(g, 'seat', personX, seat + 1, v);
-  if (cat.front) drawCat(g, cat, v);
+  ink(g, t => {
+    t.rect(x0 - 4, seat, x1 - x0 + 8, 2, color('beanie'));
+    t.rect(x0 - 4, seat + 2, x1 - x0 + 8, 1, color('beanie-dark'));
+    t.rect(x0 - 4, seat + 3, x1 - x0 + 8, 1, color('wood-light'));
+    t.rect(x0 - 4, seat + 4, x1 - x0 + 8, H - seat - 4, color('wood'));
+  });
+  ink(g, t => drawTree(t, treeX, H, treeHeight));
+  ink(g, t => drawGifts(t, treeX, H));
+  if (!cat.front) ink(g, t => drawCat(t, cat, v));
+  ink(g, t => drawPerson(t, 'seat', personX, seat + 1, v));
+  if (cat.front) ink(g, t => drawCat(t, cat, v));
 }
 
 // D. 집 밖에서 불 켜진 창 안을 본다. 창밖 풍경 그리기를 집 바깥에 쓰고, 방 안은 창 안에 그린다.
@@ -946,9 +975,11 @@ function composeOutside(g, W, H, s, v) {
   g.within(0, 0, W, ground, () => drawView(g, W, ground, s));
   g.rect(0, ground, W, H - ground, pc(s, 'snow'));
   // 집 벽(가로 판자)과 처마
-  for (let y = hy0; y < ground; y++) g.rect(hx0, y, W - hx0, 1, color((y - hy0) % 3 === 2 ? 'wood-dark' : 'wood'));
-  g.rect(hx0 - 3, hy0 - 3, W - hx0 + 3, 3, color('lamp-body'));
-  if (s.snowCovered) g.rect(hx0 - 3, hy0 - 4, W - hx0 + 3, 2, pc(s, 'snow'));
+  ink(g, t => {
+    for (let y = hy0; y < ground; y++) t.rect(hx0, y, W - hx0, 1, color((y - hy0) % 3 === 2 ? 'wood-dark' : 'wood'));
+    t.rect(hx0 - 3, hy0 - 3, W - hx0 + 3, 3, color('lamp-body'));
+    if (s.snowCovered) t.rect(hx0 - 3, hy0 - 4, W - hx0 + 3, 2, pc(s, 'snow'));
+  });
   // 창 안: 방 벽, 시계, 트리, 사람, 고양이. 사람 허리 아래는 창 아래 끝에서 잘리고, 고양이는 안쪽 창턱에 있다.
   const gx = wx0 + 2, gy = wy0 + 2, gw = wx1 - wx0 - 4, gh = wy1 - gy;
   g.within(gx, gy, gw, gh, () => {
@@ -962,18 +993,20 @@ function composeOutside(g, W, H, s, v) {
       shoulder: { pose: 'curled', x: personX + 11, bottom: top + 16 },
     }[v.cat];
     drawWall(g, gw, gh, s, [treeX, gh - 10]);
-    drawClock(g, big ? 10 : 8, big ? 10 : 8, s);
-    drawTree(g, treeX, gh + 1, treeHeight);
-    drawPerson(g, 'front', personX, gh + 4, v);
+    ink(g, t => drawClock(t, big ? 10 : 8, big ? 10 : 8, s));
+    ink(g, t => drawTree(t, treeX, gh + 1, treeHeight));
+    ink(g, t => drawPerson(t, 'front', personX, gh + 4, v));
     // ponytail: 성에가 창턱의 고양이를 가려서 고양이를 성에 앞에 그린다. 실제로는 유리 안쪽이라 성에 뒤다.
     drawFrost(g, gw, gh);
-    drawCat(g, cat, v);
+    ink(g, t => drawCat(t, cat, v));
   });
-  for (let y = wy0; y < wy1; y++) {
-    for (let x = wx0; x < wx1; x++) if (x < gx || x >= gx + gw || y < gy) g.set(x, y, color(y === wy0 ? 'wood-light' : 'wood'));
-  }
-  g.rect(wx0 - 2, wy1, wx1 - wx0 + 4, 2, color('wood-light'));
-  if (s.snowCovered) g.rect(wx0 - 2, wy1 - 1, wx1 - wx0 + 4, 1, pc(s, 'snow'));
+  ink(g, t => {
+    for (let y = wy0; y < wy1; y++) {
+      for (let x = wx0; x < wx1; x++) if (x < gx || x >= gx + gw || y < gy) t.set(x, y, color(y === wy0 ? 'wood-light' : 'wood'));
+    }
+    t.rect(wx0 - 2, wy1, wx1 - wx0 + 4, 2, color('wood-light'));
+    if (s.snowCovered) t.rect(wx0 - 2, wy1 - 1, wx1 - wx0 + 4, 1, pc(s, 'snow'));
+  });
   if (s.snowing) drawSnow(g, W, H, s);
 }
 
@@ -991,28 +1024,19 @@ function composeFront(g, W, H, s, v) {
     pet: { pose: 'side', x: personX - 15, bottom: deskTop + 1, front: true, arm: [[personX - 6, top + 15], [personX - 12, deskTop - 10]] },
     shoulder: { pose: 'curled', x: personX + 11, bottom: top + 16, front: true },
   }[v.cat];
-  // v.outline: 벽 말고 모두 윤곽선을 두른다.
-  const ink = draw => {
-    if (!v.outline) return draw(g);
-    const layer = new Grid(W, H);
-    draw(layer);
-    stamp(g, withOutline(layer), 0, 0);
-  };
   drawWall(g, W, H, s, [treeX, H - 20]);
-  ink(t => drawClock(t, Math.round(x0 / 2), y0 + 6, s));
-  if (big) ink(t => drawShelf(t, x0 + 4, x1 - 4, y0 - 10));
-  ink(t => drawWindow(t, x0, y0, x1, sill, s));
-  ink(t => drawCurtain(t, x0, y0 - 2, deskTop, -1));
-  ink(t => drawCurtain(t, x1, y0 - 2, deskTop, 1));
-  ink(t => drawTree(t, treeX, H, treeHeight));
-  if (!cat.front) ink(t => drawCat(t, cat, v));
-  ink(t => drawPerson(t, 'front', personX, deskTop + 3, v));
-  ink(t => drawDesk(t, 0, W, deskTop, H, treeX));
-  ink(t => drawGifts(t, treeX, deskTop + 1));
-  // 김은 성긴 점이라 윤곽선을 두르면 검은 덩어리가 된다. 잔만 두른다.
-  ink(t => t.sprite(personX + 10, deskTop + 1, SPRITES.mug.slice(4), SPRITE_COLORS));
-  g.sprite(personX + 10, deskTop - 4, SPRITES.mug.slice(0, 4), SPRITE_COLORS);
-  if (cat.front) ink(t => drawCat(t, cat, v));
+  ink(g, t => drawClock(t, Math.round(x0 / 2), y0 + 6, s));
+  if (big) ink(g, t => drawShelf(t, x0 + 4, x1 - 4, y0 - 10));
+  ink(g, t => drawWindow(t, x0, y0, x1, sill, s));
+  ink(g, t => drawCurtain(t, x0, y0 - 2, deskTop, -1));
+  ink(g, t => drawCurtain(t, x1, y0 - 2, deskTop, 1));
+  ink(g, t => drawTree(t, treeX, H, treeHeight));
+  if (!cat.front) ink(g, t => drawCat(t, cat, v));
+  ink(g, t => drawPerson(t, 'front', personX, deskTop + 3, v));
+  ink(g, t => drawDesk(t, 0, W, deskTop, H, treeX));
+  ink(g, t => drawGifts(t, treeX, deskTop + 1));
+  drawMug(g, personX + 10, deskTop + 1);
+  if (cat.front) ink(g, t => drawCat(t, cat, v));
 }
 
 // ---- 페이지 ----
@@ -1092,7 +1116,7 @@ function personTable(columns, scale) {
     for (const { head, look } of columns) {
       const g = new Grid(rows[0].length + 4, rows.length + 2);
       g.rect(0, 0, g.cols, g.rows, color('night-wall'));
-      drawPerson(g, pose, g.cols / 2, g.rows, { headwear: 'headphones', hat: false, ...look });
+      ink(g, t => drawPerson(t, pose, g.cols / 2, g.rows, { headwear: 'headphones', hat: false, ...look }));
       const canvas = g.canvas();
       Object.assign(canvas.style, { width: `${g.cols * scale}px`, height: `${g.rows * scale}px` });
       canvas.setAttribute('role', 'img');
@@ -1103,14 +1127,42 @@ function personTable(columns, scale) {
   return table;
 }
 
-// ---- 확정 사람, 윤곽선 예시 ----
+// ---- 구도 나란히 비교 ----
+
+const compare = { scene: 0, size: 'medium' };
+function renderCompare() {
+  const button = (label, pressed, pick) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.setAttribute('aria-pressed', pressed);
+    b.addEventListener('click', () => {
+      pick();
+      renderCompare();
+    });
+    return b;
+  };
+  const group = buttons => {
+    const span = document.createElement('span');
+    span.className = 'group';
+    span.append(...buttons);
+    return span;
+  };
+  document.getElementById('compare-controls').replaceChildren(
+    group(SCENES.map((scene, i) => button(scene.title, compare.scene === i, () => (compare.scene = i)))),
+    group(Object.keys(SIZES).map(size => button(size, compare.size === size, () => (compare.size = size)))));
+  document.getElementById('compare').replaceChildren(...COMPOSITIONS.map(({ name, compose }) =>
+    figure(widget(compose, SCENES[compare.scene], compare.size, BASE), name)));
+}
+renderCompare();
+
+// ---- 확정 사람, 배경 비교 ----
 
 // 정면 사람에 윤곽선을 둘러 4배로 키운다. 윤곽선 자리로 위·양옆에 한 칸씩 둔다.
 function personCloseUp(look) {
-  const rows = PEOPLE.front.rows, g = new Grid(rows[0].length + 2, rows.length + 1), person = new Grid(g.cols, g.rows);
+  const rows = PEOPLE.front.rows, g = new Grid(rows[0].length + 2, rows.length + 1);
   g.rect(0, 0, g.cols, g.rows, color('night-wall'));
-  drawPerson(person, 'front', g.cols / 2, g.rows, look);
-  stamp(g, withOutline(person), 0, 0);
+  ink(g, t => drawPerson(t, 'front', g.cols / 2, g.rows, look));
   const canvas = g.canvas();
   Object.assign(canvas.style, { width: `${g.cols * DOT * 4}px`, height: `${g.rows * DOT * 4}px` });
   canvas.className = 'close-up';
@@ -1120,19 +1172,19 @@ function personCloseUp(look) {
 }
 
 // ponytail: 평평한 배경을 시험하려고 전역 FLAT 을 잠시 켠다. 정해지면 상수로 바꾸거나 지운다.
-function outlineWidget(scene, v) {
+function flatWidget(scene, v) {
   FLAT = true;
   try {
-    return widget(composeFront, scene, 'medium', { ...v, outline: true });
+    return widget(composeFront, scene, 'medium', v);
   } finally {
     FLAT = false;
   }
 }
 
-document.getElementById('outline').append(...[[0, 'sleep'], [1, 'walk']].flatMap(([i, cat]) => {
+document.getElementById('background').append(...[[0, 'sleep'], [1, 'walk']].flatMap(([i, cat]) => {
   const scene = SCENES[i], v = { headwear: 'headphones', cat };
-  return [figure(widget(composeFront, scene, 'medium', v), `지금 · ${scene.title}`),
-    figure(outlineWidget(scene, v), `윤곽선 · 평평한 배경 · ${scene.title}`)];
+  return [figure(widget(composeFront, scene, 'medium', v), `지금 배경 · ${scene.title}`),
+    figure(flatWidget(scene, v), `평평한 배경 · ${scene.title}`)];
 }));
 const CONFIRMED = { headwear: 'headphones', hair: hairLength(SCENES[0].date), outfit: outfitFor(SCENES[0]) };
 document.getElementById('close-up').append(
