@@ -17,23 +17,33 @@
   figure { margin: 0; }
   figcaption { margin-top: 6px; color: var(--page-muted); font-size: 0.75rem; }
   .widget { background: var(--lofi-wood-dark); }
-  .hair { display: grid; grid-template-columns: 112px repeat(5, max-content); gap: 10px 16px; align-items: center; }
-  .hair .head { color: var(--page-muted); font-size: 0.8125rem; }
-  .hair .label { font-size: 0.875rem; font-weight: 600; }
-  .hair canvas { display: block; border-radius: 6px; image-rendering: pixelated; }
+  .people { display: grid; gap: 10px 12px; align-items: center; }
+  .people .head { color: var(--page-muted); font-size: 0.75rem; }
+  .people .label { font-size: 0.875rem; font-weight: 600; }
+  .people canvas { display: block; border-radius: 6px; image-rendering: pixelated; }
 </style>
 </head>
 <body>
 <header>
   <h1>구도 비교</h1>
   <p>크리스마스 장면 둘(이브 밤, 눈 오는 낮)로 구도 다섯을 나란히 본다. 구성 요소 다섯과 크리스마스 모양(성에, 산타 모자, 빨간 목도리, 트리·선물, 호랑가시)은 모두 같다.</p>
-  <p>사람은 여성이다. 7월 1일에 단발로 자르고 이듬해 6월 말까지 머리가 길어진다. 헤드폰은 쓰거나, 목에 걸거나, 벗는다.</p>
+  <p>사람은 여성이다. 7월 1일에 단발로 자르고 이듬해 6월 말까지 머리가 길어진다. 헤드폰은 쓰거나, 목에 걸거나, 벗는다. 옷은 이벤트마다 다르고, 평소 옷은 후보 셋을 견준다.</p>
   <p>고양이는 창밖을 보거나, 자거나, 걷는다. 사람과 어울리기도 한다(쓰다듬기, 어깨 위). 사람과 고양이는 따로 그리고, 어울리는 모습은 고양이를 사람 곁에 두고 팔 하나를 더해 만든다. 위젯에서는 날짜·시각을 시드로 하나씩 고를 예정이다.</p>
 </header>
 <main>
   <section>
+    <h2>사람 · 크기와 도트 해상도</h2>
+    <p class="note">E 정면, 크리스마스 이브 밤, medium 실제 크기다. hunsu 확대를 100% 로 두고 본다. 1과 2를 견주면 크기, 1과 3을 견주면 해상도의 효과가 보인다. 3·4는 지금 사람을 두 배로 키운 뒤 앞머리, 속눈썹·눈동자 빛, 볼, 코 그늘, 입, 헤드폰 테, 목둘레, 니트 무늬를 더 그렸다.</p>
+    <div id="resolution" class="row"></div>
+  </section>
+  <section>
+    <h2>사람 · 이벤트별 옷</h2>
+    <p class="note">평소 옷 후보 셋과 이벤트 옷. 머리 길이는 그 날짜를 따른다. 산타 모자 같은 이벤트 장식은 빼고 그렸다.</p>
+    <div id="outfits"></div>
+  </section>
+  <section>
     <h2>사람 · 머리 길이</h2>
-    <p class="note">자세마다 날짜별 머리 길이. 산타 모자는 빼고 그렸다.</p>
+    <p class="note">자세마다 날짜별 머리 길이. 옷은 평소 옷(머스터드 니트)이다.</p>
     <div id="hair"></div>
   </section>
   <div id="compositions"></div>
@@ -344,7 +354,7 @@ const SIDE_NECK = ['....kkk.......', '....kKk.......', '.....k........'];
 
 // rows: 사람. 겹치는 모양(hat 산타 모자, neck 목에 건 헤드폰)은 사람과 폭이 같고, *Bottom 은 그 아랫줄이 닿는 사람 줄이다.
 // bare: 헤드폰을 벗었을 때 헤드폰 칸(k 띠, K 귀덮개)을 칠할 색
-// 사람은 여성이다. rows 의 머리는 단발이고, fall 은 머리가 길면 그 아래로 내려오는 자리(start 줄부터 cols 칸에 최대 rows 줄)다.
+// 사람은 여성이다. 옷 칸(o 기본, d 그늘, r 테두리 빛, j 바지)은 body 줄부터이고 옷(OUTFITS)이 색을 정한다. rows 의 머리는 단발이고, fall 은 머리가 길면 그 아래로 내려오는 자리(start 줄부터 cols 칸에 최대 rows 줄)다.
 const PEOPLE = {
   back: {
     rows: [
@@ -386,6 +396,7 @@ const PEOPLE = {
       '..wwwwwwwwwwwww.',
     ],
     hatBottom: 5,
+    body: 14,
     neck: ['..KK........KK..', '..KK........KK..'],
     neckBottom: 16,
     bare: { k: 'hair', K: null },
@@ -414,6 +425,8 @@ const PEOPLE = {
     ],
     hat: SIDE_HAT,
     hatBottom: 5,
+    body: 13,
+    side: true,
     neck: SIDE_NECK,
     neckBottom: 13,
     bare: { k: 'hair', K: 'skin' },
@@ -435,6 +448,8 @@ const PEOPLE = {
     ],
     hat: SIDE_HAT,
     hatBottom: 5,
+    body: 13,
+    side: true,
     neck: SIDE_NECK,
     neckBottom: 13,
     bare: { k: 'hair', K: 'skin' },
@@ -458,8 +473,8 @@ const PEOPLE = {
       '......ssss......',
       '...oooooooooor..',
       '..ooooooooooorr.',
-      '.ooooodoodoooorr',
-      '.ooooodoodoooorr',
+      '.ooooooooooooorr',
+      '.ooooooooooooorr',
       '.oooooooooooooor',
       '.oooooooooooooor',
       '.oooooooooooooor',
@@ -476,6 +491,7 @@ const PEOPLE = {
       '..wwwwwwwwwwww..',
     ],
     hatBottom: 7,
+    body: 13,
     neck: ['....KK....KK....', '....KK....KK....'],
     neckBottom: 14,
     bare: { k: 'hair', K: null },
@@ -592,10 +608,55 @@ function hairLength(date) {
   return ((month + 5) % 12 + (day - 1) / 31) / 12;
 }
 
-// look: { headwear, hair(머리 길이), hat(산타 모자, 크리스마스 모양) }
-function drawPerson(g, pose, x, bottom, { headwear, hair, hat = true }) {
+// ---- 옷 ----
+// o·d: 기본·그늘 색, rim: 테두리 빛, skirt: 바지·치마(j), paint(ch, i, k, row, p): 무늬. k 는 옷 첫 줄부터 센 줄이다.
+
+const SAEKDONG = ['pouch', 'pouch-gold', 'summer-1', 'pouch-knot', 'hanbok'];
+const collar = k => (k === 0 ? 'hanbok-collar' : null);
+// 소매: 옆모습은 팔(d) 칸, 앞·뒷모습은 줄 양 끝 두 칸
+function isSleeve(ch, i, row, p) {
+  if (p.side) return ch === 'd';
+  const cloth = [...row].map((c, n) => ('od'.includes(c) ? n : -1)).filter(n => n >= 0);
+  return i <= cloth[0] + 1 || i >= cloth[cloth.length - 1] - 1;
+}
+
+const OUTFITS = {
+  mustard: { event: '평소', name: '머스터드 니트', o: 'knit-mustard', d: 'knit-mustard-dark', rim: 'knit-mustard-rim' },
+  sage: { event: '평소', name: '세이지 니트', o: 'knit-sage', d: 'knit-sage-dark', rim: 'knit-sage-rim' },
+  coral: { event: '평소', name: '코럴 니트', o: 'knit-coral', d: 'knit-coral-dark', rim: 'knit-coral-rim' },
+  seollal: { event: '설날', name: '색동 한복', o: 'hanbok', d: 'hanbok', skirt: 'pouch',
+    paint: (ch, i, k, row, p) => collar(k) ?? (isSleeve(ch, i, row, p) ? SAEKDONG[k % SAEKDONG.length] : null) },
+  daeboreum: { event: '정월대보름', name: '쪽빛 저고리', o: 'pouch-knot', d: 'curtain-dark', skirt: 'lamp-body', paint: (ch, i, k) => collar(k) },
+  buddha: { event: '부처님오신날', name: '연분홍 가디건', o: 'spring-1', d: 'spring-2',
+    paint: (ch, i, k, row, p) => (!p.side && k % 2 === 1 && i === row.length / 2 - 1 ? 'santa-trim' : null) },
+  chuseok: { event: '추석', name: '옥색 한복', o: 'hanbok-jade', d: 'summer-2', skirt: 'hanbok', paint: (ch, i, k) => collar(k) },
+  newYear: { event: '새해 첫날', name: '남색 코트', o: 'beanie', d: 'beanie-dark',
+    paint: (ch, i, k, row, p) => (!p.side && k % 2 === 1 && i === row.length / 2 - 1 ? 'pouch-gold' : null) },
+  halloween: { event: '할로윈', name: '줄무늬 니트', o: 'pumpkin', d: 'pumpkin-dark', paint: (ch, i, k) => (k % 4 >= 2 ? 'witch' : null) },
+  christmas: { event: '크리스마스', name: '노르딕 니트', o: 'santa', d: 'santa-dark', rim: 'pouch-light',
+    paint: (ch, i, k) => (k === 3 || k === 5 ? 'santa-trim' : k === 4 ? (i % 2 ? 'summer-2' : 'santa-trim') : null) },
+};
+const OUTFIT_BY_OCCASION = {
+  'KR.seollal': 'seollal', 'KR.jeongwolDaeboreum': 'daeboreum', 'KR.buddhasBirthday': 'buddha', 'KR.chuseok': 'chuseok',
+  'KR.newYearsDay': 'newYear', 'KR.halloween': 'halloween', 'KR.christmasEve': 'christmas', 'KR.christmas': 'christmas',
+};
+// ponytail: 평소 옷은 후보 셋 중 머스터드로 둔다. 하나를 고르면 나머지 후보는 지운다.
+const outfitFor = scene => OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'mustard';
+
+function clothing(wear, p, ch, i, k, row) {
+  if (ch === 'j') return wear.skirt ?? 'curtain-dark';
+  if (ch === 'r') return wear.rim ?? 'hoodie-rim';
+  return wear.paint?.(ch, i, k, row, p) ?? wear[ch];
+}
+
+// look: { headwear, hair(머리 길이), outfit, hat(산타 모자, 크리스마스 모양) }
+function drawPerson(g, pose, x, bottom, { headwear, hair, outfit = 'mustard', hat = true }) {
   const p = PEOPLE[pose], top = bottom - p.rows.length, left = Math.round(x - p.rows[0].length / 2);
-  g.sprite(x, bottom, p.rows, headwear === 'headphones' ? SPRITE_COLORS : { ...SPRITE_COLORS, ...p.bare });
+  const colors = headwear === 'headphones' ? SPRITE_COLORS : { ...SPRITE_COLORS, ...p.bare }, wear = OUTFITS[outfit];
+  p.rows.forEach((row, j) => [...row].forEach((ch, i) => {
+    const name = j >= p.body && 'odrj'.includes(ch) ? clothing(wear, p, ch, i, j - p.body, row) : colors[ch];
+    if (name) g.set(left + i, top + j, color(name));
+  }));
   if (headwear === 'neck') g.sprite(x, top + p.neckBottom, p.neck, SPRITE_COLORS);
   // 늘어진 머리. 양 끝 칸을 한 줄 짧게 해 끝을 둥글게 하고, 가장 오른쪽 칸은 테두리 빛이다.
   const length = Math.round(hair * p.fall.rows), right = Math.max(...p.fall.cols.flat());
@@ -608,19 +669,19 @@ function drawPerson(g, pose, x, bottom, { headwear, hair, hat = true }) {
 }
 
 // spot: { pose, x, bottom, flip, arm }. arm 은 사람 어깨에서 고양이 머리로 뻗는 팔 [시작, 끝].
-function drawCat(g, spot) {
+function drawCat(g, spot, look) {
   const { rows, scarf, scarfBottom } = CATS[spot.pose];
   g.sprite(spot.x, spot.bottom, rows, spot.flip ? { ...SPRITE_COLORS, R: 'cat' } : SPRITE_COLORS, spot.flip);
   g.sprite(spot.x, spot.bottom - rows.length + scarfBottom, scarf, { S: 'santa' }, spot.flip);
-  if (spot.arm) drawArm(g, ...spot.arm);
+  if (spot.arm) drawArm(g, ...spot.arm, OUTFITS[look.outfit].o);
 }
 
 // 두 칸 두께 소매, 끝 네 칸은 손
-function drawArm(g, [ax, ay], [bx, by]) {
+function drawArm(g, [ax, ay], [bx, by], sleeve) {
   const steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
   for (let i = 0; i <= steps; i++) {
     const t = i / steps, x = Math.round(ax + (bx - ax) * t), y = Math.round(ay + (by - ay) * t);
-    const c = color(t > 0.75 ? 'skin' : 'hoodie');
+    const c = color(t > 0.75 ? 'skin' : sleeve);
     g.set(x, y, c);
     g.set(x, y + 1, c);
   }
@@ -760,7 +821,7 @@ function composeBack(g, W, H, s, v) {
   drawClock(g, x1 + 7, y0 + 4, s);
   drawWindow(g, x0, y0, x1, sill, s);
   drawCurtain(g, x0, y0 - 2, deskTop, -1);
-  if (!cat.front) drawCat(g, cat);
+  if (!cat.front) drawCat(g, cat, v);
   g.sprite(x1 - 6, sill, SPRITES.plant, SPRITE_COLORS);
   if (H > 80) drawShelf(g, x1 + 6, W - 6, Math.round(H * 0.38));
   drawDesk(g, 0, treeX - 11, deskTop, H, treeX);
@@ -769,7 +830,7 @@ function composeBack(g, W, H, s, v) {
   drawTree(g, treeX, H);
   drawGifts(g, treeX, H);
   drawPerson(g, 'back', personX, H, v);
-  if (cat.front) drawCat(g, cat);
+  if (cat.front) drawCat(g, cat, v);
 }
 
 // B. 창 아래 책상에서 창 쪽(왼쪽)을 보고 앉은 옆모습. 책상·의자·바닥이 보인다.
@@ -801,14 +862,14 @@ function composeDesk(g, W, H, s, v) {
   for (const x of [2, deskRight - 2]) g.rect(x, deskTop + 2, 1, floor - deskTop - 2, color('wood-dark'));
   g.sprite(Math.round((x0 + 9 + left) / 2) + 2, deskTop + 1, SPRITES.books, SPRITE_COLORS);
   g.sprite(left - 3, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
-  if (!cat.front) drawCat(g, cat);
+  if (!cat.front) drawCat(g, cat, v);
   // 의자: 등받이, 앉는 판, 다리 둘
   const chair = color('wood-dark');
   g.rect(left + 13, top + 12, 2, 12, chair);
   g.rect(left + 3, top + 23, 12, 1, chair);
   for (const x of [left + 4, left + 13]) g.rect(x, top + 24, 1, floor - top - 24, chair);
   drawPerson(g, 'desk', personX, floor, v);
-  if (cat.front) drawCat(g, cat);
+  if (cat.front) drawCat(g, cat, v);
 }
 
 // C. 큰 창 아래 벤치에 무릎을 세우고 앉아 창밖을 보는 옆모습
@@ -838,9 +899,9 @@ function composeSeat(g, W, H, s, v) {
   g.rect(x0 - 4, seat + 4, x1 - x0 + 8, H - seat - 4, color('wood'));
   drawTree(g, treeX, H, treeHeight);
   drawGifts(g, treeX, H);
-  if (!cat.front) drawCat(g, cat);
+  if (!cat.front) drawCat(g, cat, v);
   drawPerson(g, 'seat', personX, seat + 1, v);
-  if (cat.front) drawCat(g, cat);
+  if (cat.front) drawCat(g, cat, v);
 }
 
 // D. 집 밖에서 불 켜진 창 안을 본다. 창밖 풍경 그리기를 집 바깥에 쓰고, 방 안은 창 안에 그린다.
@@ -874,7 +935,7 @@ function composeOutside(g, W, H, s, v) {
     drawPerson(g, 'front', personX, gh + 4, v);
     // ponytail: 성에가 창턱의 고양이를 가려서 고양이를 성에 앞에 그린다. 실제로는 유리 안쪽이라 성에 뒤다.
     drawFrost(g, gw, gh);
-    drawCat(g, cat);
+    drawCat(g, cat, v);
   });
   for (let y = wy0; y < wy1; y++) {
     for (let x = wx0; x < wx1; x++) if (x < gx || x >= gx + gw || y < gy) g.set(x, y, color(y === wy0 ? 'wood-light' : 'wood'));
@@ -905,12 +966,13 @@ function composeFront(g, W, H, s, v) {
   drawCurtain(g, x0, y0 - 2, deskTop, -1);
   drawCurtain(g, x1, y0 - 2, deskTop, 1);
   drawTree(g, treeX, H, treeHeight);
-  if (!cat.front) drawCat(g, cat);
-  drawPerson(g, 'front', personX, deskTop + 3, v);
+  if (!cat.front) drawCat(g, cat, v);
+  if (v.person !== false) drawPerson(g, 'front', personX, deskTop + 3, v);
   drawDesk(g, 0, W, deskTop, H, treeX);
   drawGifts(g, treeX, deskTop + 1);
-  g.sprite(personX + 10, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
-  if (cat.front) drawCat(g, cat);
+  if (v.person !== false) g.sprite(personX + 10, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
+  if (cat.front) drawCat(g, cat, v);
+  return { personX, deskTop };
 }
 
 // ---- 페이지 ----
@@ -935,7 +997,7 @@ function widget(compose, scene, sizeKey, v) {
   const [w, h] = SIZES[sizeKey];
   const s = sceneContext(scene);
   const g = new Grid(Math.ceil(w / DOT), Math.ceil(h / DOT));
-  compose(g, g.cols, g.rows, s, { ...v, hair: hairLength(scene.date) });
+  const layout = compose(g, g.cols, g.rows, s, { ...v, hair: hairLength(scene.date), outfit: outfitFor(scene) });
   const canvas = g.canvas();
   const offset = [Math.floor((g.cols * DOT - w) / 2), Math.floor((g.rows * DOT - h) / 2)];
   const box = document.createElement('div');
@@ -947,7 +1009,7 @@ function widget(compose, scene, sizeKey, v) {
   canvas.className = 'dots';
   Object.assign(canvas.style, { width: `${g.cols * DOT}px`, height: `${g.rows * DOT}px`, left: `${-offset[0]}px`, top: `${-offset[1]}px` });
   box.append(canvas);
-  return box;
+  return { box, layout, offset };
 }
 
 function figure(box, caption) {
@@ -962,38 +1024,117 @@ document.getElementById('compositions').append(...COMPOSITIONS.map(({ name, note
   section.className = 'composition';
   section.innerHTML = `<h2>${name}</h2><p class="note">${note}</p><div class="row sizes"></div><div class="row variations"></div>`;
   section.querySelector('.sizes').append(...Object.keys(SIZES).map(size =>
-    figure(widget(compose, SCENES[0], size, BASE), `${size} · ${SCENES[0].title} · ${HEADWEAR[BASE.headwear]} · ${CAT_STATES[BASE.cat]}`)));
+    figure(widget(compose, SCENES[0], size, BASE).box, `${size} · ${SCENES[0].title} · ${HEADWEAR[BASE.headwear]} · ${CAT_STATES[BASE.cat]}`)));
   section.querySelector('.variations').append(...VARIATIONS.map(v =>
-    figure(widget(compose, SCENES[v.scene], 'medium', v), `${SCENES[v.scene].title} · ${HEADWEAR[v.headwear]} · ${CAT_STATES[v.cat]}`)));
+    figure(widget(compose, SCENES[v.scene], 'medium', v).box, `${SCENES[v.scene].title} · ${HEADWEAR[v.headwear]} · ${CAT_STATES[v.cat]}`)));
   return section;
 }));
 
-// 사람 × 머리 길이. 크리스마스가 아닌 날도 있어 산타 모자 없이 사람만 그린다.
-const HAIR_DATES = ['7월 1일', '9월 15일', '12월 24일', '3월 15일', '6월 30일'];
-const HAIR_POSES = [['back', 'A 뒷모습'], ['desk', 'B 옆모습'], ['seat', 'C 창가 옆모습'], ['front', 'D·E 정면']];
+// ---- 사람만 보는 표 ----
+// 크리스마스가 아닌 날도 있어 산타 모자 없이 그린다. 모자·머리핀 같은 이벤트 장식은 구도를 고른 뒤 자세에 맞춰 그린다.
 
-function hairTable() {
+const POSES = [['back', 'A 뒷모습'], ['desk', 'B 옆모습'], ['seat', 'C 창가 옆모습'], ['front', 'D·E 정면']];
+const HAIR_DATES = ['7월 1일', '9월 15일', '12월 24일', '3월 15일', '6월 30일'];
+const OUTFIT_DATES = {
+  mustard: '10월 25일', sage: '10월 25일', coral: '10월 25일', seollal: '2월 17일', daeboreum: '3월 3일',
+  buddha: '5월 24일', chuseok: '9월 25일', newYear: '1월 1일', halloween: '10월 31일', christmas: '12월 25일',
+};
+
+// columns: [{ head, look }]. 자세 × 열로 사람을 scale 배 키워 보인다.
+function personTable(columns, scale) {
   const table = document.createElement('div');
-  table.className = 'hair';
-  table.insertAdjacentHTML('beforeend', `<span></span>${HAIR_DATES.map(date => `<span class="head">${date}</span>`).join('')}`);
-  for (const [pose, label] of HAIR_POSES) {
+  table.className = 'people';
+  table.style.gridTemplateColumns = `112px repeat(${columns.length}, max-content)`;
+  table.insertAdjacentHTML('beforeend', `<span></span>${columns.map(({ head }) => `<span class="head">${head}</span>`).join('')}`);
+  for (const [pose, label] of POSES) {
     table.insertAdjacentHTML('beforeend', `<span class="label">${label}</span>`);
     const rows = PEOPLE[pose].rows;
-    for (const date of HAIR_DATES) {
-      const g = new Grid(rows[0].length + 6, rows.length + 2);
+    for (const { head, look } of columns) {
+      const g = new Grid(rows[0].length + 4, rows.length + 2);
       g.rect(0, 0, g.cols, g.rows, color('night-wall'));
-      drawPerson(g, pose, g.cols / 2, g.rows, { headwear: 'headphones', hair: hairLength(date), hat: false });
+      drawPerson(g, pose, g.cols / 2, g.rows, { headwear: 'headphones', hat: false, ...look });
       const canvas = g.canvas();
-      Object.assign(canvas.style, { width: `${g.cols * 4}px`, height: `${g.rows * 4}px` });
+      Object.assign(canvas.style, { width: `${g.cols * scale}px`, height: `${g.rows * scale}px` });
       canvas.setAttribute('role', 'img');
-      canvas.setAttribute('aria-label', `${label} ${date} 머리`);
+      canvas.setAttribute('aria-label', `${label} ${head.replace('<br>', ' ')}`);
       table.append(canvas);
     }
   }
   return table;
 }
 
-document.getElementById('hair').append(hairTable());
+// ---- 사람 크기·도트 해상도 시험 ----
+// E 정면 위젯에서 사람만 따로 그려 얹는다. cells 2 는 지금 사람을 두 배로 키운 뒤 디테일을 더 그린 것이다.
+
+const RESOLUTION_TESTS = [
+  { label: '1 지금', cells: 1, dot: 3 },
+  { label: '2 크게만', cells: 1, dot: 6 },
+  { label: '3 촘촘하게만', cells: 2, dot: 1.5 },
+  { label: '4 크고 촘촘하게 (장면과 같은 도트)', cells: 2, dot: 3 },
+];
+
+function upscale(src) {
+  const out = new Grid(src.cols * 2, src.rows * 2);
+  src.cells.forEach((c, n) => out.rect((n % src.cols) * 2, Math.floor(n / src.cols) * 2, 2, 2, c));
+  return out;
+}
+
+// 두 배 격자(32×44칸)에서만 그릴 수 있는 디테일
+function fineDetails(g, look) {
+  const set = (x, y, name) => g.set(x, y, color(name));
+  for (const x of [9, 12, 13, 17, 20, 21]) set(x, 14, 'hair');
+  set(9, 15, 'hair');
+  set(22, 15, 'hair');
+  set(11, 16, 'star');
+  set(21, 16, 'star');
+  for (const x of [8, 9, 22, 23]) set(x, 19, 'spring-1');
+  // 코 그늘은 불빛(오른쪽) 반대쪽
+  set(15, 19, 'skin-dark');
+  set(15, 21, 'pouch');
+  set(16, 21, 'pouch');
+  for (let x = 12; x < 20; x++) set(x, 24, 'skin-dark');
+  if (look.headwear === 'headphones') {
+    for (const [x0, x1] of [[2, 5], [26, 29]]) {
+      for (let y = 14; y < 20; y++) for (const x of [x0, x1]) set(x, y, 'headphone');
+      for (let x = x0; x <= x1; x++) for (const y of [14, 19]) set(x, y, 'headphone');
+    }
+  }
+  for (let x = 8; x < 24; x += 2) set(x, 27, OUTFITS[look.outfit].d);
+  if (look.outfit === 'christmas') for (const y of [34, 35]) for (let x = 2; x < 30; x++) set(x, y, (x + y) % 2 ? 'summer-2' : 'santa-trim');
+}
+
+function resolutionWidget({ cells, dot }) {
+  const scene = SCENES[0], look = { headwear: 'headphones', cat: 'sleep', hair: hairLength(scene.date), outfit: outfitFor(scene) };
+  const { box, layout: { personX, deskTop }, offset } = widget(composeFront, scene, 'medium', { ...look, person: false });
+  const rows = PEOPLE.front.rows;
+  let person = new Grid(rows[0].length, rows.length);
+  drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
+  if (cells === 2) {
+    person = upscale(person);
+    fineDetails(person, look);
+  }
+  // 지금 사람과 가운데·아래를 맞춘다. 아래 세 줄(지금 크기 기준)은 책상 뒤에 가려진다.
+  const width = person.cols * dot, height = person.rows * dot, scale = width / (rows[0].length * DOT);
+  const clip = document.createElement('div');
+  Object.assign(clip.style, { position: 'absolute', left: 0, top: 0, width: '100%', height: `${deskTop * DOT - offset[1]}px`, overflow: 'hidden' });
+  const canvas = person.canvas();
+  canvas.className = 'dots';
+  Object.assign(canvas.style, {
+    width: `${width}px`, height: `${height}px`,
+    left: `${personX * DOT - width / 2 - offset[0]}px`, top: `${(deskTop + 3 * scale) * DOT - height - offset[1]}px`,
+  });
+  clip.append(canvas);
+  box.append(clip);
+  return box;
+}
+
+document.getElementById('resolution').append(...RESOLUTION_TESTS.map(test => {
+  const size = test.cells * PEOPLE.front.rows[0].length * test.dot;
+  return figure(resolutionWidget(test), `${test.label} · 도트 ${test.dot}pt · ${16 * test.cells}×${22 * test.cells}칸 · 사람 폭 ${size}pt`);
+}));
+document.getElementById('outfits').append(personTable(Object.entries(OUTFITS).map(([id, wear]) =>
+  ({ head: `${wear.event}<br>${wear.name}`, look: { outfit: id, hair: hairLength(OUTFIT_DATES[id]) } })), 3));
+document.getElementById('hair').append(personTable(HAIR_DATES.map(date => ({ head: date, look: { hair: hairLength(date) } })), 4));
 </script>
 </body>
 </html>

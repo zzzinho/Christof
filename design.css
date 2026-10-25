@@ -234,6 +234,20 @@
   --lofi-clock-rim: #5A4440;
   --lofi-clock-face: #B8AD98;
   --lofi-clock-hand: #2A2430;
+
+  /* lofi 사람 옷 (07-composition). 평소 옷 후보 셋과 크리스마스 니트 그늘, 얼굴 그늘.
+     이벤트 옷은 위 장식 색(한복, 산타, 호박 등)을 함께 쓴다. */
+  --lofi-knit-mustard: #B8904E;
+  --lofi-knit-mustard-dark: #94703C;
+  --lofi-knit-mustard-rim: #D9B274;
+  --lofi-knit-sage: #7F9C82;
+  --lofi-knit-sage-dark: #637F68;
+  --lofi-knit-sage-rim: #A8BFA0;
+  --lofi-knit-coral: #C27E6C;
+  --lofi-knit-coral-dark: #9E6254;
+  --lofi-knit-coral-rim: #DDA08A;
+  --lofi-santa-dark: #86393E;
+  --lofi-skin-dark: #94664F;
 }
 
 body {
