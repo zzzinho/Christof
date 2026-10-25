@@ -3,31 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>구도 A 뒷모습</title>
+<title>구도 비교</title>
 <link rel="stylesheet" href="design.css">
 <style>
   header { padding: 32px 24px 8px; }
   header h1 { margin: 0 0 6px; font-size: 1.5rem; }
-  header p { margin: 0; color: var(--page-muted); font-size: 0.875rem; }
-  #scenes { display: grid; gap: 40px; padding: 24px 24px 64px; }
-  .scene h2 { margin: 0 0 2px; font-size: 1rem; }
-  .scene .meta { margin: 0 0 12px; color: var(--page-muted); font-size: 0.8125rem; }
-  .sizes { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--page-gap); }
+  header p { margin: 0 0 4px; color: var(--page-muted); font-size: 0.875rem; }
+  main { display: grid; gap: 48px; padding: 24px 24px 64px; }
+  main > section > h2, .composition h2 { margin: 0 0 4px; font-size: 1.125rem; }
+  .note { margin: 0 0 12px; color: var(--page-muted); font-size: 0.8125rem; }
+  #compositions { display: grid; gap: 48px; }
+  .row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--page-gap); margin-bottom: 20px; }
+  figure { margin: 0; }
+  figcaption { margin-top: 6px; color: var(--page-muted); font-size: 0.75rem; }
   .widget { background: var(--lofi-wood-dark); }
+  .hair { display: grid; grid-template-columns: 112px repeat(5, max-content); gap: 10px 16px; align-items: center; }
+  .hair .head { color: var(--page-muted); font-size: 0.8125rem; }
+  .hair .label { font-size: 0.875rem; font-weight: 600; }
+  .hair canvas { display: block; border-radius: 6px; image-rendering: pixelated; }
 </style>
 </head>
 <body>
 <header>
-  <h1>구도 A 뒷모습</h1>
-  <p>책상 앞에 앉은 사람의 뒷모습, 창은 뒤쪽 배경. 지금 06-lofi 구도라 비교 기준이다. 크리스마스 장면 둘로 구도만 바꿔 본다. 구성 요소 다섯과 크리스마스 모양(성에, 산타 모자, 빨간 목도리, 트리·선물, 호랑가시)은 07 비교안 모두 같다.</p>
+  <h1>구도 비교</h1>
+  <p>크리스마스 장면 둘(이브 밤, 눈 오는 낮)로 구도 다섯을 나란히 본다. 구성 요소 다섯과 크리스마스 모양(성에, 산타 모자, 빨간 목도리, 트리·선물, 호랑가시)은 모두 같다.</p>
+  <p>사람은 여성이다. 7월 1일에 단발로 자르고 이듬해 6월 말까지 머리가 길어진다. 헤드폰은 쓰거나, 목에 걸거나, 벗는다.</p>
+  <p>고양이는 창밖을 보거나, 자거나, 걷는다. 사람과 어울리기도 한다(쓰다듬기, 어깨 위). 사람과 고양이는 따로 그리고, 어울리는 모습은 고양이를 사람 곁에 두고 팔 하나를 더해 만든다. 위젯에서는 날짜·시각을 시드로 하나씩 고를 예정이다.</p>
 </header>
-<main id="scenes"></main>
+<main>
+  <section>
+    <h2>사람 · 머리 길이</h2>
+    <p class="note">자세마다 날짜별 머리 길이. 산타 모자는 빼고 그렸다.</p>
+    <div id="hair"></div>
+  </section>
+  <div id="compositions"></div>
+</main>
 <script>
-// 07-composition-a~e 는 이 스크립트를 똑같이 담고 COMPOSITION 한 줄만 다르다. hunsu 가 페이지와 design.css 만 서빙해서 따로 둔 .js 를 불러오지 못한다.
-// ponytail: 06-lofi.html 그리기 코드에서 크리스마스 모양만 남겨 복사했다. 구도를 고르면 06 에 옮기고 07 비교안은 지운다.
+// 구도 비교 페이지. hunsu 가 페이지와 design.css 만 서빙해서 스크립트를 페이지 안에 담는다.
+// ponytail: 06-lofi.html 그리기 코드에서 크리스마스 모양만 남겨 복사했다. 구도를 고르면 06 에 옮기고 이 페이지는 지운다.
 
 const DOT = 3;
-const COMPOSITION = 'back';
 
 // 06-lofi 의 크리스마스 장면 둘. 둘 다 방 불을 켠 때(night, grey)라 불 끈 색은 두지 않았다.
 const SCENES = [
@@ -117,9 +132,10 @@ class Grid {
       }
     }
   }
-  sprite(x, bottom, rows, map) {
+  // flip: 좌우를 뒤집어 그린다(고양이가 반대쪽을 보게).
+  sprite(x, bottom, rows, map, flip = false) {
     const left = Math.round(x - rows[0].length / 2), top = bottom - rows.length;
-    rows.forEach((row, j) => [...row].forEach((ch, i) => { if (map[ch]) this.set(left + i, top + j, color(map[ch])); }));
+    rows.forEach((row, j) => (flip ? [...row].reverse() : [...row]).forEach((ch, i) => { if (map[ch]) this.set(left + i, top + j, color(map[ch])); }));
   }
   canvas() {
     const canvas = document.createElement('canvas');
@@ -296,12 +312,13 @@ function drawFrost(g, w, h) {
   }
 }
 
+
 // ---- 스프라이트. 불빛(트리)이 오른쪽에 있어 오른쪽 가장자리에 테두리 빛이 진다 ----
 
 // 옆모습 머리(왼쪽을 본다). 책상 자세와 창가 자세가 함께 쓴다.
 const SIDE_HEAD = [
-  '.........hh...',
-  '........hhhh..',
+  '..............',
+  '..............',
   '.....hhhhhhH..',
   '...hhhhhkhhhH.',
   '..hhhhhhkhhhH.',
@@ -314,14 +331,26 @@ const SIDE_HEAD = [
   '.....sss......',
   '.....sss......',
 ];
+const SIDE_HAT = [
+  '...........ww.',
+  '.........RRww.',
+  '......RRRRR...',
+  '.....RRRRRRR..',
+  '....RRRRRRRRR.',
+  '..wwwwwwwwwww.',
+  '..wwwwwwwwwww.',
+];
+const SIDE_NECK = ['....kkk.......', '....kKk.......', '.....k........'];
 
-// rows: 사람, hat: 산타 모자(사람과 폭이 같다), hatBottom: 모자 아랫줄이 닿는 사람 줄
+// rows: 사람. 겹치는 모양(hat 산타 모자, neck 목에 건 헤드폰)은 사람과 폭이 같고, *Bottom 은 그 아랫줄이 닿는 사람 줄이다.
+// bare: 헤드폰을 벗었을 때 헤드폰 칸(k 띠, K 귀덮개)을 칠할 색
+// 사람은 여성이다. rows 의 머리는 단발이고, fall 은 머리가 길면 그 아래로 내려오는 자리(start 줄부터 cols 칸에 최대 rows 줄)다.
 const PEOPLE = {
   back: {
     rows: [
-      '......hhh.......',
-      '.....hhhhh......',
-      '......hhhH......',
+      '................',
+      '................',
+      '.....hhhhhH.....',
       '....kkkkkkkk....',
       '...khhhhhhhhk...',
       '..khhhhhhhhhHk..',
@@ -357,6 +386,10 @@ const PEOPLE = {
       '..wwwwwwwwwwwww.',
     ],
     hatBottom: 5,
+    neck: ['..KK........KK..', '..KK........KK..'],
+    neckBottom: 16,
+    bare: { k: 'hair', K: null },
+    fall: { start: 13, cols: [[4, 11]], rows: 10 },
   },
   // 책상 앞 의자에 앉아 왼쪽 책상에 팔을 올렸다. 18번 줄(손 아래)이 책상 윗면이다.
   desk: {
@@ -379,16 +412,12 @@ const PEOPLE = {
       '.jjj..........',
       'ffff..........',
     ],
-    hat: [
-      '...........ww.',
-      '.........RRww.',
-      '......RRRRR...',
-      '.....RRRRRRR..',
-      '....RRRRRRRRR.',
-      '..wwwwwwwwwww.',
-      '..wwwwwwwwwww.',
-    ],
+    hat: SIDE_HAT,
     hatBottom: 5,
+    neck: SIDE_NECK,
+    neckBottom: 13,
+    bare: { k: 'hair', K: 'skin' },
+    fall: { start: 10, cols: [[8, 11]], rows: 9 },
   },
   // 창가 벤치에 무릎을 세우고 앉아 두 손으로 머그를 든다.
   seat: {
@@ -404,15 +433,19 @@ const PEOPLE = {
       '..jjj...jjjjj.',
       '.ffff...jjjjj.',
     ],
-    hat: null,
+    hat: SIDE_HAT,
     hatBottom: 5,
+    neck: SIDE_NECK,
+    neckBottom: 13,
+    bare: { k: 'hair', K: 'skin' },
+    fall: { start: 10, cols: [[8, 11]], rows: 9 },
   },
   // 이쪽을 본다. 눈은 감은 듯한 점 하나씩.
   front: {
     rows: [
-      '......hhhh......',
+      '................',
+      '................',
       '.....hhhhhh.....',
-      '......hhhh......',
       '....kkkkkkkk....',
       '...khhhhhhhhk...',
       '..khhhhhhhhhhk..',
@@ -443,11 +476,15 @@ const PEOPLE = {
       '..wwwwwwwwwwww..',
     ],
     hatBottom: 7,
+    neck: ['....KK....KK....', '....KK....KK....'],
+    neckBottom: 14,
+    bare: { k: 'hair', K: null },
+    fall: { start: 12, cols: [[2, 3], [12, 13]], rows: 8 },
   },
 };
-PEOPLE.seat.hat = PEOPLE.desk.hat;
 
-// rows: 고양이, scarf: 빨간 목도리(고양이와 폭이 같다), scarfBottom: 목도리 아랫줄이 닿는 고양이 줄
+// rows: 고양이, scarf: 빨간 목도리(고양이와 폭이 같다), scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
+// side, walk 는 오른쪽을 본다. 뒤집어 왼쪽을 보게 그리면 테두리 빛(R)이 불빛 반대쪽에 서므로 바탕색으로 칠한다.
 const CATS = {
   back: {
     rows: [
@@ -484,6 +521,39 @@ const CATS = {
     scarf: ['..SSSSS...', '......S...', '......S...'],
     scarfBottom: 8,
   },
+  side: {
+    rows: [
+      '.......c.R.',
+      '.......cccR',
+      '.......ccgR',
+      '.......cccR',
+      '......cccR.',
+      '....ccccR..',
+      '...cccccR..',
+      '..ccccccR..',
+      '..ccccccR..',
+      '.cccccccR..',
+      'c.cccccccR.',
+      'cccccccccR.',
+    ],
+    scarf: ['......SSSS.', '......S....'],
+    scarfBottom: 5,
+  },
+  walk: {
+    rows: [
+      'c.........c.R.',
+      'c.........cccR',
+      'c.........ccgR',
+      '.c.......ccccR',
+      '.cccccccccccR.',
+      '..ccccccccccR.',
+      '..cccccccccR..',
+      '..c.c....c.R..',
+      '..c.c....c.R..',
+    ],
+    scarf: ['.........SS...', '.........S....'],
+    scarfBottom: 5,
+  },
   curled: {
     rows: [
       '.c.c........',
@@ -510,18 +580,50 @@ const SPRITE_COLORS = {
   1: 'book-1', 2: 'book-2', 3: 'book-3', l: 'plant', p: 'pot',
 };
 
-// ---- 구성 요소 ----
+// ---- 사람·고양이 ----
+// 사람과 고양이는 따로 그린다. 어울리는 모습(쓰다듬기, 어깨 위)은 구도가 고양이를 사람 곁에 두고 팔 하나를 더해 만든다.
 
-function drawPerson(g, pose, x, bottom) {
-  const { rows, hat, hatBottom } = PEOPLE[pose];
-  g.sprite(x, bottom, rows, SPRITE_COLORS);
-  g.sprite(x, bottom - rows.length + hatBottom, hat, { R: 'santa', w: 'santa-trim' });
+const HEADWEAR = { headphones: '헤드폰', neck: '목에 건 헤드폰', bare: '헤드폰 없음' };
+const CAT_STATES = { window: '창밖 보는 고양이', sleep: '자는 고양이', walk: '걷는 고양이', pet: '고양이 쓰다듬기', shoulder: '어깨 위 고양이' };
+
+// 머리 길이 0~1. 7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다.
+function hairLength(date) {
+  const [month, day] = date.match(/\d+/g).map(Number);
+  return ((month + 5) % 12 + (day - 1) / 31) / 12;
 }
 
-function drawCat(g, pose, x, bottom) {
-  const { rows, scarf, scarfBottom } = CATS[pose];
-  g.sprite(x, bottom, rows, SPRITE_COLORS);
-  g.sprite(x, bottom - rows.length + scarfBottom, scarf, { S: 'santa' });
+// look: { headwear, hair(머리 길이), hat(산타 모자, 크리스마스 모양) }
+function drawPerson(g, pose, x, bottom, { headwear, hair, hat = true }) {
+  const p = PEOPLE[pose], top = bottom - p.rows.length, left = Math.round(x - p.rows[0].length / 2);
+  g.sprite(x, bottom, p.rows, headwear === 'headphones' ? SPRITE_COLORS : { ...SPRITE_COLORS, ...p.bare });
+  if (headwear === 'neck') g.sprite(x, top + p.neckBottom, p.neck, SPRITE_COLORS);
+  // 늘어진 머리. 양 끝 칸을 한 줄 짧게 해 끝을 둥글게 하고, 가장 오른쪽 칸은 테두리 빛이다.
+  const length = Math.round(hair * p.fall.rows), right = Math.max(...p.fall.cols.flat());
+  for (const [i0, i1] of p.fall.cols) {
+    for (let i = i0; i <= i1; i++) {
+      for (let j = 0; j < length - (i === i0 || i === i1 ? 1 : 0); j++) g.set(left + i, top + p.fall.start + j, color(i === right ? 'hair-rim' : 'hair'));
+    }
+  }
+  if (hat) g.sprite(x, top + p.hatBottom, p.hat, { R: 'santa', w: 'santa-trim' });
+}
+
+// spot: { pose, x, bottom, flip, arm }. arm 은 사람 어깨에서 고양이 머리로 뻗는 팔 [시작, 끝].
+function drawCat(g, spot) {
+  const { rows, scarf, scarfBottom } = CATS[spot.pose];
+  g.sprite(spot.x, spot.bottom, rows, spot.flip ? { ...SPRITE_COLORS, R: 'cat' } : SPRITE_COLORS, spot.flip);
+  g.sprite(spot.x, spot.bottom - rows.length + scarfBottom, scarf, { S: 'santa' }, spot.flip);
+  if (spot.arm) drawArm(g, ...spot.arm);
+}
+
+// 두 칸 두께 소매, 끝 네 칸은 손
+function drawArm(g, [ax, ay], [bx, by]) {
+  const steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 2);
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps, x = Math.round(ax + (bx - ax) * t), y = Math.round(ay + (by - ay) * t);
+    const c = color(t > 0.75 ? 'skin' : 'hoodie');
+    g.set(x, y, c);
+    g.set(x, y + 1, c);
+  }
 }
 
 // 불빛에서 멀어질수록 차가운 색. 거친 질감은 성긴 어두운 점.
@@ -636,19 +738,29 @@ function drawClock(g, cx, cy, s) {
   g.sprite(cx, cy - 5, ['LL.LL', '.LrL.'], { L: 'summer-2', r: 'santa' });
 }
 
+
 // ---- 구도 ----
 // 크기마다 자리를 따로 정한다. wide: medium, big: large.
+// 고양이 자리는 상태마다 하나다. front 가 참이면 사람 뒤가 아니라 앞에 그린다.
 
 // A. 책상 앞에 앉은 뒷모습, 창은 뒤쪽 배경 (06-lofi 와 같다)
-function composeBack(g, W, H, s) {
+function composeBack(g, W, H, s, v) {
   const wide = W > H, deskTop = H - 7, sill = deskTop - 2;
   const x0 = Math.round(W * (wide ? 0.06 : 0.04)), x1 = x0 + Math.round(W * (wide ? 0.5 : 0.6));
   const y0 = Math.round(H * 0.1), treeX = W - 9, personX = Math.round(W * (wide ? 0.72 : 0.6));
+  const top = H - PEOPLE.back.rows.length;
+  const cat = {
+    window: { pose: 'back', x: x0 + 9, bottom: sill },
+    sleep: { pose: 'curled', x: x0 + 10, bottom: sill },
+    walk: { pose: 'walk', x: x0 + 12, bottom: sill },
+    pet: { pose: 'side', x: personX - 15, bottom: deskTop + 1, front: true, arm: [[personX - 6, top + 15], [personX - 12, deskTop - 10]] },
+    shoulder: { pose: 'curled', x: personX, bottom: top + 16, front: true },
+  }[v.cat];
   drawWall(g, W, H, s, [treeX, H - 20]);
   drawClock(g, x1 + 7, y0 + 4, s);
   drawWindow(g, x0, y0, x1, sill, s);
   drawCurtain(g, x0, y0 - 2, deskTop, -1);
-  drawCat(g, 'back', x0 + 9, sill);
+  if (!cat.front) drawCat(g, cat);
   g.sprite(x1 - 6, sill, SPRITES.plant, SPRITE_COLORS);
   if (H > 80) drawShelf(g, x1 + 6, W - 6, Math.round(H * 0.38));
   drawDesk(g, 0, treeX - 11, deskTop, H, treeX);
@@ -656,16 +768,25 @@ function composeBack(g, W, H, s) {
   g.sprite(personX - pt(24), deskTop + 1, SPRITES.mug, SPRITE_COLORS);
   drawTree(g, treeX, H);
   drawGifts(g, treeX, H);
-  drawPerson(g, 'back', personX, H);
+  drawPerson(g, 'back', personX, H, v);
+  if (cat.front) drawCat(g, cat);
 }
 
 // B. 창 아래 책상에서 창 쪽(왼쪽)을 보고 앉은 옆모습. 책상·의자·바닥이 보인다.
-function composeDesk(g, W, H, s) {
+function composeDesk(g, W, H, s, v) {
   const wide = W > H, big = H > 80, rows = PEOPLE.desk.rows;
   const floor = H - (big ? 8 : 5), top = floor - rows.length, deskTop = top + 18;
   const personX = Math.round(W * (wide ? 0.62 : big ? 0.56 : 0.58)), left = personX - rows[0].length / 2;
   const x0 = Math.round(W * 0.05), x1 = left - (wide || big ? 4 : 2), y0 = Math.round(H * 0.1);
   const treeX = W - (W > 80 ? 10 : 7), treeHeight = W > 80 ? 40 : 30;
+  // 쓰다듬기: 책상 위 손 바로 앞에 사람을 보고 앉는다.
+  const cat = {
+    window: { pose: 'back', x: x0 + 9, bottom: deskTop },
+    sleep: { pose: 'curled', x: x0 + 10, bottom: deskTop },
+    walk: { pose: 'walk', x: Math.round(left / 2) + 4, bottom: floor + 1 },
+    pet: { pose: 'side', x: left - 4, bottom: deskTop },
+    shoulder: { pose: 'curled', x: personX + 6, bottom: top + 14, flip: true, front: true },
+  }[v.cat];
   drawWall(g, W, H, s, [treeX, floor - 20]);
   drawFloor(g, floor, W, H);
   drawClock(g, Math.round((x1 + treeX - 10) / 2), y0 + 5, s);
@@ -678,22 +799,32 @@ function composeDesk(g, W, H, s) {
   const deskRight = left + 4;
   drawDesk(g, 0, deskRight, deskTop, deskTop + 2, treeX);
   for (const x of [2, deskRight - 2]) g.rect(x, deskTop + 2, 1, floor - deskTop - 2, color('wood-dark'));
-  drawCat(g, 'back', x0 + 9, deskTop);
   g.sprite(Math.round((x0 + 9 + left) / 2) + 2, deskTop + 1, SPRITES.books, SPRITE_COLORS);
   g.sprite(left - 3, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
+  if (!cat.front) drawCat(g, cat);
   // 의자: 등받이, 앉는 판, 다리 둘
   const chair = color('wood-dark');
   g.rect(left + 13, top + 12, 2, 12, chair);
   g.rect(left + 3, top + 23, 12, 1, chair);
   for (const x of [left + 4, left + 13]) g.rect(x, top + 24, 1, floor - top - 24, chair);
-  drawPerson(g, 'desk', personX, floor);
+  drawPerson(g, 'desk', personX, floor, v);
+  if (cat.front) drawCat(g, cat);
 }
 
-// C. 큰 창 아래 벤치에 무릎을 세우고 앉은 옆모습. 사람은 창을 등지지 않고 창밖을 본다.
-function composeSeat(g, W, H, s) {
+// C. 큰 창 아래 벤치에 무릎을 세우고 앉아 창밖을 보는 옆모습
+function composeSeat(g, W, H, s, v) {
   const big = H > 80, seat = H - (big ? 20 : 13);
   const x0 = Math.round(W * 0.04), x1 = Math.round(W * (W > 80 ? 0.74 : 0.69)), y0 = Math.round(H * (big ? 0.3 : 0.08));
-  const treeX = W - (W > 80 ? 11 : 7), treeHeight = W > 80 ? 40 : 30, personX = x1 - 10;
+  const treeX = W - (W > 80 ? 11 : 7), treeHeight = W > 80 ? 40 : 30;
+  const personX = x1 - 10, left = personX - 7, top = seat + 1 - PEOPLE.seat.rows.length;
+  // 쓰다듬기 대신 발끝에 붙어 앉아 사람을 올려다본다. 두 손은 머그를 들고 있다.
+  const cat = {
+    window: { pose: 'back', x: personX - 18, bottom: seat + 1 },
+    sleep: { pose: 'curled', x: personX - 13, bottom: seat + 1 },
+    walk: { pose: 'walk', x: personX - 22, bottom: seat + 1 },
+    pet: { pose: 'side', x: left - 4, bottom: seat + 1 },
+    shoulder: { pose: 'curled', x: personX + 6, bottom: top + 14, flip: true, front: true },
+  }[v.cat];
   drawWall(g, W, H, s, [treeX, H - 20]);
   drawClock(g, Math.round((x1 + 4 + W) / 2), big ? y0 + 6 : 8, s);
   if (big) drawShelf(g, x0 + 6, x1 - 6, y0 - 10);
@@ -707,12 +838,13 @@ function composeSeat(g, W, H, s) {
   g.rect(x0 - 4, seat + 4, x1 - x0 + 8, H - seat - 4, color('wood'));
   drawTree(g, treeX, H, treeHeight);
   drawGifts(g, treeX, H);
-  drawCat(g, 'curled', personX - 13, seat + 1);
-  drawPerson(g, 'seat', personX, seat + 1);
+  if (!cat.front) drawCat(g, cat);
+  drawPerson(g, 'seat', personX, seat + 1, v);
+  if (cat.front) drawCat(g, cat);
 }
 
 // D. 집 밖에서 불 켜진 창 안을 본다. 창밖 풍경 그리기를 집 바깥에 쓰고, 방 안은 창 안에 그린다.
-function composeOutside(g, W, H, s) {
+function composeOutside(g, W, H, s, v) {
   const big = H > 80;
   const { ground, hx0, hy0, wx0, wx1, wy0, wy1, treeHeight } = W > 80
     ? (big ? { ground: 116, hx0: 16, hy0: 54, wx0: 30, wx1: 106, wy0: 66, wy1: 106, treeHeight: 34 }
@@ -724,16 +856,25 @@ function composeOutside(g, W, H, s) {
   for (let y = hy0; y < ground; y++) g.rect(hx0, y, W - hx0, 1, color((y - hy0) % 3 === 2 ? 'wood-dark' : 'wood'));
   g.rect(hx0 - 3, hy0 - 3, W - hx0 + 3, 3, color('lamp-body'));
   if (s.snowCovered) g.rect(hx0 - 3, hy0 - 4, W - hx0 + 3, 2, pc(s, 'snow'));
-  // 창 안: 방 벽, 시계, 트리, 사람, 고양이. 사람 허리 아래는 창 아래 끝에서 잘린다.
+  // 창 안: 방 벽, 시계, 트리, 사람, 고양이. 사람 허리 아래는 창 아래 끝에서 잘리고, 고양이는 안쪽 창턱에 있다.
   const gx = wx0 + 2, gy = wy0 + 2, gw = wx1 - wx0 - 4, gh = wy1 - gy;
   g.within(gx, gy, gw, gh, () => {
-    const treeX = gw - Math.round(treeHeight / 3);
+    const treeX = gw - Math.round(treeHeight / 3), personX = Math.round(gw * 0.5), top = gh + 4 - PEOPLE.front.rows.length;
+    // 고양이는 트리 앞 창턱에 있다. 왼쪽은 불빛에서 멀어 어두운 고양이가 벽에 묻힌다. 창밖을 보는 고양이는 이쪽을 본다.
+    const cat = {
+      window: { pose: 'front', x: treeX, bottom: gh },
+      sleep: { pose: 'curled', x: treeX, bottom: gh },
+      walk: { pose: 'walk', x: treeX - 2, bottom: gh, flip: true },
+      pet: { pose: 'side', x: personX + 14, bottom: gh, flip: true, arm: [[personX + 5, top + 15], [personX + 10, gh - 10]] },
+      shoulder: { pose: 'curled', x: personX + 9, bottom: top + 14 },
+    }[v.cat];
     drawWall(g, gw, gh, s, [treeX, gh - 10]);
     drawClock(g, big ? 10 : 8, big ? 10 : 8, s);
     drawTree(g, treeX, gh + 1, treeHeight);
-    drawPerson(g, 'front', Math.round(gw * 0.5), gh + 4);
-    drawCat(g, 'front', big ? 14 : 6 + (W > 80 ? 5 : 0), gh);
+    drawPerson(g, 'front', personX, gh + 4, v);
+    // ponytail: 성에가 창턱의 고양이를 가려서 고양이를 성에 앞에 그린다. 실제로는 유리 안쪽이라 성에 뒤다.
     drawFrost(g, gw, gh);
+    drawCat(g, cat);
   });
   for (let y = wy0; y < wy1; y++) {
     for (let x = wx0; x < wx1; x++) if (x < gx || x >= gx + gw || y < gy) g.set(x, y, color(y === wy0 ? 'wood-light' : 'wood'));
@@ -744,10 +885,19 @@ function composeOutside(g, W, H, s) {
 }
 
 // E. 책상 너머 사람이 이쪽을 본다. 창은 사람 뒤에 있다.
-function composeFront(g, W, H, s) {
+function composeFront(g, W, H, s, v) {
   const big = H > 80, deskTop = H - 7, sill = deskTop - 4;
   const x0 = Math.round(W * (W > 80 ? 0.28 : 0.3)), x1 = Math.round(W * (W > 80 ? 0.78 : 0.9)), y0 = Math.round(H * (big ? 0.3 : 0.1));
   const personX = Math.round((x0 + x1) / 2), treeX = W - (W > 80 ? 10 : 6), treeHeight = W > 80 ? 40 : 30;
+  const top = deskTop + 3 - PEOPLE.front.rows.length;
+  // 창밖을 보는 고양이는 사람 뒤 창턱에 있다.
+  const cat = {
+    window: { pose: 'back', x: x0 + 9, bottom: sill },
+    sleep: { pose: 'curled', x: x0 - 9, bottom: deskTop + 1, front: true },
+    walk: { pose: 'walk', x: x0 - 8, bottom: deskTop + 1, front: true },
+    pet: { pose: 'side', x: personX - 15, bottom: deskTop + 1, front: true, arm: [[personX - 6, top + 15], [personX - 12, deskTop - 10]] },
+    shoulder: { pose: 'curled', x: personX + 9, bottom: top + 14, front: true },
+  }[v.cat];
   drawWall(g, W, H, s, [treeX, H - 20]);
   drawClock(g, Math.round(x0 / 2), y0 + 6, s);
   if (big) drawShelf(g, x0 + 4, x1 - 4, y0 - 10);
@@ -755,22 +905,37 @@ function composeFront(g, W, H, s) {
   drawCurtain(g, x0, y0 - 2, deskTop, -1);
   drawCurtain(g, x1, y0 - 2, deskTop, 1);
   drawTree(g, treeX, H, treeHeight);
-  drawPerson(g, 'front', personX, deskTop + 3);
+  if (!cat.front) drawCat(g, cat);
+  drawPerson(g, 'front', personX, deskTop + 3, v);
   drawDesk(g, 0, W, deskTop, H, treeX);
   drawGifts(g, treeX, deskTop + 1);
-  drawCat(g, 'front', x0 - 9, deskTop + 1);
   g.sprite(personX + 10, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
+  if (cat.front) drawCat(g, cat);
 }
-
-const COMPOSITIONS = { back: composeBack, desk: composeDesk, seat: composeSeat, outside: composeOutside, front: composeFront };
 
 // ---- 페이지 ----
 
-function widget(scene, sizeKey) {
+const COMPOSITIONS = [
+  { name: 'A 뒷모습', note: '책상 앞에 앉은 사람의 뒷모습, 창은 뒤쪽 배경. 지금 06-lofi 구도라 비교 기준이다.', compose: composeBack },
+  { name: 'B 책상 옆모습', note: '창 아래 책상에서 창 쪽을 보고 앉은 옆모습. 책상·의자·바닥까지 보인다.', compose: composeDesk },
+  { name: 'C 창가 의자', note: '큰 창 아래 벤치에 무릎을 세우고 앉아 머그를 든 옆모습. 두 손이 머그를 들어 쓰다듬기 대신 고양이가 발끝에서 올려다본다.', compose: composeSeat },
+  { name: 'D 밖에서 본 창', note: '눈 쌓인 집 밖에서 불 켜진 창 안을 본다. 사람이 이쪽을 보고, 날씨는 집 둘레 하늘과 땅으로 보인다.', compose: composeOutside },
+  { name: 'E 정면', note: '책상 너머 사람이 이쪽을 본다. 창은 사람 뒤에 있다.', compose: composeFront },
+];
+const BASE = { headwear: 'headphones', cat: 'window' };
+const VARIATIONS = [
+  { scene: 1, headwear: 'headphones', cat: 'window' },
+  { scene: 0, headwear: 'neck', cat: 'sleep' },
+  { scene: 1, headwear: 'bare', cat: 'walk' },
+  { scene: 0, headwear: 'neck', cat: 'pet' },
+  { scene: 1, headwear: 'bare', cat: 'shoulder' },
+];
+
+function widget(compose, scene, sizeKey, v) {
   const [w, h] = SIZES[sizeKey];
   const s = sceneContext(scene);
   const g = new Grid(Math.ceil(w / DOT), Math.ceil(h / DOT));
-  COMPOSITIONS[COMPOSITION](g, g.cols, g.rows, s);
+  compose(g, g.cols, g.rows, s, { ...v, hair: hairLength(scene.date) });
   const canvas = g.canvas();
   const offset = [Math.floor((g.cols * DOT - w) / 2), Math.floor((g.rows * DOT - h) / 2)];
   const box = document.createElement('div');
@@ -782,17 +947,53 @@ function widget(scene, sizeKey) {
   canvas.className = 'dots';
   Object.assign(canvas.style, { width: `${g.cols * DOT}px`, height: `${g.rows * DOT}px`, left: `${-offset[0]}px`, top: `${-offset[1]}px` });
   box.append(canvas);
-  return { box, colors: new Set(g.cells.filter(Boolean)).size };
+  return box;
 }
 
-document.getElementById('scenes').append(...SCENES.map(scene => {
-  const widgets = Object.keys(SIZES).map(size => widget(scene, size));
+function figure(box, caption) {
+  const fig = document.createElement('figure');
+  fig.append(box);
+  fig.insertAdjacentHTML('beforeend', `<figcaption>${caption}</figcaption>`);
+  return fig;
+}
+
+document.getElementById('compositions').append(...COMPOSITIONS.map(({ name, note, compose }) => {
   const section = document.createElement('section');
-  section.className = 'scene';
-  section.innerHTML = `<h2>${scene.title}</h2><p class="meta">${scene.region} ${scene.date} ${scene.time} · ${scene.weather[0]} · 색 ${widgets.map(w => w.colors).join('/')}</p><div class="sizes"></div>`;
-  section.querySelector('.sizes').append(...widgets.map(w => w.box));
+  section.className = 'composition';
+  section.innerHTML = `<h2>${name}</h2><p class="note">${note}</p><div class="row sizes"></div><div class="row variations"></div>`;
+  section.querySelector('.sizes').append(...Object.keys(SIZES).map(size =>
+    figure(widget(compose, SCENES[0], size, BASE), `${size} · ${SCENES[0].title} · ${HEADWEAR[BASE.headwear]} · ${CAT_STATES[BASE.cat]}`)));
+  section.querySelector('.variations').append(...VARIATIONS.map(v =>
+    figure(widget(compose, SCENES[v.scene], 'medium', v), `${SCENES[v.scene].title} · ${HEADWEAR[v.headwear]} · ${CAT_STATES[v.cat]}`)));
   return section;
 }));
+
+// 사람 × 머리 길이. 크리스마스가 아닌 날도 있어 산타 모자 없이 사람만 그린다.
+const HAIR_DATES = ['7월 1일', '9월 15일', '12월 24일', '3월 15일', '6월 30일'];
+const HAIR_POSES = [['back', 'A 뒷모습'], ['desk', 'B 옆모습'], ['seat', 'C 창가 옆모습'], ['front', 'D·E 정면']];
+
+function hairTable() {
+  const table = document.createElement('div');
+  table.className = 'hair';
+  table.insertAdjacentHTML('beforeend', `<span></span>${HAIR_DATES.map(date => `<span class="head">${date}</span>`).join('')}`);
+  for (const [pose, label] of HAIR_POSES) {
+    table.insertAdjacentHTML('beforeend', `<span class="label">${label}</span>`);
+    const rows = PEOPLE[pose].rows;
+    for (const date of HAIR_DATES) {
+      const g = new Grid(rows[0].length + 6, rows.length + 2);
+      g.rect(0, 0, g.cols, g.rows, color('night-wall'));
+      drawPerson(g, pose, g.cols / 2, g.rows, { headwear: 'headphones', hair: hairLength(date), hat: false });
+      const canvas = g.canvas();
+      Object.assign(canvas.style, { width: `${g.cols * 4}px`, height: `${g.rows * 4}px` });
+      canvas.setAttribute('role', 'img');
+      canvas.setAttribute('aria-label', `${label} ${date} 머리`);
+      table.append(canvas);
+    }
+  }
+  return table;
+}
+
+document.getElementById('hair').append(hairTable());
 </script>
 </body>
 </html>
