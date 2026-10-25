@@ -33,7 +33,7 @@
 <main>
   <section>
     <h2>언더테일 예시</h2>
-    <p class="note">E 정면 medium. 왼쪽은 지금 그대로다. 오른쪽은 장면 전체를 언더테일 비율(도트 2.5pt)로 그리고, 사람·고양이에 검은 윤곽선과 빛·그늘 없는 평평한 색, 갈색 머리를 넣었다. 사람 크기(폭 48pt)는 같다. 방·창문·나무에는 윤곽선을 넣지 않았다.</p>
+    <p class="note">E 정면 medium. 왼쪽은 지금 그대로다. 오른쪽은 장면 전체를 언더테일 비율(도트 2.5pt)로 그렸다. 벽 말고 모든 것(사람, 고양이, 시계, 창, 커튼, 트리, 책상, 선물, 머그)에 검은 윤곽선을 두르고, 사람은 빛·그늘 없는 평평한 색에 갈색 머리다. 배경은 디더링과 벽 잡티, 벽 불빛 번짐을 빼고 색을 단계로 끊었다. 사람 크기(폭 48pt)는 같다.</p>
     <div id="undertale" class="row"></div>
   </section>
   <section>
@@ -60,6 +60,8 @@
 // ponytail: 06-lofi.html 그리기 코드에서 크리스마스 모양만 남겨 복사했다. 구도를 고르면 06 에 옮기고 이 페이지는 지운다.
 
 let DOT = 3;
+// 언더테일 예시: 디더링·잡티 없이 색을 단계로 끊어 칠한다.
+let FLAT = false;
 
 // 06-lofi 의 크리스마스 장면 둘. 둘 다 방 불을 켠 때(night, grey)라 불 끈 색은 두지 않았다.
 const SCENES = [
@@ -109,7 +111,7 @@ class Rand {
 }
 
 const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]];
-const bayer = (x, y) => (BAYER[((y % 4) + 4) % 4][((x % 4) + 4) % 4] + 0.5) / 16;
+const bayer = (x, y) => (FLAT ? 0.5 : (BAYER[((y % 4) + 4) % 4][((x % 4) + 4) % 4] + 0.5) / 16);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const pt = v => v / DOT;
 const blend = (a, b, f, x, y) => (clamp((f - 0.5) / 0.3 + 0.5, 0, 1) > bayer(x, y) ? b : a);
@@ -720,10 +722,15 @@ function drawWall(g, W, H, s, light) {
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       let c = pc(s, 'wall');
+      // FLAT 이면 불빛 번짐을 뺀다. 단계로 끊으면 벽에 갈색 원판이 생긴다.
+      if (FLAT) {
+        g.set(x, y, c);
+        continue;
+      }
       const d = Math.hypot(x + 0.5 - light[0], (y + 0.5 - light[1]) * 1.2) / reach;
       if (d < 0.35) c = blend(pc(s, 'wall-warmer'), pc(s, 'wall-warm'), d / 0.35, x, y);
       else if (d < 0.75) c = blend(pc(s, 'wall-warm'), c, (d - 0.35) / 0.4, x, y);
-      if (grain.range(0, 1) < 0.04) c = pc(s, 'wall-dark');
+      if (!FLAT && grain.range(0, 1) < 0.04) c = pc(s, 'wall-dark');
       g.set(x, y, c);
     }
   }
@@ -986,29 +993,33 @@ function composeFront(g, W, H, s, v) {
     pet: { pose: 'side', x: personX - 15, bottom: deskTop + 1, front: true, arm: [[personX - 6, top + 15], [personX - 12, deskTop - 10]] },
     shoulder: { pose: 'curled', x: personX + 11, bottom: top + 16, front: true },
   }[v.cat];
-  drawWall(g, W, H, s, [treeX, H - 20]);
-  drawClock(g, Math.round(x0 / 2), y0 + 6, s);
-  if (big) drawShelf(g, x0 + 4, x1 - 4, y0 - 10);
-  drawWindow(g, x0, y0, x1, sill, s);
-  drawCurtain(g, x0, y0 - 2, deskTop, -1);
-  drawCurtain(g, x1, y0 - 2, deskTop, 1);
-  drawTree(g, treeX, H, treeHeight);
-  // v.outline: 사람·고양이에 윤곽선. v.k: 사람을 frontFigure 해상도로 그린다(언더테일 예시).
+  // v.outline: 벽 말고 모두 윤곽선을 두른다. v.k: 사람을 frontFigure 해상도로 그린다(언더테일 예시).
   const ink = draw => {
     if (!v.outline) return draw(g);
     const layer = new Grid(W, H);
     draw(layer);
     stamp(g, withOutline(layer), 0, 0);
   };
+  drawWall(g, W, H, s, [treeX, H - 20]);
+  ink(t => drawClock(t, Math.round(x0 / 2), y0 + 6, s));
+  if (big) ink(t => drawShelf(t, x0 + 4, x1 - 4, y0 - 10));
+  ink(t => drawWindow(t, x0, y0, x1, sill, s));
+  ink(t => drawCurtain(t, x0, y0 - 2, deskTop, -1));
+  ink(t => drawCurtain(t, x1, y0 - 2, deskTop, 1));
+  ink(t => drawTree(t, treeX, H, treeHeight));
   if (!cat.front) ink(t => drawCat(t, cat, v));
   if (v.person !== false) {
     ink(t => (v.k
       ? stamp(t, frontFigure(v.k, v, v.outline), personX - Math.round(8 * v.k), deskTop + Math.round(3 * v.k) - Math.round(22 * v.k))
       : drawPerson(t, 'front', personX, deskTop + 3, v)));
   }
-  drawDesk(g, 0, W, deskTop, H, treeX);
-  drawGifts(g, treeX, deskTop + 1);
-  if (v.person !== false) g.sprite(personX + 10, deskTop + 1, SPRITES.mug, SPRITE_COLORS);
+  ink(t => drawDesk(t, 0, W, deskTop, H, treeX));
+  ink(t => drawGifts(t, treeX, deskTop + 1));
+  if (v.person !== false) {
+    // 김은 성긴 점이라 윤곽선을 두르면 검은 덩어리가 된다. 잔만 두른다.
+    ink(t => t.sprite(personX + 10, deskTop + 1, SPRITES.mug.slice(4), SPRITE_COLORS));
+    g.sprite(personX + 10, deskTop - 4, SPRITES.mug.slice(0, 4), SPRITE_COLORS);
+  }
   if (cat.front) ink(t => drawCat(t, cat, v));
   return { personX, deskTop };
 }
@@ -1206,11 +1217,11 @@ function resolutionCloseUp({ k, outline }) {
 
 // ponytail: 장면 전체를 다른 도트 크기로 그리려고 전역 DOT 를 잠시 바꾼다. 도트 크기를 고르면 상수 하나로 돌아간다.
 function undertaleWidget(scene, v) {
-  DOT = 2.5;
+  [DOT, FLAT] = [2.5, true];
   try {
     return widget(composeFront, scene, 'medium', { ...v, outline: true, k: 1.2 }).box;
   } finally {
-    DOT = 3;
+    [DOT, FLAT] = [3, false];
   }
 }
 
