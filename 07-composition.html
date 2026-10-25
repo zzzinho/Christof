@@ -20,7 +20,7 @@
   .people { display: grid; gap: 10px 12px; align-items: center; }
   .people .head { color: var(--page-muted); font-size: 0.75rem; }
   .people .label { font-size: 0.875rem; font-weight: 600; }
-  .people canvas { display: block; border-radius: 6px; image-rendering: pixelated; }
+  .people canvas, canvas.close-up { display: block; border-radius: 6px; image-rendering: pixelated; }
 </style>
 </head>
 <body>
@@ -32,9 +32,11 @@
 </header>
 <main>
   <section>
-    <h2>사람 · 크기와 도트 해상도</h2>
-    <p class="note">E 정면, 크리스마스 이브 밤, medium 실제 크기다. hunsu 확대를 100% 로 두고 본다. 1과 2를 견주면 크기, 1과 3을 견주면 해상도의 효과가 보인다. 3·4는 지금 사람을 두 배로 키운 뒤 앞머리, 속눈썹·눈동자 빛, 볼, 코 그늘, 입, 헤드폰 테, 목둘레, 니트 무늬를 더 그렸다.</p>
+    <h2>사람 · 도트 해상도</h2>
+    <p class="note">E 정면, 크리스마스 이브 밤, medium 실제 크기다. hunsu 확대를 100% 로 두고 본다. 사람 크기는 셋 다 지금과 같고 도트만 촘촘해진다. 2·3은 같은 도형을 해상도만 달리 그렸고, 늘어난 칸은 윤곽(둥근 머리, 앞머리, 어깨선)에만 쓴다. 얼굴은 감은 눈 두 줄뿐이다.</p>
     <div id="resolution" class="row"></div>
+    <p class="note">같은 사람 4배 확대</p>
+    <div id="close-up" class="row"></div>
   </section>
   <section>
     <h2>사람 · 이벤트별 옷</h2>
@@ -1063,75 +1065,102 @@ function personTable(columns, scale) {
   return table;
 }
 
-// ---- 사람 크기·도트 해상도 시험 ----
-// E 정면 위젯에서 사람만 따로 그려 얹는다. cells 2 는 지금 사람을 두 배로 키운 뒤 디테일을 더 그린 것이다.
+// ---- 사람 도트 해상도 시험 ----
+// 크기는 지금 사람(48×66pt) 그대로 두고 도트만 촘촘하게 한다. 늘어난 칸은 윤곽(둥근 머리, 앞머리, 어깨선)을
+// 매끄럽게 하는 데만 쓰고, 얼굴은 감은 눈 두 줄만 둔다. 볼·입·눈동자 빛 같은 잔디테일은 도트 맛을 없애서 넣지 않는다.
 
 const RESOLUTION_TESTS = [
-  { label: '1 지금', cells: 1, dot: 3 },
-  { label: '2 크게만', cells: 1, dot: 6 },
-  { label: '3 촘촘하게만', cells: 2, dot: 1.5 },
-  { label: '4 크고 촘촘하게 (장면과 같은 도트)', cells: 2, dot: 3 },
+  { label: '1 지금', k: 1 },
+  { label: '2 조금 촘촘하게', k: 1.5 },
+  { label: '3 두 배 촘촘하게', k: 2 },
 ];
 
-function upscale(src) {
-  const out = new Grid(src.cols * 2, src.rows * 2);
-  src.cells.forEach((c, n) => out.rect((n % src.cols) * 2, Math.floor(n / src.cols) * 2, 2, 2, c));
-  return out;
-}
-
-// 두 배 격자(32×44칸)에서만 그릴 수 있는 디테일
-function fineDetails(g, look) {
-  const set = (x, y, name) => g.set(x, y, color(name));
-  for (const x of [9, 12, 13, 17, 20, 21]) set(x, 14, 'hair');
-  set(9, 15, 'hair');
-  set(22, 15, 'hair');
-  set(11, 16, 'star');
-  set(21, 16, 'star');
-  for (const x of [8, 9, 22, 23]) set(x, 19, 'spring-1');
-  // 코 그늘은 불빛(오른쪽) 반대쪽
-  set(15, 19, 'skin-dark');
-  set(15, 21, 'pouch');
-  set(16, 21, 'pouch');
-  for (let x = 12; x < 20; x++) set(x, 24, 'skin-dark');
-  if (look.headwear === 'headphones') {
-    for (const [x0, x1] of [[2, 5], [26, 29]]) {
-      for (let y = 14; y < 20; y++) for (const x of [x0, x1]) set(x, y, 'headphone');
-      for (let x = x0; x <= x1; x++) for (const y of [14, 19]) set(x, y, 'headphone');
+// 정면 사람을 도형으로 그린다. 좌표는 지금 스프라이트(16×22칸) 단위이고, k 는 그 한 칸을 몇 칸으로 나눌지다.
+function frontFigure(k, look) {
+  const g = new Grid(Math.round(16 * k), Math.round(22 * k)), wear = OUTFITS[look.outfit];
+  const row = y => Math.floor(y * k);
+  const at = (x, y, j) => {
+    const dx = x - 8;
+    if (look.hat !== false) {
+      if (Math.hypot(x - 13.6, y - 1.3) <= 0.8) return 'santa-trim';
+      if (y >= 4.8 && y < 6.6 && Math.abs(dx) <= 6.2) return 'santa-trim';
+      const t = (4.8 - y) / 3.8;
+      if (t >= 0 && t <= 1 && x >= 3 + t * 8.2 && x <= 13 + t * 0.2) return 'santa';
     }
-  }
-  for (let x = 8; x < 24; x += 2) set(x, 27, OUTFITS[look.outfit].d);
-  if (look.outfit === 'christmas') for (const y of [34, 35]) for (let x = 2; x < 30; x++) set(x, y, (x + y) % 2 ? 'summer-2' : 'santa-trim');
+    for (const cx of [2.3, 13.7]) {
+      if (Math.abs(x - cx) <= 0.85 && Math.abs(y - 8.6) <= 1.6) return Math.abs(x - cx) > 0.4 || Math.abs(y - 8.6) > 1.1 ? 'headphone' : 'headphone-accent';
+    }
+    if (y >= 6.7 + 0.3 * Math.sin(x * 2.4) && (dx / 3.8) ** 2 + ((y - 9.3) / 2.9) ** 2 <= 1) {
+      return j === row(9) && (Math.abs(dx + 1.9) <= 0.6 || Math.abs(dx - 1.9) <= 0.6) ? 'hair' : 'skin';
+    }
+    if ((dx / 5.5) ** 2 + ((y - 7.4) / 5.6) ** 2 <= 1 || (y >= 7.4 && y <= 12.2 && Math.abs(dx) <= 5.3)) return 'hair';
+    if (y > 12.2 && y <= 12.2 + look.hair * 5 && Math.abs(dx) >= 3.2 && Math.abs(dx) <= 5.3) return 'hair';
+    if (Math.abs(dx) <= 1.5 && y >= 11.6 && y < 13.4) return j === row(11.9) ? 'skin-dark' : 'skin';
+    if (y >= 12.7 && Math.abs(dx) <= Math.min(7.4, 1.6 + Math.sqrt(y - 12.6) * 4.6)) {
+      if (look.outfit !== 'christmas') return wear.o;
+      if ((y >= 15.4 && y < 16.2) || (y >= 17 && y < 17.8)) return 'santa-trim';
+      if (y >= 16.2 && y < 17) return Math.floor(x * k) % 3 === 1 ? 'summer-2' : 'santa-trim';
+      return wear.o;
+    }
+    return null;
+  };
+  const names = [];
+  for (let j = 0; j < g.rows; j++) for (let i = 0; i < g.cols; i++) names.push(at((i + 0.5) / k, (j + 0.5) / k, j));
+  // 오른쪽(불빛 쪽) 끝 한 칸은 테두리 빛, 옷 왼쪽 끝 한 칸은 그늘
+  names.forEach((name, n) => {
+    const i = n % g.cols, right = i + 1 < g.cols ? names[n + 1] : null, left = i > 0 ? names[n - 1] : null;
+    let c = name;
+    if (name === 'hair' && !right) c = 'hair-rim';
+    if (name === wear.o && !right) c = wear.rim ?? 'hoodie-rim';
+    if (name === wear.o && !left) c = wear.d;
+    g.set(i, Math.floor(n / g.cols), c && color(c));
+  });
+  return g;
 }
 
-function resolutionWidget({ cells, dot }) {
+function resolutionWidget({ k }) {
   const scene = SCENES[0], look = { headwear: 'headphones', cat: 'sleep', hair: hairLength(scene.date), outfit: outfitFor(scene) };
   const { box, layout: { personX, deskTop }, offset } = widget(composeFront, scene, 'medium', { ...look, person: false });
   const rows = PEOPLE.front.rows;
   let person = new Grid(rows[0].length, rows.length);
-  drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
-  if (cells === 2) {
-    person = upscale(person);
-    fineDetails(person, look);
-  }
-  // 지금 사람과 가운데·아래를 맞춘다. 아래 세 줄(지금 크기 기준)은 책상 뒤에 가려진다.
-  const width = person.cols * dot, height = person.rows * dot, scale = width / (rows[0].length * DOT);
+  if (k === 1) drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
+  else person = frontFigure(k, look);
+  // 지금 사람과 같은 자리·크기. 아래 세 줄(지금 기준)은 책상 뒤에 가려진다.
+  const width = rows[0].length * DOT, height = rows.length * DOT;
   const clip = document.createElement('div');
   Object.assign(clip.style, { position: 'absolute', left: 0, top: 0, width: '100%', height: `${deskTop * DOT - offset[1]}px`, overflow: 'hidden' });
   const canvas = person.canvas();
   canvas.className = 'dots';
   Object.assign(canvas.style, {
     width: `${width}px`, height: `${height}px`,
-    left: `${personX * DOT - width / 2 - offset[0]}px`, top: `${(deskTop + 3 * scale) * DOT - height - offset[1]}px`,
+    left: `${personX * DOT - width / 2 - offset[0]}px`, top: `${(deskTop + 3) * DOT - height - offset[1]}px`,
   });
   clip.append(canvas);
   box.append(clip);
   return box;
 }
 
-document.getElementById('resolution').append(...RESOLUTION_TESTS.map(test => {
-  const size = test.cells * PEOPLE.front.rows[0].length * test.dot;
-  return figure(resolutionWidget(test), `${test.label} · 도트 ${test.dot}pt · ${16 * test.cells}×${22 * test.cells}칸 · 사람 폭 ${size}pt`);
-}));
+// 같은 사람을 4배로 키워 윤곽을 본다
+function resolutionCloseUp({ k }) {
+  const scene = SCENES[0], look = { headwear: 'headphones', hair: hairLength(scene.date), outfit: outfitFor(scene) };
+  const rows = PEOPLE.front.rows;
+  let person = new Grid(rows[0].length, rows.length);
+  if (k === 1) drawPerson(person, 'front', rows[0].length / 2, rows.length, look);
+  else person = frontFigure(k, look);
+  const g = new Grid(person.cols, person.rows);
+  g.rect(0, 0, g.cols, g.rows, color('night-wall'));
+  person.cells.forEach((c, n) => g.set(n % g.cols, Math.floor(n / g.cols), c));
+  const canvas = g.canvas();
+  Object.assign(canvas.style, { width: `${rows[0].length * DOT * 4}px`, height: `${rows.length * DOT * 4}px` });
+  canvas.className = 'close-up';
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', '사람 4배 확대');
+  return canvas;
+}
+
+document.getElementById('resolution').append(...RESOLUTION_TESTS.map(test =>
+  figure(resolutionWidget(test), `${test.label} · 도트 ${DOT / test.k}pt · ${16 * test.k}×${22 * test.k}칸`)));
+document.getElementById('close-up').append(...RESOLUTION_TESTS.map(test => figure(resolutionCloseUp(test), test.label)));
 document.getElementById('outfits').append(personTable(Object.entries(OUTFITS).map(([id, wear]) =>
   ({ head: `${wear.event}<br>${wear.name}`, look: { outfit: id, hair: hairLength(OUTFIT_DATES[id]) } })), 3));
 document.getElementById('hair').append(personTable(HAIR_DATES.map(date => ({ head: date, look: { hair: hairLength(date) } })), 4));
