@@ -467,11 +467,11 @@ const PEOPLE = {
       '...khhhhhhhhk...',
       '..khhhhhhhhhhk..',
       '..khhhhhhhhhhk..',
-      '.KKhhssssssHHKK.',
-      '.KKhhsesseshHKK.',
-      '.KKhhsssssshHKK.',
-      '...hhsssssshH...',
-      '...hhhsssshhH...',
+      '.KKhsssssssHHKK.',
+      '.KKhsessseshHKK.',
+      '.KKhssssssshHKK.',
+      '...hssssssshH...',
+      '...hhssssshhH...',
       '......ssss......',
       '...oooooooooor..',
       '..ooooooooooorr.',
@@ -1088,20 +1088,20 @@ function frontFigure(k, look) {
     const dx = x - 8;
     if (look.hat !== false) {
       if (Math.hypot(x - 13.2, y - 1.3) <= 0.8) return 'santa-trim';
-      if (y >= 4.8 && y < 6.6 && Math.abs(dx) <= 5.4) return 'santa-trim';
+      if (y >= 4.8 && y < 6.6 && Math.abs(dx) <= 5.8) return 'santa-trim';
       const t = (4.8 - y) / 3.8;
-      if (t >= 0 && t <= 1 && x >= 3.6 + t * 7.4 && x <= 12.4 + t * 0.4) return 'santa';
+      if (t >= 0 && t <= 1 && x >= 3.3 + t * 7.7 && x <= 12.7 + t * 0.3) return 'santa';
     }
-    for (const cx of [3, 13]) {
+    for (const cx of [2.7, 13.3]) {
       if (Math.abs(x - cx) <= 0.85 && Math.abs(y - 8.6) <= 1.6) return Math.abs(x - cx) > 0.4 || Math.abs(y - 8.6) > 1.1 ? 'headphone' : 'headphone-accent';
     }
     // 얼굴은 갸름한 달걀꼴: 아래로 갈수록 좁아져 턱이 좁다.
-    const v = (y - 9.3) / 3.1, half = 3.2 * (v > 0 ? 1 - 0.35 * v : 1) * Math.sqrt(Math.max(0, 1 - v * v));
+    const v = (y - 9.3) / 3, half = 3.5 * (v > 0 ? 1 - 0.2 * v : 1) * Math.sqrt(Math.max(0, 1 - v * v));
     if (y >= 6.7 + 0.3 * Math.sin(x * 2.4) && Math.abs(dx) <= half) {
-      return j === row(9) && (Math.abs(dx + 1.5) <= 0.5 || Math.abs(dx - 1.5) <= 0.5) ? 'hair' : 'skin';
+      return j === row(9) && (Math.abs(dx + 1.7) <= 0.5 || Math.abs(dx - 1.7) <= 0.5) ? 'hair' : 'skin';
     }
-    if ((dx / 4.9) ** 2 + ((y - 7.4) / 5.4) ** 2 <= 1 || (y >= 7.4 && y <= 12.2 && Math.abs(dx) <= 4.7)) return 'hair';
-    if (y > 12.2 && y <= 12.2 + look.hair * 5 && Math.abs(dx) >= 2.8 && Math.abs(dx) <= 4.7) return 'hair';
+    if ((dx / 5.2) ** 2 + ((y - 7.4) / 5.5) ** 2 <= 1 || (y >= 7.4 && y <= 12.2 && Math.abs(dx) <= 5)) return 'hair';
+    if (y > 12.2 && y <= 12.2 + look.hair * 5 && Math.abs(dx) >= 3 && Math.abs(dx) <= 5) return 'hair';
     if (Math.abs(dx) <= 1.5 && y >= 11.6 && y < 13.4) return j === row(11.9) ? 'skin-dark' : 'skin';
     if (y >= 12.7 && Math.abs(dx) <= Math.min(7.4, 1.6 + Math.sqrt(y - 12.6) * 4.6)) {
       if (look.outfit !== 'christmas') return wear.o;
