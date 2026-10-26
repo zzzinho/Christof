@@ -324,12 +324,13 @@ function layout(W, H, s) {
   const personX = Math.round(W * (wide ? (tree ? 0.72 : 0.74) : (tree ? 0.6 : 0.72)));
   const clock = [x1 + 7, y0 + 4], cat = [x0 + 9, sill], personTop = H - PERSON.rows.length;
   // 고양이 상태마다 자리. front 면 사람 앞에 그린다. arm: 쓰다듬는 팔 [어깨, 손끝].
+  // item: 고양이 곁에 두는 이벤트 물건 자리 [가운데, 바닥]. 어깨 위 고양이는 곁에 바닥이 없어 창턱 고양이 자리에 둔다.
   const cats = {
-    window: { pose: 'back', x: cat[0], bottom: sill },
-    sleep: { pose: 'curled', x: x0 + 10, bottom: sill },
-    walk: { pose: 'walk', x: x0 + 12, bottom: sill },
-    pet: { pose: 'side', x: personX - 15, bottom: deskTop + 1, front: true, arm: [[personX - 6, personTop + 15], [personX - 12, deskTop - 10]] },
-    shoulder: { pose: 'curled', x: personX + 1, bottom: personTop + 18, front: true },
+    window: { pose: 'back', x: cat[0], bottom: sill, item: [cat[0] + 8, sill] },
+    sleep: { pose: 'curled', x: x0 + 10, bottom: sill, item: [x0 + 20, sill] },
+    walk: { pose: 'walk', x: x0 + 12, bottom: sill, item: [x0 + 23, sill] },
+    pet: { pose: 'side', x: personX - 15, bottom: deskTop + 1, front: true, arm: [[personX - 6, personTop + 15], [personX - 12, deskTop - 10]], item: [personX - 24, deskTop + 1] },
+    shoulder: { pose: 'curled', x: personX + 1, bottom: personTop + 18, front: true, item: [cat[0], sill] },
   };
   return {
     W, H, deskTop, sill, x0, x1, y0, tree, treeX, lampX, personX, clock, cat, cats,
@@ -839,10 +840,10 @@ function drawLanterns(g, left, right, y, lit) {
 // 여성의 뒷모습. 옷은 이벤트마다 다르고(OUTFITS), 이벤트 모양(모자·머리 장식)은 사람 위에 겹쳐 그린다. (x: 가운데, top: 사람 맨 윗줄)
 
 const PERSON_LOOKS = {
-  // 댕기: 늘어진 머리 끝을 묶은 붉은 리본
+  // 댕기: 늘어진 머리 끝에 맨 붉은 리본. 금박 매듭 아래로 두 가닥이 늘어진다.
   daenggi(g, x, top, s) {
     const end = top + PERSON.fall.start + Math.round(s.hair * PERSON.fall.rows);
-    g.sprite(x, end + 2, ['PP.PP', '.PPP.'], { P: 'pouch' });
+    g.sprite(x, end + 3, ['PP.PP', '.PgP.', '.P.P.', '.P.P.'], { P: 'pouch', g: 'pouch-gold' });
   },
   beanie(g, x, top) {
     g.sprite(x, top + 5, SPRITES.beanie, { w: 'santa-trim', B: 'beanie', b: 'beanie-dark' });
@@ -917,33 +918,24 @@ function drawPerson(g, L, s) {
 // ---- 구성 요소 3: 고양이 ----
 // 치즈 고양이. 상태(창밖 보기, 잠, 걷기, 쓰다듬기, 어깨 위)마다 자세와 자리가 다르다. 이벤트 모양은 머리 위나 곁에 둔다.
 
-// 고양이 자리에서 머리 위 가운데와 고양이 오른쪽 바닥(곁에 두는 물건 자리)을 구한다.
+// 고양이 자리에서 스프라이트 왼쪽 위와 머리 위 가운데 칸을 구한다.
 function catAnchor(spot) {
   const { rows, head } = CATS[spot.pose], left = Math.round(spot.x - rows[0].length / 2), top = spot.bottom - rows.length;
-  return { left, top, width: rows[0].length, head: [left + head[0], top + head[1]], beside: [left + rows[0].length + 2, spot.bottom] };
+  return { left, top, width: rows[0].length, head: [left + head[0], top + head[1]] };
 }
 
 const CAT_LOOKS = {
-  pouch(g, spot) {
-    const { beside: [x, y] } = catAnchor(spot);
-    g.sprite(x + 1, y, SPRITES.catPouch, { P: 'pouch', p: 'pouch-light', g: 'pouch-gold' });
-  },
+  pouch: (g, { item: [x, y] }) => g.sprite(x, y, SPRITES.catPouch, { P: 'pouch', p: 'pouch-light', g: 'pouch-gold' }),
   beanie(g, spot) {
     const { head: [x, y] } = catAnchor(spot);
     g.sprite(x, y + 1, SPRITES.catBeanie, { w: 'santa-trim', B: 'beanie' });
   },
-  walnut(g, spot) {
-    const { beside: [x, y] } = catAnchor(spot);
-    g.sprite(x, y, ['nNn', 'NnN'], { n: 'wood-light', N: 'branch' });
-  },
+  walnut: (g, { item: [x, y] }) => g.sprite(x, y, ['nNn', 'NnN'], { n: 'wood-light', N: 'branch' }),
   lotus(g, spot) {
     const { head: [x, y] } = catAnchor(spot);
     g.sprite(x, y, SPRITES.catLotus, { P: 'spring-1', p: 'spring-2' });
   },
-  persimmon(g, spot) {
-    const { beside: [x, y] } = catAnchor(spot);
-    g.sprite(x, y, ['.l.', 'ooo', 'ooo'], { l: 'plant-dark', o: 'autumn-1' });
-  },
+  persimmon: (g, { item: [x, y] }) => g.sprite(x, y, ['.l.', 'ooo', 'ooo'], { l: 'plant-dark', o: 'autumn-1' }),
   // 등 양쪽에 펼친 박쥐 날개. 머리 줄 아래부터 몸 바깥으로 뻗는다.
   batWings(g, spot) {
     const { left, width, head: [, y] } = catAnchor(spot);
