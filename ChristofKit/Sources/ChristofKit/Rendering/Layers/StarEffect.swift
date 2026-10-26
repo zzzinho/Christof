@@ -1,23 +1,12 @@
-import SwiftUI
-
-struct StarEffect: SceneLayerProvider {
-    @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
-        let palette = SkyPalette(context)
-        if let condition = context.weather?.condition, !condition.showsStars { return [] }
-        let opacity = (1 - palette.daylight / 0.4) * (1 - palette.gloom * 2)
-        guard opacity > 0.05 else { return [] }
-        return [
-            WindowLayer(id: "stars", depth: .stars) {
-                Canvas { ctx, size in
-                    let u = min(size.width, size.height)
-                    var random = SeededRandom(seed: 3)
-                    for _ in 0..<70 {
-                        let center = CGPoint(x: random(0...1) * size.width, y: random(0...0.66) * size.height)
-                        let radius = u * random(0.003...0.008)
-                        ctx.fill(Path(ellipseIn: CGRect(center: center, radius: radius)), with: .color(.white.opacity(opacity * random(0.35...1))))
-                    }
-                }
-            }
-        ]
+struct StarEffect: OutsideEffect {
+    func draw(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) {
+        guard s.phase == .night, s.weather?.condition.showsStars ?? true else { return }
+        var stars = SeededRandom(seed: 3)
+        let count = jsRound(Double(w * h) * DotGrid.dot * DotGrid.dot * 0.001)
+        let star = LofiPalette.color("star"), dim = LofiPalette.color("star-dim")
+        for _ in 0..<count {
+            let x = (stars(0...1) * Double(w)).rounded(.down), y = (stars(0...0.55) * Double(h)).rounded(.down)
+            g.set(x, y, stars(0...1) < 0.3 ? star : dim)
+        }
     }
 }

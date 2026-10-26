@@ -5,6 +5,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 // 실제 지역·날짜를 SceneContextFactory 에 넣어 해·달 계산과 이벤트 판정을 그대로 거치고, 날씨만 가짜 예보를 준다.
+// PNG 와 함께 칸 격자(.grid)와 장면 입력(scenes.json)을 써서 Scripts/compare-design.mjs 가 시안과 칸 단위로 비교한다.
 
 struct Scenario {
     let name: String
@@ -87,7 +88,31 @@ let scenarios: [Scenario] = [
 let output = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first ?? "snapshots", isDirectory: true)
 try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
 
+/// 시안(06-lofi.html)의 SCENES 한 줄과 같은 모양. 계산한 해·달 값을 그대로 넘겨 같은 입력으로 그리게 한다.
+func designScene(_ name: String, _ context: SceneContext) -> [String: Any] {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = context.region.timeZone
+    let t = calendar.dateComponents([.month, .day, .hour, .minute], from: context.date)
+    return [
+        "title": name, "region": context.region.name,
+        "date": "\(t.month!)월 \(t.day!)일", "time": "\(t.hour!):\(String(format: "%02d", t.minute!))", "hour": t.hour!,
+        "season": "\(context.season)",
+        "sun": [context.sun.altitude, context.sun.azimuth],
+        "moon": [context.moon.phase, context.moon.altitude, context.moon.azimuth],
+        "weather": context.weather.map { ["\($0.condition)", $0.intensity, $0.cloudCover, $0.temperatureCelsius] as [Any] } ?? NSNull(),
+        // ponytail: 이벤트 모양을 아직 옮기지 않아 시안에도 이벤트 없이 그리게 한다.
+        "occasions": [String](),
+    ]
+}
+
+func gridText(_ grid: DotGrid) -> String {
+    (0..<grid.rows).map { y in
+        (0..<grid.cols).map { x in grid.cells[y * grid.cols + x].map { String(format: "%06X", $0) } ?? "------" }.joined(separator: " ")
+    }.joined(separator: "\n")
+}
+
 let factory = SceneContextFactory()
+var designScenes: [[String: Any]] = []
 for scenario in scenarios {
     let context = factory.context(at: scenario.date, region: scenario.region, forecast: scenario.forecast)
     if let id = scenario.occasion, !context.occasions.contains(where: { $0.id == id }) {
@@ -99,10 +124,13 @@ for scenario in scenarios {
         "해 \(Int(context.sun.altitude.rounded()))°/\(Int(context.sun.azimuth.rounded()))°",
         "달 위상 \((context.moon.phase * 100).rounded() / 100) \(Int(context.moon.altitude.rounded()))°/\(Int(context.moon.azimuth.rounded()))°",
         "이벤트 \(context.occasions.map(\.id))")
+    designScenes.append(designScene(scenario.name, context))
     for style in WindowSize.allCases {
         let size = style.referenceSize
+        let grid = SceneComposer.grid(for: context, cols: Int((size.width / DotGrid.dot).rounded(.up)), rows: Int((size.height / DotGrid.dot).rounded(.up)))
+        try gridText(grid).write(to: output.appending(path: "\(scenario.name)-\(fileSuffix(style)).grid"), atomically: true, encoding: .utf8)
         // 위젯은 시스템이 둥근 모서리로 자른다. 비슷하게 보이도록 같은 반지름으로 자른다.
-        let view = WindowView(context: context, style: style)
+        let view = WindowView(context: context)
             .frame(width: size.width, height: size.height)
             .clipShape(.rect(cornerRadius: 22, style: .continuous))
         let renderer = ImageRenderer(content: view)
@@ -117,4 +145,5 @@ for scenario in scenarios {
         guard CGImageDestinationFinalize(destination) else { fatalError("저장 실패: \(url.path)") }
     }
 }
+try JSONSerialization.data(withJSONObject: designScenes, options: [.prettyPrinted, .sortedKeys]).write(to: output.appending(path: "scenes.json"))
 print("\(scenarios.count * WindowSize.allCases.count) PNG → \(output.path)")

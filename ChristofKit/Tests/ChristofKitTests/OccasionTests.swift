@@ -84,8 +84,7 @@ func fullMoonRule(_ label: String, _ date: Date, _ expected: Bool) {
     #expect(FullMoonRule().isActive(at: date, in: seoul) == expected, "\(label)")
 }
 
-@Test("하늘 이벤트는 일출·일몰·보름달이고 장식이 없다")
+@Test("하늘 이벤트는 일출·일몰·보름달이다")
 func celestialOccasions() {
     #expect(CelestialOccasions.all.map(\.id) == ["sky.sunrise", "sky.sunset", "sky.fullMoon"])
-    #expect(CelestialOccasions.all.allSatisfy { $0.decorations.isEmpty })
 }

@@ -1,4 +1,4 @@
-/// SplitMix64. 위젯은 정지 이미지라 같은 입력이면 같은 그림이어야 한다.
+/// SplitMix64. 위젯은 정지 이미지라 같은 입력이면 같은 그림이어야 한다. 시안의 Rand 와 같은 수열이다.
 struct SeededRandom: RandomNumberGenerator {
     private var state: UInt64
 
@@ -16,5 +16,10 @@ struct SeededRandom: RandomNumberGenerator {
 
     mutating func callAsFunction(_ range: ClosedRange<Double>) -> Double {
         Double.random(in: range, using: &self)
+    }
+
+    /// lower...upper 정수. 시안의 Rand.int 와 같은 값을 낸다.
+    mutating func int(_ lower: Int, _ upper: Int) -> Int {
+        Int(self(Double(lower)...(Double(upper) + 0.999)).rounded(.down))
     }
 }

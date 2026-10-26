@@ -1,43 +1,22 @@
-import SwiftUI
-
-struct CloudEffect: SceneLayerProvider {
-    @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
-        guard let weather = context.weather else { return [] }
-        let count = Int((weather.cloudCover * 7).rounded())
-        let deck = weather.condition.hasCloudDeck
-        guard count > 0 || deck else { return [] }
-        let color = SkyPalette(context).cloud
-        return [
-            WindowLayer(id: "clouds", depth: .clouds) {
-                Canvas { ctx, size in
-                    let u = min(size.width, size.height)
-                    var random = SeededRandom(seed: 5)
-                    if deck {
-                        ctx.fill(
-                            Path(CGRect(origin: .zero, size: size)),
-                            with: .linearGradient(
-                                Gradient(colors: [color.color(0.95), color.color(0.7), color.color(0)]),
-                                startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height * 0.6)))
-                    }
-                    for _ in 0..<count {
-                        let center = CGPoint(x: random(-0.05...1.05) * size.width, y: random(0.1...0.42) * size.height)
-                        Self.drawCloud(&ctx, center: center, scale: u * random(0.13...0.2), color: color)
-                    }
-                }
+/// 구름층(흐림·비·눈·뇌우)은 하늘 위쪽을 덮고 아래로 갈수록 성겨진다. 조각구름은 구름양만큼 띄운다.
+struct CloudEffect: OutsideEffect {
+    func draw(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) {
+        guard let weather = s.weather else { return }
+        let light = s.color("cloud"), dark = s.color("cloud-dark")
+        if weather.condition.hasCloudDeck {
+            let depth = Double(h) * 0.55
+            for y in 0..<Int(depth.rounded(.up)) {
+                let t = Double(y) / depth
+                for x in 0..<w where (1 - t) * 1.5 > bayer(x, y) { g.set(x, y, t < 0.5 ? light : dark) }
             }
-        ]
-    }
-
-    private static func drawCloud(_ ctx: inout GraphicsContext, center: CGPoint, scale s: CGFloat, color: RGB) {
-        var puff = Path()
-        puff.addEllipse(in: CGRect(x: center.x - s * 1.2, y: center.y - s * 0.1, width: s * 2.4, height: s * 0.7))
-        for (dx, dy, r) in [(-0.6, 0.05, 0.42), (-0.15, -0.25, 0.58), (0.4, -0.1, 0.5), (0.8, 0.1, 0.34)] {
-            puff.addEllipse(in: CGRect(center: CGPoint(x: center.x + s * dx, y: center.y + s * dy), radius: s * r))
         }
-        ctx.fill(
-            puff,
-            with: .linearGradient(
-                Gradient(colors: [color.mixed(with: RGB(hex: 0xFFFFFF), 0.15).color(0.95), color.scaled(0.85).color(0.95)]),
-                startPoint: CGPoint(x: center.x, y: center.y - s * 0.8), endPoint: CGPoint(x: center.x, y: center.y + s * 0.6)))
+        var random = SeededRandom(seed: 5)
+        for _ in 0..<jsRound(weather.cloudCover * 5) {
+            let cx = random(-0.05...1.05) * Double(w), cy = random(0.1...0.4) * Double(h), size = random(3...5)
+            let puffs = [(-size, 0, size * 0.7), (0, -size * 0.4, size), (size, 0, size * 0.75)]
+            g.shape(cx - size * 2, cy - size * 1.5, cx + size * 2, cy + size,
+                    inside: { x, y in y <= cy + size * 0.5 && puffs.contains { dx, dy, r in jsHypot(x - cx - dx, y - cy - dy) <= r } },
+                    color: { _, y in Double(y) + 0.5 > cy + size * 0.1 ? dark : light })
+        }
     }
 }

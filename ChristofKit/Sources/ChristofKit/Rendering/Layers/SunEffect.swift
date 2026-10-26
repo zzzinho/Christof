@@ -1,26 +1,19 @@
 import SwiftUI
 
-struct SunEffect: SceneLayerProvider {
-    @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
-        guard let position = CelestialPosition.sun(context.sun, latitude: context.region.latitude) else { return [] }
-        let palette = SkyPalette(context)
-        guard let visibility = palette.celestialVisibility else { return [] }
-        // 지평선 가까운 해는 조금 크게 그린다(달·해 착시).
-        let ratio = 0.075 * (1.3 - 0.3 * SkyPalette.smoothstep(0, 15, context.sun.altitude))
-        return [
-            WindowLayer(id: "sun", depth: .celestialBody) {
-                Canvas { ctx, size in
-                    let center = CGPoint(x: position.x * size.width, y: position.y * size.height)
-                    let radius = min(size.width, size.height) * ratio
-                    let glow = radius * 4.5
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(center: center, radius: glow)),
-                        with: .radialGradient(
-                            Gradient(colors: [palette.sun.color(0.6 * visibility), palette.sun.color(0)]),
-                            center: center, startRadius: radius * 0.6, endRadius: glow))
-                    ctx.fill(Path(ellipseIn: CGRect(center: center, radius: radius)), with: .color(palette.sun.color(visibility)))
-                }
-            }
-        ]
+
+struct SunEffect: OutsideEffect {
+    func draw(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) {
+        guard let (cx, cy, r) = Self.circle(s, w, h) else { return }
+        g.ring(cx, cy, r, 2, s.color("sky-4"))
+        g.disc(cx, cy, r, LofiPalette.color(s.sunAltitude < 10 ? "sun-low" : "sun-high"))
     }
+
+    static func circle(_ s: DotScene, _ w: Int, _ h: Int) -> (Double, Double, Double)? {
+        s.sunPoint.map { bodyCircle($0, w, h, radius: 9) }
+    }
+}
+
+/// 해·달 원. 반지름은 pt 다.
+func bodyCircle(_ point: UnitPoint, _ w: Int, _ h: Int, radius: Double) -> (Double, Double, Double) {
+    ((point.x * Double(w)).rounded(.down) + 0.5, (point.y * Double(h)).rounded(.down) + 0.5, radius / DotGrid.dot + 0.3)
 }

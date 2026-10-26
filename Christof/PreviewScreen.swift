@@ -163,7 +163,7 @@ private struct WindowPreviews: View {
             Text(Self.title(of: style))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            WindowView(context: context, style: style)
+            WindowView(context: context)
                 .frame(width: style.referenceSize.width, height: style.referenceSize.height)
                 .clipShape(.rect(cornerRadius: 22))
         }

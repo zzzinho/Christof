@@ -4,18 +4,9 @@ import WidgetKit
 
 struct WindowEntryView: View {
     let entry: WindowEntry
-    @Environment(\.widgetFamily) private var family
 
     var body: some View {
-        WindowView(context: entry.context, style: style)
+        WindowView(context: entry.context)
             .containerBackground(.background, for: .widget)
-    }
-
-    private var style: WindowSize {
-        switch family {
-        case .systemSmall: .compact
-        case .systemLarge, .systemExtraLarge: .expanded
-        default: .regular
-        }
     }
 }

@@ -1,26 +1,13 @@
-import SwiftUI
-
-struct RainEffect: SceneLayerProvider {
-    @MainActor func layers(for context: SceneContext) -> [WindowLayer] {
-        guard let weather = context.weather, weather.condition.isRain else { return [] }
+struct RainEffect: OutsideEffect {
+    func draw(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) {
+        guard let weather = s.weather, weather.condition.isRain else { return }
         let drizzle = weather.condition == .drizzle
-        let count = drizzle ? 40 + Int(60 * weather.intensity) : 70 + Int(130 * weather.intensity)
-        let opacity = 0.35 + 0.25 * SkyPalette(context).daylight
-        return [
-            WindowLayer(id: "rain", depth: .weather) {
-                Canvas { ctx, size in
-                    let u = min(size.width, size.height)
-                    let length = size.height * (drizzle ? 0.035 : 0.08)
-                    var random = SeededRandom(seed: 17)
-                    var drops = Path()
-                    for _ in 0..<count {
-                        let start = CGPoint(x: random(-0.05...1.05) * size.width, y: random(-0.05...1) * size.height)
-                        drops.move(to: start)
-                        drops.addLine(to: CGPoint(x: start.x - length * 0.25, y: start.y + length))
-                    }
-                    ctx.stroke(drops, with: .color(.white.opacity(opacity)), style: StrokeStyle(lineWidth: u * (drizzle ? 0.005 : 0.007), lineCap: .round))
-                }
-            }
-        ]
+        let count = jsRound(Double(w * h) * (drizzle ? 0.012 : 0.02) * (0.5 + weather.intensity))
+        let length = drizzle ? 2 : 3, rain = s.color("rain")
+        var random = SeededRandom(seed: 17)
+        for _ in 0..<count {
+            let x = Int(random(0...Double(w + 2)).rounded(.down)), y = Int(random(-2...Double(h)).rounded(.down))
+            for k in 0..<length { g.set(x - k / 2, y + k, rain) }
+        }
     }
 }

@@ -13,6 +13,4 @@ public enum WindowSize: Sendable, CaseIterable {
         case .expanded: CGSize(width: 364, height: 382)
         }
     }
-
-    var showsRegion: Bool { self != .compact }
 }
