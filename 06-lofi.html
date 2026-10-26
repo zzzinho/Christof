@@ -824,16 +824,19 @@ function drawFog(g, w, h, s) {
   }
 }
 
-// 창 위에 건 연등 줄. 해가 진 뒤에는 연등 속이 밝다.
+// 창 위에 건 연등 줄. 해가 진 뒤에는 연등 속이 밝다. 줄은 가는 선이라 윤곽선 없이, 연등만 윤곽선을 두른다.
 function drawLanterns(g, left, right, y, lit) {
   const sag = x => y + Math.round(Math.sin((x - left) / (right - left) * Math.PI) * 3);
-  for (let x = left; x <= right; x++) g.set(x, sag(x), color('wire'));
   const n = Math.max(3, Math.round((right - left) / pt(28)));
-  for (let i = 0; i < n; i++) {
-    const bx = Math.round(left + (right - left) * (i + 0.5) / n), shade = `bulb-${i % 4 + 1}`;
-    g.set(bx, sag(bx) + 1, color('wire'));
-    g.sprite(bx, sag(bx) + 2 + SPRITES.lantern.length, SPRITES.lantern, { p: shade, P: lit ? 'lamp-light' : shade, l: 'plant' });
-  }
+  const at = i => Math.round(left + (right - left) * (i + 0.5) / n);
+  ink(g, t => {
+    for (let i = 0; i < n; i++) {
+      const bx = at(i), shade = `bulb-${i % 4 + 1}`;
+      t.sprite(bx, sag(bx) + 2 + SPRITES.lantern.length, SPRITES.lantern, { p: shade, P: lit ? 'lamp-light' : shade, l: 'plant' });
+    }
+  });
+  for (let x = left; x <= right; x++) g.set(x, sag(x), color('wire'));
+  for (let i = 0; i < n; i++) g.set(at(i), sag(at(i)) + 1, color('wire'));
 }
 
 // ---- 구성 요소 2: 사람 ----
@@ -851,7 +854,8 @@ const PERSON_LOOKS = {
   },
   // 달 머리핀: 오른쪽 옆머리(헤드폰 띠 아래)에 꽂은 초승달
   moonPin: (g, x, top) => g.sprite(x + 3, top + 7, ['MM', 'M.', 'MM'], { M: 'moon' }),
-  lotusPin: (g, x, top) => g.sprite(x + 3, top + 3, ['.P', 'PP', 'pP'], { P: 'spring-1', p: 'spring-2' }),
+  // 연꽃 머리핀: 달 머리핀과 같은 오른쪽 옆머리 자리
+  lotusPin: (g, x, top) => g.sprite(x + 3, top + 7, ['P.P', 'PpP'], { P: 'spring-1', p: 'spring-2' }),
   witchHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.witchHat, { W: 'witch', b: 'pumpkin' }),
   santaHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.santaHat, { R: 'santa', w: 'santa-trim' }),
 };
