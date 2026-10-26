@@ -54,7 +54,7 @@ enum PersonPainter {
             for (i, ch) in row.enumerated() {
                 // 불을 끈 낮에는 옷의 테두리 빛(r) 자리도 기본 색이다.
                 let cloth: Character = s.lightOn || ch != "r" ? ch : "o"
-                let name = j >= p.body && "odrj".contains(ch) ? s.outfit.color(cloth) : colors[ch]
+                let name = j >= p.body && "odrj".contains(ch) ? s.outfit.color(cloth, i, j - p.body, row) : colors[ch]
                 if let name { g.set(left + i, top + j, LofiPalette.color(name)) }
             }
         }
@@ -68,5 +68,6 @@ enum PersonPainter {
                 for j in 0..<max(0, length - (edge ? 1 : 0)) { g.set(left + i, top + p.fall.start + j, i == right ? rim : hair) }
             }
         }
+        for look in s.looks.person { look.draw(&g, L.personX, top, s) }
     }
 }

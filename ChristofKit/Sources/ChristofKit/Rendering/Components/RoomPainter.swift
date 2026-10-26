@@ -1,8 +1,12 @@
 /// 창턱 화분, large 의 선반, 책상과 책·머그, 스탠드
 enum RoomPainter {
     static func draw(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene) {
-        let colors = Sprites.colors(lightOn: s.lightOn)
-        g.ink { $0.sprite(L.x1 - 6, L.sill, Sprites.plant, colors) }
+        let colors = Sprites.colors(lightOn: s.lightOn), looks = s.looks.room
+        if let sill = looks.first(where: { $0.spot == .sill }) {
+            sill.draw(&g, L, s)
+        } else {
+            g.ink { $0.sprite(L.x1 - 6, L.sill, Sprites.plant, colors) }
+        }
         if L.H > 80 { g.ink { drawShelf(&$0, L.x1 + 6, L.W - 6, jsRound(Double(L.H) * 0.38)) } }
 
         // 책상: 윗면은 불빛(낮에는 창) 가까울수록 밝다. 트리가 있으면 그 앞에서 끝난다.
@@ -17,7 +21,13 @@ enum RoomPainter {
         }
         g.ink { $0.sprite(L.personX - 14, L.deskTop + 1, Sprites.books, colors) }
         drawMug(&g, L.personX - 8, L.deskTop + 1, colors)
-        g.ink { $0.sprite(L.lampX, L.deskTop + 1, Sprites.lamp, colors) }
+        for look in looks where look.spot == .desk { look.draw(&g, L, s) }
+        if let lamp = looks.first(where: { $0.spot == .lamp }) {
+            lamp.draw(&g, L, s)
+        } else {
+            g.ink { $0.sprite(L.lampX, L.deskTop + 1, Sprites.lamp, colors) }
+        }
+        for look in looks where look.spot == .wall { look.draw(&g, L, s) }
     }
 
     /// 김은 성긴 점이라 윤곽선을 두르면 검은 덩어리가 된다. 잔만 두른다.

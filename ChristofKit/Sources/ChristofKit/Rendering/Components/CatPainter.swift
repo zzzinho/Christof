@@ -2,6 +2,7 @@
 enum CatPainter {
     static func draw(_ g: inout DotGrid, _ s: DotScene, _ spot: CatSpot) {
         g.sprite(spot.x, spot.bottom, spot.pose.rows, Sprites.colors(lightOn: s.lightOn))
+        for look in s.looks.cat { look.draw(&g, spot, s) }
         if let arm = spot.arm { drawArm(&g, arm.from, arm.to, sleeve: s.outfit.base) }
     }
 
@@ -21,8 +22,12 @@ enum CatPainter {
 }
 
 /// T 는 줄무늬. 다섯 자세 모두 머리 폭(테두리 포함 6~7칸)과 몸집을 맞춘다. side, walk 는 오른쪽(사람·불빛 쪽)을 본다.
+/// head: 머리 위 가운데 칸(귀 사이), scarf: 빨간 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
 struct CatPose {
     let rows: [String]
+    let head: (x: Double, y: Int)
+    let scarf: [String]
+    let scarfBottom: Int
 
     static let back = CatPose(rows: [
         ".c....c....",
@@ -37,7 +42,7 @@ struct CatPose {
         "ccccccccR..",
         "cTTcccccRc.",
         ".ccccccccc.",
-    ])
+    ], head: (3.5, 2), scarf: ["..SSSSS....", "..S........", "..S........", ".S........."], scarfBottom: 9)
     static let front = CatPose(rows: [
         ".c.....c..",
         ".cc...cc..",
@@ -50,7 +55,7 @@ struct CatPose {
         ".cccccccR.",
         "ccccccccRc",
         "cccccccccc",
-    ])
+    ], head: (4, 2), scarf: ["..SSSSS...", "......S...", "......S..."], scarfBottom: 8)
     static let side = CatPose(rows: [
         ".......c..c.",
         "......ccccc.",
@@ -64,7 +69,7 @@ struct CatPose {
         "..ccccccccR.",
         "c.ccccccccR.",
         "ccccccccccR.",
-    ])
+    ], head: (8.5, 1), scarf: ["......SSSS..", "......S....."], scarfBottom: 5)
     static let walk = CatPose(rows: [
         "c..........c..c.",
         "c.........ccccc.",
@@ -76,7 +81,7 @@ struct CatPose {
         "..cccccccccR....",
         "..cc.c...cc.R...",
         "..c..c...c..c...",
-    ])
+    ], head: (12.5, 1), scarf: ["..........SSS...", "...........S...."], scarfBottom: 4)
     /// 감은 눈, 꼬리를 앞으로 감았다.
     static let curled = CatPose(rows: [
         ".c..c.........",
@@ -86,5 +91,5 @@ struct CatPose {
         "cccccccTccTccR",
         "ccTTTTTTTcccR.",
         ".ccccccccccc..",
-    ])
+    ], head: (2.5, 1), scarf: [".SSSS.........", "..S..........."], scarfBottom: 5)
 }

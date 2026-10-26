@@ -49,6 +49,17 @@ func everyPhaseAndWeatherHasItsColors(_ condition: WeatherCondition?) {
     }
 }
 
+/// 이벤트 모양이 쓰는 색 이름도 팔레트에 있어야 한다. 시각마다 고양이 상태·헤드폰이 바뀌고, 낮에는 불을 끈다.
+@Test(arguments: KoreaOccasions.all.map(\.id))
+func everyOccasionLookHasItsColors(_ id: String) throws {
+    let occasion = try #require(KoreaOccasions.all.first { $0.id == id })
+    for hour in 0..<24 {
+        let date = try Date("2026-01-15T\(String(format: "%02d", hour)):00:00+09:00", strategy: .iso8601)
+        let context = scene(sun: hour < 7 || hour > 18 ? -30 : 40, date: date, occasions: [occasion])
+        #expect(SceneComposer.grid(for: context, cols: 122, rows: 57).cells.allSatisfy { $0 != nil })
+    }
+}
+
 @Test func seedPicksHeadwearAndCatStateLikeTheDesign() throws {
     // 시안 06-lofi.html 장면 설명줄과 같은 값
     let morning = DotScene(scene(date: try Date("2026-07-15T13:00:00+09:00", strategy: .iso8601)))

@@ -100,8 +100,7 @@ func designScene(_ name: String, _ context: SceneContext) -> [String: Any] {
         "sun": [context.sun.altitude, context.sun.azimuth],
         "moon": [context.moon.phase, context.moon.altitude, context.moon.azimuth],
         "weather": context.weather.map { ["\($0.condition)", $0.intensity, $0.cloudCover, $0.temperatureCelsius] as [Any] } ?? NSNull(),
-        // ponytail: 이벤트 모양을 아직 옮기지 않아 시안에도 이벤트 없이 그리게 한다.
-        "occasions": [String](),
+        "occasions": context.occasions.map(\.id),
     ]
 }
 

@@ -54,13 +54,17 @@ public struct DotGrid: Sendable {
     }
 
     /// rows 는 문자열 격자, map 은 글자 → 색 이름. 아래 가운데를 (x, bottom) 에 맞춘다.
-    mutating func sprite(_ x: Int, _ bottom: Int, _ rows: [String], _ map: [Character: String]) {
-        let left = jsRound(Double(x) - Double(rows[0].count) / 2), top = bottom - rows.count
+    mutating func sprite(_ x: Double, _ bottom: Int, _ rows: [String], _ map: [Character: String]) {
+        let left = jsRound(x - Double(rows[0].count) / 2), top = bottom - rows.count
         for (j, row) in rows.enumerated() {
             for (i, ch) in row.enumerated() {
                 if let name = map[ch] { set(left + i, top + j, LofiPalette.color(name)) }
             }
         }
+    }
+
+    mutating func sprite(_ x: Int, _ bottom: Int, _ rows: [String], _ map: [Character: String]) {
+        sprite(Double(x), bottom, rows, map)
     }
 
     mutating func disc(_ cx: Double, _ cy: Double, _ r: Double, _ color: (Int, Int) -> UInt32?) {

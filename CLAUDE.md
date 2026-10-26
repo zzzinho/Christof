@@ -25,9 +25,9 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 
 목적은 이벤트를 쉽게 추가·제거·수정하고, 국가별로 확장할 수 있게 하는 것이다.
 
-- 이벤트 하나 = `Occasion` 값 하나. 언제(`OccasionRule`)와 창문 장식(`decorations`)을 함께 정의한다. 이벤트 추가·제거·수정은 국가 프로필의 `occasions` 목록에서 그 값만 건드린다.
+- 이벤트 하나 = `Occasion` 값 하나. 언제(`OccasionRule`)와 구성 요소별 모양·옷(`OccasionLooks`)을 함께 정의한다. 이벤트 추가·제거·수정은 국가 프로필의 `occasions` 목록에서 그 값만 건드린다.
 - 국가 하나 = `CountryProfile` 타입 하나 (지역 목록, 이벤트, 계절). 새 국가는 `Countries/<국가>/` 에 프로필을 만들고 `CountryRegistry.standard` 에 등록만 한다. 공용 코드는 고치지 않는다.
-- 날짜 규칙 종류, 창밖 효과, 구성 요소는 각각 타입 하나씩 둔다 (`OccasionRule`, `OutsideEffect`, `…Painter`). 새 종류는 새 타입으로 추가하고, 종류별로 분기하는 `switch` 를 여러 곳에 늘리지 않는다.
+- 날짜 규칙 종류, 창밖 효과, 구성 요소, 모양 종류는 각각 타입 하나씩 둔다 (`OccasionRule`, `OutsideEffect`, `…Painter`, `WindowLook` 등). 같은 종류의 모양은 값으로 늘린다(`DeskItem.tteokguk`). 새 종류는 새 타입으로 추가하고, 종류별로 분기하는 `switch` 를 여러 곳에 늘리지 않는다.
 - 데이터 가져오기(날씨·천문·이벤트 판정), 장면 정보 조립(`SceneContextFactory`), 그리기(레이어)는 서로 다른 타입이 맡는다.
 
 ## 주석
@@ -55,6 +55,6 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
   - 그리기는 시안 `06-lofi.html` 의 JS 를 같은 이름·순서로 옮긴 것이다. 반올림·hypot·난수도 JS 와 같게 계산해서 같은 칸이 나온다.
   - `Occasions/`: 이벤트 모델과 날짜 규칙 타입. 음력 명절은 `Calendar(identifier: .dangi)` 로 계산한다.
   - `Countries/`: 국가 프로필과 레지스트리. 국가와 무관한 하늘 이벤트는 `CelestialOccasions`.
-  - `Rendering/Components`: 구성 요소(벽, 시계, 창문, 고양이, 방 안, 사람). `Rendering/Layers`: 창밖 효과. `LofiPalette` 는 design.css 의 `--lofi-*` 색이다.
+  - `Rendering/Components`: 구성 요소(벽, 시계, 창문, 고양이, 방 안, 사람). `Rendering/Layers`: 창밖 효과. `Rendering/Looks`: 구성 요소별 이벤트 모양(시안의 `*_LOOKS`). `LofiPalette` 는 design.css 의 `--lofi-*` 색이다.
 - `Christof/`: 컨테이너 앱. `ChristofWidget/`: 위젯 익스텐션. 둘 다 iOS·macOS 멀티플랫폼 타깃이다.
 - 루트의 `DESIGN.md`, `design.css`, `*.html`: hunsu(저장소 루트에서 `hunsu` 실행)로 만드는 위젯 시안. 디자인 세션이 고치고, 고른 시안은 개발 세션이 `Rendering/` 에 옮긴다.

@@ -3,11 +3,12 @@
 public enum SceneComposer {
     public static func grid(for context: SceneContext, cols: Int, rows: Int) -> DotGrid {
         let s = DotScene(context)
-        let L = RoomLayout(cols: cols, rows: rows)
+        let L = RoomLayout(cols: cols, rows: rows, tree: s.looks.room.contains { $0.spot == .lamp })
         let cat = L.catSpot(s.catState)
         var g = DotGrid(cols: cols, rows: rows)
         WallPainter.draw(&g, L, s)
         g.ink { ClockPainter.draw(&$0, L, s) }
+        for look in s.looks.clock { look.bare(&g, L.clock.x, L.clock.y, s) }
         WindowPainter.draw(&g, L, s)
         if !cat.front { g.ink { CatPainter.draw(&$0, s, cat) } }
         RoomPainter.draw(&g, L, s)

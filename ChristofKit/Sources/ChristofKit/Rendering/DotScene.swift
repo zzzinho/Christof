@@ -30,6 +30,7 @@ struct DotScene {
     let catState: CatState
     let hair: Double
     let outfit: Outfit
+    let looks: OccasionLooks
 
     var lightOn: Bool { phase != .day }
 
@@ -59,8 +60,9 @@ struct DotScene {
         catState = CatState.allCases[random.int(0, CatState.allCases.count - 1)]
         // 7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다.
         hair = (Double((month + 5) % 12) + Double(day - 1) / 31) / 12
+        looks = .merged(context.occasions.map(\.looks))
         // ponytail: 평소 옷은 시안 후보 셋(머스터드·세이지·코럴) 중 시안이 쓰는 머스터드만 옮겼다.
-        outfit = .mustard
+        outfit = looks.outfit ?? .mustard
     }
 
     /// 때마다 다른 색
