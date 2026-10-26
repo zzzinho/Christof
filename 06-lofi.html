@@ -576,6 +576,7 @@ function compose(g, W, H, s) {
   const L = layout(W, H, s), cat = L.cats[s.catState];
   drawWall(g, L, s);
   ink(g, t => drawClock(t, L, s));
+  for (const name of s.looks.clock) CLOCK_LOOKS[name].bare?.(g, ...L.clock);
   drawWindow(g, L, s);
   if (!cat.front) ink(g, t => drawCat(t, s, cat));
   drawRoom(g, L, s);
@@ -626,7 +627,7 @@ const WINDOW_LOOKS = {
   } },
   // 할로윈: 하늘의 박쥐
   bats: { sky(g, w, h) {
-    for (const [fx, fy] of [[0.2, 0.22], [0.5, 0.12], [0.72, 0.3]]) g.sprite(Math.round(w * fx), Math.round(h * fy) + 3, SPRITES.bat, { W: 'cat' });
+    for (const [fx, fy] of [[0.2, 0.22], [0.5, 0.12], [0.72, 0.3]]) g.sprite(Math.round(w * fx), Math.round(h * fy) + 3, SPRITES.bat, { W: 'outline' });
   } },
   // 크리스마스: 유리 모서리와 아래쪽에 낀 성에
   frost: { glass(g, w, h) {
@@ -1068,8 +1069,9 @@ function drawGifts(g, L) {
 function drawCobweb(g, W) {
   const cx = W - 0.5, cy = 0, c = color('star-dim');
   const at = (deg, r) => [cx + Math.cos(deg * Math.PI / 180) * r, cy + Math.sin(deg * Math.PI / 180) * r];
-  for (const deg of [100, 135, 170]) for (let r = 0; r <= 7; r += 0.5) g.set(...at(deg, r), c);
-  for (const r of [2.5, 4.5, 7]) for (let deg = 95; deg <= 175; deg += 6) g.set(...at(deg, r), c);
+  // 고리 사이를 3칸 넘게 띄워야 도트로 줄었을 때 뭉쳐 보이지 않는다
+  for (const deg of [95, 125, 150, 175]) for (let r = 0; r <= 11; r += 0.5) g.set(...at(deg, r), c);
+  for (const r of [4, 7.5, 11]) for (let deg = 95; deg <= 175; deg += 40 / r) g.set(...at(deg, r), c);
 }
 
 // large 의 빈 벽에 둔 선반: 세워 둔 책과 늘어진 화분
@@ -1120,10 +1122,10 @@ const CLOCK_LOOKS = {
       g.rect(x + (x < cx ? 1 : 0), cy - 9, 1, 2, color('hanbok'));
     }
   } },
-  // 할로윈: 시계에 매달린 거미
-  spider: { draw(g, cx, cy) {
-    g.rect(cx + 4, cy + 5, 1, 6, color('star-dim'));
-    g.sprite(cx + 4, cy + 14, ['W.W', '.W.', 'W.W'], { W: 'cat' });
+  // 할로윈: 시계에 매달린 거미. 줄과 다리가 가늘어 윤곽선 없이(bare) 시계 위에 그린다.
+  spider: { bare(g, cx, cy) {
+    g.rect(cx + 4, cy + 6, 1, 5, color('star-dim'));
+    g.sprite(cx + 4, cy + 14, ['W.W.W', '.WWW.', 'W.W.W'], { W: 'outline' });
   } },
   // 크리스마스: 시계 위 호랑가시 잎과 열매
   holly: { draw: (g, cx, cy) => g.sprite(cx, cy - 5, ['LL.LL', '.LrL.'], { L: 'summer-2', r: 'santa' }) },
