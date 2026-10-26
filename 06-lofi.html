@@ -115,7 +115,7 @@ const OCCASIONS = {
   'KR.seollal': { name: '설날', looks: { window: 'kite', person: 'daenggi', cat: 'pouch', room: 'tteokguk', clock: 'norigae' } },
   'KR.jeongwolDaeboreum': { name: '정월대보름', looks: { window: ['moonHalo', 'daljip'], person: 'moonPin', cat: 'walnut', room: 'bureom', clock: 'moonFace' } },
   'KR.buddhasBirthday': { name: '부처님오신날', looks: { window: 'lanterns', person: 'lotusPin', cat: 'lotus', room: 'lotusBowl', clock: 'lantern' } },
-  'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'persimmonBranch'], person: 'daenggi', cat: 'persimmon', room: 'songpyeon', clock: 'rabbitEars' } },
+  'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'persimmonBranch'], person: 'ribbonPin', cat: 'persimmon', room: 'songpyeon', clock: 'rabbitEars' } },
   'KR.newYearsDay': { name: '새해 첫날', looks: { window: 'sunGlow', person: 'beanie', cat: 'beanie', room: 'greetingCards', clock: 'sparkles' } },
   'KR.halloween': { name: '할로윈', looks: { window: 'bats', person: 'witchHat', cat: 'batWings', room: 'pumpkin', clock: 'spider' } },
   'KR.christmasEve': { name: '크리스마스 이브', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' } },
@@ -856,6 +856,8 @@ const PERSON_LOOKS = {
   moonPin: (g, x, top) => g.sprite(x + 3, top + 7, ['MM', 'M.', 'MM'], { M: 'moon' }),
   // 연꽃 머리핀: 달 머리핀과 같은 오른쪽 옆머리 자리
   lotusPin: (g, x, top) => g.sprite(x + 3, top + 7, ['P.P', 'PpP'], { P: 'spring-1', p: 'spring-2' }),
+  // 리본 핀: 추석 무렵엔 머리가 짧아 댕기가 옷깃에 묻히므로 옆머리에 꽂는다
+  ribbonPin: (g, x, top) => g.sprite(x + 3, top + 7, ['P.P', 'PgP', 'P.P'], { P: 'pouch', g: 'pouch-gold' }),
   witchHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.witchHat, { W: 'witch', b: 'pumpkin' }),
   santaHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.santaHat, { R: 'santa', w: 'santa-trim' }),
 };
