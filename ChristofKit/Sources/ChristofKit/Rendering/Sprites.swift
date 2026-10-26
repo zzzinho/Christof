@@ -31,4 +31,6 @@ enum Sprites {
     static let mug = [".t.t...", "t.t....", ".t.t...", ".......", "mmmmm..", "mMMMmmm", "mMMMm.m", "mMMMmmm", ".mmm..."]
     static let books = [".11111111.", "2222222222", ".33333333.", "1111111111"]
     static let plant = [".l.l.", "lLlLl", ".lLl.", "ppppp", ".ppp."]
+    /// 김은 성긴 점이라 그릇 줄만 윤곽선을 두른다.
+    static let rice = [".t.t.", ".www.", "BBBBB", ".BBB."]
 }

@@ -12,8 +12,28 @@ struct DotScene {
         case headphones, neck, bare
     }
 
-    enum CatState: CaseIterable {
-        case window, sleep, walk, pet, shoulder
+    enum CatState: Sendable {
+        case window, sleep, walk, beside, pet, shoulder, eat
+    }
+
+    /// 사람과 고양이의 상호작용. 시각이 종류를 정하고, 종류 안의 고양이 상태는 시드로 고른다.
+    enum Interaction {
+        case apart, together, meal
+
+        var cats: [CatState] {
+            switch self {
+            case .apart: [.window, .sleep, .walk]
+            case .together: [.beside, .pet, .shoulder]
+            case .meal: [.eat]
+            }
+        }
+
+        /// [시작 시각, 종류]. 아침(7~8시)·점심(12시)·저녁(18~19시)은 밥, 사람이 일하는 낮은 따로, 밤은 같이.
+        static let daily: [(from: Int, kind: Interaction)] = [(0, .together), (7, .meal), (9, .apart), (12, .meal), (13, .apart), (18, .meal), (20, .together)]
+
+        static func at(hour: Int) -> Interaction {
+            daily.last { hour >= $0.from }?.kind ?? .together
+        }
     }
 
     let phase: Phase
@@ -54,13 +74,15 @@ struct DotScene {
         // 따뜻한 겨울(부산·제주)은 마른 풍경으로 두고, 눈이 오거나 영하일 때만 지붕에 눈을 얹는다.
         snowCovered = weather.map { $0.condition == .snow || (context.season == .winter && $0.temperatureCelsius <= 0) } ?? false
 
-        // 같은 날 같은 시각이면 늘 같은 모습이고, 한 시간마다 바뀐다.
+        looks = .merged(context.occasions.map(\.looks))
+        // 같은 날 같은 시각이면 늘 같은 모습이고, 한 시간마다 바뀐다. 순간이 덮어도 뽑는 순서(헤드폰 → 고양이)는 같다.
         var random = SeededRandom(seed: UInt64((month * 100 + day) * 100 + hour))
         headwear = Headwear.allCases[random.int(0, Headwear.allCases.count - 1)]
-        catState = CatState.allCases[random.int(0, CatState.allCases.count - 1)]
+        let cats = Interaction.at(hour: hour).cats, picked = cats[random.int(0, cats.count - 1)]
+        let moment = context.occasions.lazy.compactMap(\.looks.moment).first { [hour] in $0.hours.contains(hour) }
+        catState = moment?.cat ?? picked
         // 7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다.
         hair = (Double((month + 5) % 12) + Double(day - 1) / 31) / 12
-        looks = .merged(context.occasions.map(\.looks))
         // ponytail: 평소 옷은 시안 후보 셋(머스터드·세이지·코럴) 중 시안이 쓰는 머스터드만 옮겼다.
         outfit = looks.outfit ?? .mustard
     }

@@ -50,6 +50,11 @@ struct RoomLayout {
             CatSpot(pose: .side, x: personX - 15, bottom: deskTop + 1, item: (personX - 24, deskTop + 1), front: true,
                     arm: ((personX - 6, personTop + 15), (personX - 12, deskTop - 10)))
         case .shoulder: CatSpot(pose: .curled, x: personX + 1, bottom: personTop + 18, item: (cat.x, sill), front: true)
+        case .beside: CatSpot(pose: .back, x: personX - 14, bottom: deskTop + 1, item: (personX - 24, deskTop + 1), front: true)
+        // small 은 고양이 왼쪽에 자리가 없어 물건을 창턱에 둔다.
+        case .eat:
+            CatSpot(pose: .eat, x: personX - 28, bottom: deskTop + 1, item: (cat.x, sill), front: true,
+                    bowl: (personX - 20, deskTop + 1), dish: personX - 13)
         }
     }
 }
@@ -62,6 +67,10 @@ struct CatSpot {
     var front = false
     /// 쓰다듬는 팔 [어깨, 손끝]
     var arm: (from: (x: Int, y: Int), to: (x: Int, y: Int))?
+    /// 고양이 밥그릇
+    var bowl: (x: Int, y: Int)?
+    /// 사람 몫 밥 자리. 밥 먹는 동안은 책과 머그를 치우고 그 자리에 둔다.
+    var dish: Int?
 
     var left: Int { jsRound(Double(x) - Double(pose.rows[0].count) / 2) }
     var head: (x: Double, y: Int) { (Double(left) + pose.head.x, bottom - pose.rows.count + pose.head.y) }

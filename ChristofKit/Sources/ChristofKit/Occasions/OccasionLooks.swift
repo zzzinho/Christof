@@ -6,6 +6,8 @@ public struct OccasionLooks: Sendable {
     var cat: [any CatLook] = []
     var room: [any RoomLook] = []
     var clock: [any ClockLook] = []
+    /// 그 이벤트다운 사람·고양이 순간. 그 시각 동안 시각표로 고른 상호작용을 덮는다.
+    var moment: OccasionMoment?
 
     public static let none = OccasionLooks()
 
@@ -15,4 +17,10 @@ public struct OccasionLooks: Sendable {
             window: list.flatMap(\.window), person: list.flatMap(\.person), outfit: list.lazy.compactMap(\.outfit).first,
             cat: list.flatMap(\.cat), room: list.flatMap(\.room), clock: list.flatMap(\.clock))
     }
+}
+
+struct OccasionMoment: Sendable {
+    /// 양 끝 포함
+    let hours: ClosedRange<Int>
+    let cat: DotScene.CatState
 }

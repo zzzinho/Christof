@@ -11,20 +11,26 @@ protocol RoomLook: Sendable {
     func draw(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene)
 }
 
-/// 책상 위 사람 왼쪽에 두는 물건
+/// 책상 위 사람 왼쪽에 두는 물건. 책상 위 고양이(곁에서 보기·쓰다듬기)와 그 곁 물건보다 왼쪽이다.
+/// food 면 밥 먹는 시각에 사람 몫 밥 대신 놓는다.
 struct DeskItem: RoomLook {
     let rows: [String]
     let colors: [Character: String]
+    var food = false
     var spot: RoomSpot { .desk }
 
     func draw(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene) {
-        g.ink { $0.sprite(L.personX - 23, L.deskTop + 1, rows, colors) }
+        place(&g, L.personX - 30, L)
     }
 
-    static let tteokguk = DeskItem(rows: [".t.t.", "cgccc", "BBBBB", ".BBB."], colors: ["t": "steam", "c": "hanbok-collar", "g": "summer-1", "B": "pouch-knot"])
+    func place(_ g: inout DotGrid, _ x: Int, _ L: RoomLayout) {
+        g.ink { $0.sprite(x, L.deskTop + 1, rows, colors) }
+    }
+
+    static let tteokguk = DeskItem(rows: [".t.t.", "cgccc", "BBBBB", ".BBB."], colors: ["t": "steam", "c": "hanbok-collar", "g": "summer-1", "B": "pouch-knot"], food: true)
     static let greetingCards = DeskItem(rows: ["P..W.", "PP.WW", "PP.WW"], colors: ["P": "pouch", "W": "hanbok-collar"])
-    static let bureom = DeskItem(rows: [".nNn.", "NnNnN", "BBBBB", ".BBB."], colors: ["n": "wood-light", "N": "branch", "B": "mug-dark"])
-    static let songpyeon = DeskItem(rows: [".pWg.", "pWgWp", "MMMMM"], colors: ["p": "hanbok", "W": "hanbok-collar", "g": "summer-1", "M": "mug"])
+    static let bureom = DeskItem(rows: [".nNn.", "NnNnN", "BBBBB", ".BBB."], colors: ["n": "wood-light", "N": "branch", "B": "mug-dark"], food: true)
+    static let songpyeon = DeskItem(rows: [".pWg.", "pWgWp", "MMMMM"], colors: ["p": "hanbok", "W": "hanbok-collar", "g": "summer-1", "M": "mug"], food: true)
 }
 
 /// 창턱 화분 자리를 차지하는 물건. lit 은 불을 켰을 때만 바꾸는 색이다.

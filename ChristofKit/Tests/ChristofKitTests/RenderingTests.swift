@@ -61,11 +61,13 @@ func everyOccasionLookHasItsColors(_ id: String) throws {
 }
 
 @Test func seedPicksHeadwearAndCatStateLikeTheDesign() throws {
-    // 시안 06-lofi.html 장면 설명줄과 같은 값
-    let morning = DotScene(scene(date: try Date("2026-07-15T13:00:00+09:00", strategy: .iso8601)))
-    #expect(morning.headwear == .neck && morning.catState == .walk)
-    let night = DotScene(scene(date: try Date("2026-09-25T21:00:00+09:00", strategy: .iso8601)))
-    #expect(night.headwear == .headphones && night.catState == .shoulder)
+    // 시안 06-lofi.html 장면 설명줄과 같은 값. 오후 1시는 시각표로 "따로"다.
+    let afternoon = DotScene(scene(date: try Date("2026-07-15T13:00:00+09:00", strategy: .iso8601)))
+    #expect(afternoon.headwear == .neck && afternoon.catState == .sleep)
+    // 추석 밤 9시는 시각표("같이")를 이벤트 순간(보름달 같이 보기)이 덮는다.
+    let chuseok = try #require(KoreaOccasions.all.first { $0.id == "KR.chuseok" })
+    let night = DotScene(scene(date: try Date("2026-09-25T21:00:00+09:00", strategy: .iso8601), occasions: [chuseok]))
+    #expect(night.headwear == .headphones && night.catState == .beside)
 }
 
 @Test func accessibilityLabelReadsRegionTimeWeatherAndOccasions() throws {

@@ -19,9 +19,19 @@ enum RoomPainter {
             }
             t.rect(0, L.deskTop + 1, deskRight, L.H - L.deskTop - 1, LofiPalette.color("wood"))
         }
-        g.ink { $0.sprite(L.personX - 14, L.deskTop + 1, Sprites.books, colors) }
-        drawMug(&g, L.personX - 8, L.deskTop + 1, colors)
-        for look in looks where look.spot == .desk { look.draw(&g, L, s) }
+        // 밥 먹는 동안은 책·머그와 밥이 아닌 책상 물건(연하장)을 치우고 그 자리에 밥을 놓는다.
+        if let dish = L.catSpot(s.catState).dish {
+            if let food = looks.lazy.compactMap({ $0 as? DeskItem }).first(where: \.food) {
+                food.place(&g, dish, L)
+            } else {
+                g.ink { $0.sprite(dish, L.deskTop + 1, Array(Sprites.rice[1...]), ["w": "hanbok-collar", "B": "hanbok-jade"]) }
+                g.sprite(dish, L.deskTop - 2, Array(Sprites.rice[..<1]), ["t": "steam"])
+            }
+        } else {
+            g.ink { $0.sprite(L.personX - 14, L.deskTop + 1, Sprites.books, colors) }
+            drawMug(&g, L.personX - 8, L.deskTop + 1, colors)
+            for look in looks where look.spot == .desk { look.draw(&g, L, s) }
+        }
         if let lamp = looks.first(where: { $0.spot == .lamp }) {
             lamp.draw(&g, L, s)
         } else {

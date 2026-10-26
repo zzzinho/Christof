@@ -2,6 +2,8 @@
 enum CatPainter {
     static func draw(_ g: inout DotGrid, _ s: DotScene, _ spot: CatSpot) {
         g.sprite(spot.x, spot.bottom, spot.pose.rows, Sprites.colors(lightOn: s.lightOn))
+        // 그릇은 고양이 다음에 그려 숙인 입을 가린다.
+        if let bowl = spot.bowl { g.sprite(bowl.x, bowl.y, [".fff.", "BBBBB"], ["f": "autumn-2", "B": "beanie"]) }
         for look in s.looks.cat { look.draw(&g, spot, s) }
         if let arm = spot.arm { drawArm(&g, arm.from, arm.to, sleeve: s.outfit.base) }
     }
@@ -82,6 +84,18 @@ struct CatPose {
         "..cc.c...cc.R...",
         "..c..c...c..c...",
     ], head: (12.5, 1), scarf: ["..........SSS...", "...........S...."], scarfBottom: 4)
+    /// 밥그릇에 머리를 숙였다.
+    static let eat = CatPose(rows: [
+        "c................",
+        "c................",
+        ".c...............",
+        ".ccTccTccTcR.....",
+        "..cTccTccTccR.c.c",
+        "..ccccccccccccccc",
+        "..ccccccccc..cTec",
+        "..cc.c...cc..cccR",
+        "..c..c...c.......",
+    ], head: (15, 4), scarf: ["...........SS....", "...........S....."], scarfBottom: 6)
     /// 감은 눈, 꼬리를 앞으로 감았다.
     static let curled = CatPose(rows: [
         ".c..c.........",
