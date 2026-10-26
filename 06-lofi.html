@@ -849,7 +849,8 @@ const PERSON_LOOKS = {
     g.sprite(x, top + 5, SPRITES.beanie, { w: 'santa-trim', B: 'beanie', b: 'beanie-dark' });
     g.sprite(x, top + 17, SPRITES.scarf, { f: 'scarf' });
   },
-  moonPin: (g, x, top) => g.rect(x + 2, top + 1, 2, 2, color('moon')),
+  // 달 머리핀: 오른쪽 옆머리(헤드폰 띠 아래)에 꽂은 초승달
+  moonPin: (g, x, top) => g.sprite(x + 3, top + 7, ['MM', 'M.', 'MM'], { M: 'moon' }),
   lotusPin: (g, x, top) => g.sprite(x + 3, top + 3, ['.P', 'PP', 'pP'], { P: 'spring-1', p: 'spring-2' }),
   witchHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.witchHat, { W: 'witch', b: 'pumpkin' }),
   santaHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.santaHat, { R: 'santa', w: 'santa-trim' }),
