@@ -34,6 +34,15 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 - 코드로 알 수 없는 것만 주석으로 남긴다: 왜 그렇게 했는지, 외부 제약(API·플랫폼 동작), 의도한 단순화와 그 한계.
 - 이름·타입·코드로 드러나는 내용(무엇을 하는지, 매개변수 설명, 예시 값)은 주석으로 되풀이하지 않는다. 공개 API라고 해서 doc 주석을 꼭 달지 않는다.
 
+## 세션
+
+디자인 세션과 개발 세션을 나눠 쓴다. 세션을 열고 첫 입력으로 스킬을 불러 범위를 정한다.
+
+- 디자인: `claude -n 디자인` 으로 열고 `/design`. 시안(`DESIGN.md`, `design.css`, `*.html`)만 고친다.
+- 개발: `claude -n 개발` 로 열고 `/dev`. 앱·위젯 코드만 고친다.
+- 두 세션은 같은 작업 트리를 쓴다. 커밋할 때 자기 범위 파일만 경로를 적어 올린다.
+- 범위와 확인 방법은 `.claude/skills/design/SKILL.md`, `.claude/skills/dev/SKILL.md` 에 있다.
+
 ## 작업 방식
 
 - git으로 관리한다. 빌드·테스트가 통과한 단위로 커밋한다.
@@ -46,4 +55,4 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
   - `Countries/`: 국가 프로필과 레지스트리. 국가와 무관한 하늘 이벤트는 `CelestialOccasions`.
   - `Rendering/Layers`, `Rendering/Decorations`: 기본 효과와 이벤트 장식 레이어.
 - `Christof/`: 컨테이너 앱. `ChristofWidget/`: 위젯 익스텐션. 둘 다 iOS·macOS 멀티플랫폼 타깃이다.
-- 루트의 `DESIGN.md`, `design.css`, `*.html`: hunsu(저장소 루트에서 `hunsu` 실행)로 만드는 위젯 시안. 그리기 코드를 SVG로 옮긴 것이라 `Rendering/` 을 바꾸면 시안도 맞춰 고치고, 시안을 고르면 `Rendering/` 에 옮긴다.
+- 루트의 `DESIGN.md`, `design.css`, `*.html`: hunsu(저장소 루트에서 `hunsu` 실행)로 만드는 위젯 시안. 디자인 세션이 고치고, 고른 시안은 개발 세션이 `Rendering/` 에 옮긴다.
