@@ -1,12 +1,13 @@
 /// 창 아래쪽 가로수로 계절을 보인다. 해가 진 뒤에는 실루엣이고, 겨울은 잎 없는 가지다.
+/// 봄은 새잎(은행나무·느티나무), 가을은 은행나무 노랑에 셋째마다 단풍. 벚꽃은 일본으로 읽혀서 쓰지 않는다.
 struct StreetTreeEffect: OutsideEffect {
     func draw(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) {
         var random = SeededRandom(seed: 13)
         let dark = s.phase == .night || s.phase == .dusk
         let crowns: [String]? = switch s.season {
-        case .spring: ["spring-1", "spring-2"]
+        case .spring: ["leaf-new", "leaf-new-dark"]
         case .summer: ["summer-1", "summer-2"]
-        case .autumn: ["autumn-1", "autumn-2", "autumn-3"]
+        case .autumn: ["ginkgo", "autumn-3", "autumn-1"]
         case .winter: nil
         }
         let bark = dark ? s.color("city") : LofiPalette.color("branch")
@@ -29,6 +30,13 @@ struct StreetTreeEffect: OutsideEffect {
             }
             x += r * 2 + random(1...4)
             i += 1
+        }
+        // 봄: 길가 개나리 울타리
+        if s.season == .spring {
+            for x in 0..<w {
+                let top = h - 2 - (random(0...1) < 0.5 ? 1 : 0)
+                g.rect(x, top, 1, h - top, dark ? s.color("city") : LofiPalette.color("forsythia"))
+            }
         }
     }
 }

@@ -42,9 +42,12 @@ struct Sparkles: ClockLook {
 /// 시계 아래 작은 연등
 struct ClockLantern: ClockLook {
     func draw(_ g: inout DotGrid, _ cx: Int, _ cy: Int, _ s: DotScene) {
-        g.rect(cx, cy + 7, 1, 2, LofiPalette.color("wire"))
         let lantern = LanternString.lantern
-        g.sprite(cx, cy + 9 + lantern.count, lantern, ["p": "bulb-1", "P": s.lightOn ? "lamp-light" : "bulb-1", "l": "plant"])
+        g.sprite(cx, cy + 9 + lantern.count, lantern, ["p": "lotus-lantern", "P": s.lightOn ? "lamp-light" : "lotus-lantern", "l": "plant"])
+    }
+
+    func bare(_ g: inout DotGrid, _ cx: Int, _ cy: Int, _ s: DotScene) {
+        g.rect(cx, cy + 7, 1, 2, LofiPalette.color("wire"))
     }
 }
 

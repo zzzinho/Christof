@@ -10,7 +10,7 @@ enum WindowPainter {
 
     static func draw(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene) {
         let (x0, x1, y0, sill) = (L.x0, L.x1, L.y0, L.sill)
-        let wood = LofiPalette.color("wood"), woodLight = LofiPalette.color("wood-light")
+        let sash = LofiPalette.color("sash")
         g.ink { t in
             let v = L.view
             t.within(v.x, v.y, v.w, v.h) { t in
@@ -22,15 +22,17 @@ enum WindowPainter {
                 for effect in weather { effect.draw(&t, v.w, v.h, s) }
                 for look in looks { look.glass(&t, v.w, v.h, s) }
             }
+            // 아파트 샷시: 흰 PVC 틀에 미닫이 두 짝. 가운데는 두 짝의 문틀이 겹쳐 굵고, 크리센트 잠금이 달렸다.
             for y in y0..<sill {
                 for x in x0..<x1 where !(x >= x0 + 2 && x < x1 - 2 && y >= y0 + 2) {
-                    t.set(x, y, y == y0 ? woodLight : wood)
+                    t.set(x, y, y == y0 ? LofiPalette.color("sash-light") : sash)
                 }
             }
-            let midX = jsRound(Double(x0 + x1) / 2), midY = jsRound(Double(y0) + Double(sill - y0) * 0.42)
-            t.rect(midX, y0 + 2, 1, sill - y0 - 2, wood)
-            t.rect(x0 + 2, midY, x1 - x0 - 4, 1, wood)
-            t.rect(x0 - 2, sill, x1 - x0 + 4, 2, woodLight)
+            let midX = jsRound(Double(x0 + x1) / 2)
+            t.rect(midX - 1, y0 + 2, 3, sill - y0 - 2, sash)
+            t.rect(midX, y0 + 2, 1, sill - y0 - 2, LofiPalette.color("sash-dark"))
+            t.rect(midX - 1, jsRound(Double(y0) + Double(sill - y0) * 0.55), 1, 2, LofiPalette.color("outline"))
+            t.rect(x0 - 2, sill, x1 - x0 + 4, 2, LofiPalette.color("wood-light"))
         }
         let curtain = LofiPalette.color("curtain"), curtainDark = LofiPalette.color("curtain-dark")
         g.ink { t in

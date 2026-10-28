@@ -65,7 +65,7 @@ func sunTime(_ region: Region, _ month: Int, _ day: Int, _ event: KeyPath<SunSta
 let seoul = region("KR.seoul")
 let scenarios: [Scenario] = [
     Scenario("01-summer-clear-day", seoul, localTime(seoul, 7, 15, 13), (.clear, 0, 0.1, 31)),
-    Scenario("02-spring-blossom-day", region("KR.daegu"), localTime(region("KR.daegu"), 4, 5, 11), (.partlyCloudy, 0, 0.3, 17)),
+    Scenario("02-spring-forsythia-day", region("KR.daegu"), localTime(region("KR.daegu"), 4, 5, 11), (.partlyCloudy, 0, 0.3, 17)),
     Scenario("03-sunrise", seoul, sunTime(seoul, 10, 18, \.sunrise), (.clear, 0, 0.2, 9), occasion: "sky.sunrise"),
     Scenario("04-sunset", region("KR.busan"), sunTime(region("KR.busan"), 6, 21, \.sunset), (.partlyCloudy, 0, 0.35, 24), occasion: "sky.sunset"),
     Scenario("05-crescent-night", seoul, localTime(seoul, 3, 22, 20), (.clear, 0, 0, 5)),

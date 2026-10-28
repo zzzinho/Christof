@@ -95,17 +95,20 @@ struct Frost: WindowLook {
 
 /// 창 위에 건 연등 줄. 해가 진 뒤에는 연등 속이 밝다. 줄은 가는 선이라 윤곽선 없이, 연등만 윤곽선을 두른다.
 struct LanternString: WindowLook {
-    static let lantern = [".p.p.", "ppPpp", "pPPPp", "ppPpp", ".lll.", "..p.."]
+    /// 연꽃등: 끝이 뾰족한 꽃잎 두 겹, 아래에 연잎. 둥근 제등(일본)과 구분되게 꽃잎 끝을 살린다.
+    static let lantern = [".p.p.p.", "ppPpPpp", "pPPPPPp", ".pPPPp.", "lllllll", ".l.l.l."]
+    /// 오색 연등: 분홍 연꽃등을 앞세워 노랑·초록·빨강·파랑을 돌린다.
+    static let colors = ["lotus-lantern", "bulb-2", "bulb-3", "bulb-1", "bulb-4"]
 
     func frame(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene) {
         let (left, right, y) = (L.x0, L.x1, L.y0 - 1)
         let span = Double(right - left)
         func sag(_ x: Int) -> Int { y + jsRound(sin(Double(x - left) / span * Double.pi) * 3) }
-        let n = max(3, jsRound(span / (28 / DotGrid.dot)))
+        let n = max(3, jsRound(span / (32 / DotGrid.dot)))
         func at(_ i: Int) -> Int { jsRound(Double(left) + span * (Double(i) + 0.5) / Double(n)) }
         g.ink { t in
             for i in 0..<n {
-                let bx = at(i), shade = "bulb-\(i % 4 + 1)"
+                let bx = at(i), shade = Self.colors[i % Self.colors.count]
                 t.sprite(bx, sag(bx) + 2 + Self.lantern.count, Self.lantern, ["p": shade, "P": s.lightOn ? "lamp-light" : shade, "l": "plant"])
             }
         }
