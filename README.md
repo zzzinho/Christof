@@ -23,13 +23,31 @@
 
 ## 설치 (macOS 26 이상)
 
-1. [Releases](https://github.com/zzzinho/Christof/releases/latest)에서 `Christof-macOS.zip` 을 받아 풀고, `Christof.app` 을 응용 프로그램 폴더로 옮깁니다.
-2. Apple 공증을 받지 않은 앱이라 터미널에서 격리 속성을 지워야 열립니다.
-   ```sh
-   xattr -dr com.apple.quarantine /Applications/Christof.app
-   ```
-3. 앱을 한 번 엽니다. 앱에서 위젯 미리보기를 보고, 시각·날씨·이벤트를 바꿔 볼 수 있습니다.
-4. 바탕화면을 우클릭하고 "위젯 편집"을 고른 뒤, Christof 위젯을 바탕화면에 놓습니다.
+터미널에서 실행합니다. 최신 릴리스를 `/Applications` 에 설치하고 앱을 엽니다. 이미 설치돼 있으면 새 버전으로 바꿉니다.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/install.sh | sh
+```
+
+특정 버전을 설치하거나 이전 버전으로 되돌리려면 버전을 붙입니다. 버전 목록은 [Releases](https://github.com/zzzinho/Christof/releases)에 있습니다.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/install.sh | sh -s -- v0.1.0
+```
+
+설치가 끝나면 바탕화면을 우클릭하고 "위젯 편집"을 고른 뒤, Christof 위젯을 바탕화면에 놓습니다. 앱에서는 위젯 미리보기를 보고 시각·날씨·이벤트를 바꿔 볼 수 있고, 맨 아래에 설치된 버전이 나옵니다.
+
+Apple 공증을 받지 않은 앱입니다. 스크립트로 받으면 그냥 열립니다. 브라우저로 zip 을 받았다면 `xattr -dr com.apple.quarantine /Applications/Christof.app` 을 실행해야 열립니다.
+
+## 삭제
+
+앱과 위젯, 설정을 지웁니다. 바탕화면에 놓인 위젯도 함께 사라집니다.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/uninstall.sh | sh
+```
+
+`~/Library/Containers` 의 Christof 폴더는 macOS 가 막아 남을 수 있습니다. 남아도 문제는 없고, 지우려면 Finder 에서 휴지통으로 옮깁니다.
 
 iOS용은 배포하지 않습니다. 유료 개발자 계정이 없어서입니다. iOS에서는 소스를 빌드해 시뮬레이터에서 실행해 볼 수 있습니다.
 
@@ -43,11 +61,17 @@ xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'platform=m
 xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'generic/platform=iOS Simulator' build
 ```
 
-`v` 로 시작하는 태그를 올리면 GitHub Actions가 macOS 앱을 빌드해 릴리스에 올립니다.
+## 배포와 버전
+
+버전은 `MAJOR.MINOR.PATCH` 입니다. `v0.2.0` 처럼 버전 태그를 올리면 GitHub Actions가 테스트를 돌리고 macOS 앱을 빌드해 릴리스에 올립니다. 앱 버전은 태그를 따르고, 빌드 번호는 워크플로 실행 번호입니다.
 
 ```sh
 git tag v0.2.0 && git push origin v0.2.0
 ```
+
+- MAJOR: 설정이 호환되지 않게 바뀔 때
+- MINOR: 이벤트, 지역, 장면처럼 보이는 것이 늘어날 때
+- PATCH: 고친 것만 있을 때
 
 ## 구조
 

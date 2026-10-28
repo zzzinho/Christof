@@ -192,7 +192,13 @@ private struct WidgetGuide: View {
             Text("지역은 위젯을 길게 눌러 위젯 편집에서 고릅니다.")
             Text("위젯을 누르면 이 앱이 열립니다. 시각·날씨·이벤트를 바꾸고 저장하면 위젯에 반영됩니다.")
             #endif
+            Text("버전 \(Self.info("CFBundleShortVersionString")) (\(Self.info("CFBundleVersion")))")
+                .foregroundStyle(.secondary)
         }
         .font(.callout)
+    }
+
+    private static func info(_ key: String) -> String {
+        Bundle.main.object(forInfoDictionaryKey: key) as? String ?? "?"
     }
 }
