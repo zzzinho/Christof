@@ -94,7 +94,7 @@ const DOT = 3;
 // 01-window 와 같은 장면. sun: [고도, 방위각], moon: [위상, 고도, 방위각], weather: [종류, 강도, 구름양, 기온] 또는 null(오프라인)
 const SCENES = [
   { title: '여름 낮 · 맑음', region: '서울', date: '7월 15일', time: '오후 1:00', hour: 13, season: 'summer', sun: [73, 198], moon: [0.03, 73, 160], weather: ['clear', 0, 0.1, 31], occasions: [] },
-  { title: '봄 낮 · 벚꽃', region: '대구', date: '4월 5일', time: '오전 11:00', hour: 11, season: 'spring', sun: [54, 141], moon: [0.59, -42, 271], weather: ['partlyCloudy', 0, 0.3, 17], occasions: [] },
+  { title: '봄 낮 · 개나리', region: '대구', date: '4월 5일', time: '오전 11:00', hour: 11, season: 'spring', sun: [54, 141], moon: [0.59, -42, 271], weather: ['partlyCloudy', 0, 0.3, 17], occasions: [] },
   { title: '일출', region: '서울', date: '10월 18일', time: '오전 6:42', hour: 6, season: 'autumn', sun: [-1, 101], moon: [0.23, -75, 42], weather: ['clear', 0, 0.2, 9], occasions: ['sky.sunrise'] },
   { title: '일몰', region: '부산', date: '6월 21일', time: '오후 7:41', hour: 19, season: 'summer', sun: [-1, 300], moon: [0.23, 48, 219], weather: ['partlyCloudy', 0, 0.35, 24], occasions: ['sky.sunset'] },
   { title: '초승달 밤', region: '서울', date: '3월 22일', time: '오후 8:00', hour: 20, season: 'spring', sun: [-15, 283], moon: [0.13, 29, 276], weather: ['clear', 0, 0, 5], occasions: [] },
@@ -806,27 +806,50 @@ function drawLightning(g, w, h, s) {
   }
 }
 
-// 먼 도시와 가까운 지붕들. 해가 진 뒤와 흐린 날은 창에 호박색 불이 켜진다.
+// 한국 도시: 뒤에 산 능선, 그 앞에 아파트 단지, 가까이 낮은 상가·빌라. 해가 진 뒤와 흐린 날은 창에 호박색 불이 켜진다.
 function drawCity(g, w, h, s) {
   const city = new Rand(7);
   const lit = s.phase === 'day' ? 0 : s.phase === 'grey' ? 0.4 : 1;
-  for (const [layer, bottomF, minH, maxH, density] of [['city-far', 0.86, 14, 30, 0.12], ['city', 0.95, 8, 20, 0.25]]) {
-    let x = city.range(-3, 0);
-    while (x < w) {
-      const bw = city.int(Math.round(pt(14)), Math.round(pt(30)));
-      const bh = Math.round(pt(city.range(minH, maxH)) + h * 0.08);
-      const bottom = Math.round(h * bottomF), top = bottom - bh;
-      g.rect(x, top, bw, h - top, pc(s, layer));
-      if (layer === 'city' && s.snowCovered) g.rect(x, top, bw, 1, pc(s, 'snow'));
-      for (let wy = top + 2; wy < h; wy += 2) {
-        for (let wx = Math.round(x) + 1; wx < x + bw - 1; wx += 2) if (city.range(0, 1) < density * lit) g.set(wx, wy, color('window-lit'));
-      }
-      x += bw + city.int(0, 2);
+  const farBottom = Math.round(h * 0.86);
+  drawMountains(g, w, h, s, farBottom);
+  // 아파트: 폭 넓은 판상형 동과 옥탑. 층은 두 칸, 집마다 창 두 칸이라 불 꺼진 창도 격자로 보인다.
+  for (let x = Math.round(city.range(-3, 0)); x < w;) {
+    const bw = city.int(Math.round(pt(30)), Math.round(pt(48)));
+    const top = farBottom - Math.round(pt(city.range(26, 40)) + h * 0.08);
+    g.rect(x, top, bw, h - top, pc(s, 'city-far'));
+    g.rect(x + city.int(2, bw - 6), top - 2, 4, 2, pc(s, 'city-far'));
+    for (let fy = top + 2; fy < h; fy += 2) {
+      for (let ux = x + 1; ux + 3 <= x + bw; ux += 3) g.rect(ux, fy, 2, 1, city.range(0, 1) < 0.3 * lit ? color('window-lit') : pc(s, 'city'));
     }
+    x += bw + city.int(1, 3);
+  }
+  // 가까운 낮은 건물. 밤에는 그중 하나의 옥상에 교회 빨간 네온 십자가가 켜진다.
+  const crossAt = city.int(1, 3), night = s.phase === 'night' || s.phase === 'dusk';
+  for (let x = city.range(-3, 0), i = 0; x < w; i++) {
+    const bw = city.int(Math.round(pt(14)), Math.round(pt(30)));
+    const top = Math.round(h * 0.95) - Math.round(pt(city.range(8, 20)) + h * 0.08);
+    g.rect(x, top, bw, h - top, pc(s, 'city'));
+    if (s.snowCovered) g.rect(x, top, bw, 1, pc(s, 'snow'));
+    for (let wy = top + 2; wy < h; wy += 2) {
+      for (let wx = Math.round(x) + 1; wx < x + bw - 1; wx += 2) if (city.range(0, 1) < 0.25 * lit) g.set(wx, wy, color('window-lit'));
+    }
+    if (i === crossAt && night) g.sprite(Math.round(x + bw / 2), top, ['.X.', 'XXX', '.X.', '.X.'], { X: 'bulb-1' });
+    x += bw + city.int(0, 2);
   }
 }
 
-const CROWNS = { spring: ['spring-1', 'spring-2'], summer: ['summer-1', 'summer-2'], autumn: ['autumn-1', 'autumn-2', 'autumn-3'] };
+// 뒷산 능선. 한국 도시는 산을 등지고 있다.
+// ponytail: 봄 진달래를 능선에 점으로 찍어 봤더니 하늘에 뜬 꽃잎(벚꽃)처럼 보여서 뺐다.
+function drawMountains(g, w, h, s, farBottom) {
+  const base = farBottom - pt(52) - h * 0.08;
+  for (let x = 0; x < w; x++) {
+    const top = Math.round(base - pt(8) * (0.6 * Math.sin(x * 0.07 + 1) + 0.4 * Math.sin(x * 0.19 + 2)));
+    g.rect(x, top, 1, farBottom - top, pc(s, 'mountain'));
+  }
+}
+
+// 봄은 새잎(은행나무·느티나무), 가을은 은행나무 노랑에 셋째마다 단풍. 벚꽃은 일본으로 읽혀서 쓰지 않는다.
+const CROWNS = { spring: ['leaf-new', 'leaf-new-dark'], summer: ['summer-1', 'summer-2'], autumn: ['ginkgo', 'autumn-3', 'autumn-1'] };
 
 // 창 아래쪽 가로수로 계절을 보인다. 해가 진 뒤에는 실루엣이고, 겨울은 잎 없는 가지다.
 function drawStreetTrees(g, w, h, s) {
@@ -850,6 +873,13 @@ function drawStreetTrees(g, w, h, s) {
       g.rect(cx, top - 3, 1, 3, bark);
     }
     x += r * 2 + random.range(1, 4);
+  }
+  // 봄: 길가 개나리 울타리
+  if (s.season === 'spring') {
+    for (let x = 0; x < w; x++) {
+      const top = h - 2 - (random.range(0, 1) < 0.5 ? 1 : 0);
+      g.rect(x, top, 1, h - top, dark ? pc(s, 'city') : color('forsythia'));
+    }
   }
 }
 

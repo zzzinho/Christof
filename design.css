@@ -154,6 +154,7 @@
   --lofi-night-sky-2: #262845;
   --lofi-night-sky-3: #3A3558;
   --lofi-night-sky-4: #5A4566;
+  --lofi-night-mountain: #34314F;
   --lofi-night-city-far: #2A2842;
   --lofi-night-city: #1C1C2E;
   --lofi-night-cloud: #34354F;
@@ -170,6 +171,7 @@
   --lofi-dusk-sky-2: #4C4068;
   --lofi-dusk-sky-3: #87586C;
   --lofi-dusk-sky-4: #B97C66;
+  --lofi-dusk-mountain: #634A66;
   --lofi-dusk-city-far: #4A3C5C;
   --lofi-dusk-city: #30293F;
   --lofi-dusk-cloud: #7A5C70;
@@ -184,6 +186,7 @@
   --lofi-day-sky-2: #8097AD;
   --lofi-day-sky-3: #95A6B6;
   --lofi-day-sky-4: #AAB4BC;
+  --lofi-day-mountain: #869490;
   --lofi-day-city-far: #8A93A2;
   --lofi-day-city: #6E7888;
   --lofi-day-cloud: #B3B9C1;
@@ -196,6 +199,7 @@
   --lofi-grey-sky-2: #666C79;
   --lofi-grey-sky-3: #737985;
   --lofi-grey-sky-4: #80858E;
+  --lofi-grey-mountain: #6C717D;
   --lofi-grey-city-far: #5F6573;
   --lofi-grey-city: #4C5262;
   --lofi-grey-cloud: #707682;
@@ -221,6 +225,11 @@
   --lofi-autumn-1: #A8653F;
   --lofi-autumn-2: #86503A;
   --lofi-autumn-3: #B38A4A;
+  /* 한국 계절 나무: 봄 새잎·개나리, 가을 은행나무 */
+  --lofi-leaf-new: #7E9862;
+  --lofi-leaf-new-dark: #657D4F;
+  --lofi-forsythia: #C8AE4C;
+  --lofi-ginkgo: #C6A042;
   --lofi-branch: #5A4E58;
   --lofi-pumpkin: #B0693D;
   --lofi-pumpkin-dark: #874E33;

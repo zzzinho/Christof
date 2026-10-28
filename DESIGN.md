@@ -11,6 +11,22 @@ Christof 는 macOS·iOS 위젯이다. 고른 지역의 날씨·시간·이벤트
 - 창문이 주인공이다. 사람은 창을 가리지 않는 크기(정면 기준 폭 48pt 안팎)로 두고 장면에 어우러지게 한다.
 - 디테일은 도트로 읽히는 만큼만 둔다. 얼굴은 눈 정도만 두고 볼·입·눈동자 빛 같은 잔디테일은 넣지 않는다. 너무 촘촘하게 그리면 도트의 맛이 없어진다.
 
+## 한국 문화
+
+한국 지역은 한국 풍경과 풍속으로만 그린다. 일본(츠키미, 넨가조, 제등, 벚꽃 거리)으로 읽히는 요소는 쓰지 않는다. 2026-10-28에 조사한 근거는 다음과 같다.
+
+| 쓰지 않는다 (일본으로 읽힘) | 대신 쓴다 (한국) | 근거 |
+| --- | --- | --- |
+| 추석의 토끼·경단·억새 (츠키미의 떡 찧는 토끼, 경단 탑, 억새) | 송편, 소나무(송편은 솔잎에 찐다), 햇과일 배, 선물 보자기 | [츠키미 상징](https://www.byfood.com/blog/tsukimi-p-670), [송편](https://www.imaeil.com/page/view/2012092714275904651), [보자기](https://www.ajunews.com/view/20190911111516557), [소나무 문화](https://www.seoul.co.kr/news/editOpinion/2007/10/05/20071005031012) |
+| 새해 연하장 (일본 넨가조의 대표 풍속) | 해맞이(첫 해), 새 달력 | [넨가조](https://web-japan.org/kidsweb/explore/calendar/december/nengajo.html), [해맞이·제야의 종](https://mediahub.seoul.go.kr/archives/1501806) |
+| 둥근 제등 | 연꽃 모양 연등(오색) | [연등회 전통등](https://mediahub.seoul.go.kr/archives/2007987), [연꽃등 만들기](https://bizforms.co.kr/form_view/form_40635.asp) |
+| 봄 가로수 벚꽃 | 봄 개나리(노랑)·진달래(분홍 보라), 가을 은행나무(노랑) | [서울 가로수 은행나무 1위](https://mediahub.seoul.go.kr/archives/144926), [가로수 수종 2023](https://hangyo.com/news/article.html?no=103473), [개나리](https://www.earth.com/plant-encyclopedia/Angiosperms/Oleaceae/forsythia-koreana/en/) |
+| 낮은 지붕 골목, 나무 십자 창살 | 아파트 단지, 뒤의 산 능선, 밤의 빨간 네온 십자가, 아파트 샷시 창 | [빨간 십자가](https://www.koreatimes.co.kr/southkorea/20120615/church-crosses-in-the-dark), [한국 아파트](https://wiki.openstreetmap.org/wiki/Ko:Korea_Apartments) |
+
+- 설날(방패연, 색동 한복, 댕기, 복주머니, 떡국, 노리개)과 정월대보름(달집, 부럼)은 이미 한국 풍속이라 그대로 둔다. [설](https://ko.wikisource.org/wiki/%EA%B8%80%EB%A1%9C%EB%B2%8C_%EC%84%B8%EA%B3%84_%EB%8C%80%EB%B0%B1%EA%B3%BC%EC%82%AC%EC%A0%84/%EB%AC%B8%ED%99%94%C2%B7%EB%AF%BC%EC%86%8D/%EA%B5%AD%EA%B2%BD%EC%9D%BC-%EA%B3%B5%ED%9C%B4%EC%9D%BC-%EA%B8%B0%EB%85%90%EC%9D%BC%EA%B3%BC_%EB%AF%BC%EC%86%8D/%EB%AA%85%EC%A0%88%EA%B3%BC_%EB%86%80%EC%9D%B4%C2%B7%EC%9D%8C%EC%8B%9D/%EC%84%A4), [정월대보름](https://theme.archives.go.kr/next/pages/new_newsletter/2023/html/vol_133/sub01.html)
+- 할로윈·크리스마스는 나라와 관계없는 모양이라 그대로 둔다.
+- 다른 나라를 더할 때도 그 나라 풍경과 풍속으로 따로 그린다. 나라끼리 모양을 섞지 않는다.
+
 ## 글자 없음
 
 - 위젯 안에 글자를 쓰지 않는다. 하단 캡션 띠도 없다.
@@ -161,14 +177,23 @@ Christof 는 macOS·iOS 위젯이다. 고른 지역의 날씨·시간·이벤트
 4. 해, 달
 5. 이벤트 모양 sky
 6. 번개
-7. 도시 (먼 건물, 가까운 건물, 지붕 눈)
+7. 도시 (뒷산 능선, 아파트 단지, 가까운 낮은 건물, 지붕 눈, 밤 교회 십자가)
 8. 가로수 (계절)
 9. 이벤트 모양 ground
 10. 비, 눈, 안개
 11. 이벤트 모양 glass
 
 - 해·달을 구름보다 나중에 그린다. 조각구름이 달을 가리면 보름달도 초승달처럼 보인다.
-- 가로수로 계절을 보인다: 봄 벚꽃, 여름 초록, 가을 단풍, 겨울 잎 없는 가지. 해가 진 뒤에는 실루엣이다.
+- 도시는 한국 아파트 동네다(위 "한국 문화").
+  - 뒷산 능선: 아파트 뒤로 낮게 이어진다(때마다 `mountain` 색).
+  - 아파트: 폭 넓은 판상형 동과 옥탑이다. 층은 두 칸이고, 집마다 창이 두 칸이다. 불 꺼진 창도 `city` 색으로 칠해 낮에도 창 격자가 보인다.
+  - 가까운 낮은 상가·빌라: 밤(night·dusk)에는 그중 하나의 옥상에 빨간 네온 십자가(`bulb-1`)가 켜진다.
+- 가로수로 계절을 보인다. 해가 진 뒤에는 실루엣이다.
+  - 봄: 새잎(연두)과 길가 개나리 울타리
+  - 여름: 초록
+  - 가을: 은행나무 노랑, 셋째마다 단풍
+  - 겨울: 잎 없는 가지
+  - 벚꽃은 일본으로 읽혀서 쓰지 않는다. 봄 능선에 진달래 점을 찍어 봤으나 하늘에 뜬 꽃잎처럼 보여서 뺐다.
 - 지붕 눈은 눈이 오거나 겨울 영하일 때만 얹는다.
 
 ## SwiftUI 로 옮길 수 있게 그린다
