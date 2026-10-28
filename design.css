@@ -107,6 +107,10 @@
   --lofi-wood: #4A3A3E;
   --lofi-wood-dark: #2E242B;
   --lofi-wood-light: #6B5148;
+  /* 아파트 샷시(흰 PVC 창틀) */
+  --lofi-sash: #9C98A0;
+  --lofi-sash-light: #B4B0B6;
+  --lofi-sash-dark: #77737D;
   --lofi-desk-lit: #8A6650;
   --lofi-curtain: #5E6585;
   --lofi-curtain-dark: #4A5070;
