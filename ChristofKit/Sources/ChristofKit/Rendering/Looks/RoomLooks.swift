@@ -28,7 +28,9 @@ struct DeskItem: RoomLook {
     }
 
     static let tteokguk = DeskItem(rows: [".t.t.", "cgccc", "BBBBB", ".BBB."], colors: ["t": "steam", "c": "hanbok-collar", "g": "summer-1", "B": "pouch-knot"], food: true)
-    static let greetingCards = DeskItem(rows: ["P..W.", "PP.WW", "PP.WW"], colors: ["P": "pouch", "W": "hanbok-collar"])
+    /// 새해 첫날 탁상 달력: 고리, 1월 빨간 머리띠, 날짜 칸(일요일 빨강·토요일 파랑), 받침. 연하장은 일본 넨가조로 읽혀서 쓰지 않는다.
+    static let calendar = DeskItem(rows: [".k..k.", "PPPPPP", "rWWWWb", "rWWWWb", "MMMMMM"],
+                                   colors: ["k": "clock-hand", "P": "pouch", "r": "santa", "W": "hanbok-collar", "b": "pouch-knot", "M": "mug-dark"])
     static let bureom = DeskItem(rows: [".nNn.", "NnNnN", "BBBBB", ".BBB."], colors: ["n": "wood-light", "N": "branch", "B": "mug-dark"], food: true)
     static let songpyeon = DeskItem(rows: [".pWg.", "pWgWp", "MMMMM"], colors: ["p": "hanbok", "W": "hanbok-collar", "g": "summer-1", "M": "mug"], food: true)
 }

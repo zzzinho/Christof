@@ -51,16 +51,6 @@ struct ClockLantern: ClockLook {
     }
 }
 
-/// 달토끼 귀
-struct RabbitEars: ClockLook {
-    func draw(_ g: inout DotGrid, _ cx: Int, _ cy: Int, _ s: DotScene) {
-        for x in [cx - 3, cx + 2] {
-            g.rect(x, cy - 10, 2, 4, LofiPalette.color("hanbok-collar"))
-            g.rect(x + (x < cx ? 1 : 0), cy - 9, 1, 2, LofiPalette.color("hanbok"))
-        }
-    }
-}
-
 /// 시계에 매달린 거미
 struct Spider: ClockLook {
     func bare(_ g: inout DotGrid, _ cx: Int, _ cy: Int, _ s: DotScene) {

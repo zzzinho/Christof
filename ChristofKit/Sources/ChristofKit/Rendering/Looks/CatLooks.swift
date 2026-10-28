@@ -14,7 +14,8 @@ struct CatItem: CatLook {
 
     static let pouch = CatItem(rows: ["..p..", ".PPP.", "PpgpP", "PpppP", ".PPP."], colors: ["P": "pouch", "p": "pouch-light", "g": "pouch-gold"])
     static let walnut = CatItem(rows: ["nNn", "NnN"], colors: ["n": "wood-light", "N": "branch"])
-    static let persimmon = CatItem(rows: [".l.", "ooo", "ooo"], colors: ["l": "plant-dark", "o": "autumn-1"])
+    /// 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
+    static let bojagi = CatItem(rows: ["k.k", ".k.", "ABC", "CAB"], colors: ["k": "hanbok", "A": "hanbok", "B": "hanbok-jade", "C": "pouch-gold"])
 }
 
 /// 머리 위 가운데 칸에 아래 끝을 맞춘 모양. dy 만큼 내려 머리에 씌운다.

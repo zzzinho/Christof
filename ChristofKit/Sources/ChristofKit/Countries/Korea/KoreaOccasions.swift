@@ -15,11 +15,11 @@ public enum KoreaOccasions {
             clock: [ClockLantern()], moment: OccasionMoment(hours: 19...22, cat: .beside))),  // 연등 같이 보기
         // 추석 무렵엔 머리가 짧아 댕기가 옷깃에 묻히므로 옆머리에 리본 핀을 꽂는다.
         Occasion(id: "KR.chuseok", name: "추석", rule: LunarDateRule(calendar: .dangi, month: 8, day: 15, daysBefore: 1, daysAfter: 1), looks: OccasionLooks(
-            window: [MoonHalo(), PersimmonBranch()], person: [PersonSprite.ribbonPin], outfit: .chuseok, cat: [CatItem.persimmon],
-            room: [DeskItem.songpyeon], clock: [RabbitEars()], moment: OccasionMoment(hours: 19...23, cat: .beside))),  // 보름달 같이 보기
+            window: [MoonHalo(), PineBranch()], person: [PersonSprite.ribbonPin], outfit: .chuseok, cat: [CatItem.bojagi],
+            room: [DeskItem.songpyeon], clock: [ClockFace(face: "moon")], moment: OccasionMoment(hours: 19...23, cat: .beside))),  // 보름달 같이 보기
         Occasion(id: "KR.newYearsDay", name: "새해 첫날", rule: GregorianDateRule(month: 1, day: 1), looks: OccasionLooks(
             window: [SunGlow()], person: [PersonSprite.beanie, PersonSprite.scarf], outfit: .newYear, cat: [CatHeadItem.beanie],
-            room: [DeskItem.greetingCards], clock: [Sparkles()], moment: OccasionMoment(hours: 6...8, cat: .beside))),  // 첫 해 같이 보기
+            room: [DeskItem.calendar], clock: [Sparkles()], moment: OccasionMoment(hours: 6...8, cat: .beside))),  // 첫 해 같이 보기
         Occasion(id: "KR.halloween", name: "할로윈", rule: GregorianDateRule(month: 10, day: 31), looks: OccasionLooks(
             window: [Bats()], person: [PersonSprite.witchHat], outfit: .halloween, cat: [BatWings()], room: [SillItem.pumpkin, Cobweb()],
             clock: [Spider()], moment: OccasionMoment(hours: 19...23, cat: .walk))),  // 고양이 혼자 밤 순찰

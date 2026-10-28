@@ -19,7 +19,7 @@ enum RoomPainter {
             }
             t.rect(0, L.deskTop + 1, deskRight, L.H - L.deskTop - 1, LofiPalette.color("wood"))
         }
-        // 밥 먹는 동안은 책·머그와 밥이 아닌 책상 물건(연하장)을 치우고 그 자리에 밥을 놓는다.
+        // 밥 먹는 동안은 책·머그와 밥이 아닌 책상 물건(달력)을 치우고 그 자리에 밥을 놓는다.
         if let dish = L.catSpot(s.catState).dish {
             if let food = looks.lazy.compactMap({ $0 as? DeskItem }).first(where: \.food) {
                 food.place(&g, dish, L)

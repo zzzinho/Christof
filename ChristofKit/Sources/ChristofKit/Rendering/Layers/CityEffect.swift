@@ -2,8 +2,9 @@ import Foundation
 
 /// 한국 도시: 뒤에 산 능선, 그 앞에 아파트 단지, 가까이 낮은 상가·빌라. 해가 진 뒤와 흐린 날은 창에 호박색 불이 켜진다.
 /// 불을 켜지 않는 낮에도 난수를 같은 만큼 써서 건물 모양이 때와 관계없이 같다.
-struct CityEffect: OutsideEffect {
-    func draw(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) {
+/// 밤에 켜지는 교회 십자가 자리 [가운데, 바닥]를 돌려준다. 십자가는 가로수 다음에 그린다(drawCross).
+struct CityEffect {
+    func draw(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) -> (x: Int, y: Int)? {
         var city = SeededRandom(seed: 7)
         let lit = s.phase == .day ? 0 : s.phase == .grey ? 0.4 : 1
         let windowLit = LofiPalette.color("window-lit")
@@ -23,9 +24,10 @@ struct CityEffect: OutsideEffect {
             }
             x += bw + city.int(1, 3)
         }
-        // 가까운 낮은 건물. 밤에는 그중 하나의 옥상에 교회 빨간 네온 십자가가 켜진다.
-        let crossAt = city.int(1, 3), night = s.phase == .night || s.phase == .dusk
-        var bx = city(-3...0), i = 0
+        // 가까운 낮은 건물. 밤에는 오른쪽 유리(창턱 고양이와 겹치지 않는 곳)의 첫 건물 옥상에 교회 빨간 네온 십자가가 켜진다.
+        let night = s.phase == .night || s.phase == .dusk
+        var cross: (x: Int, y: Int)?
+        var bx = city(-3...0)
         while bx < Double(w) {
             let bw = city.int(jsRound(14 / DotGrid.dot), jsRound(30 / DotGrid.dot))
             let top = jsRound(Double(h) * 0.95) - jsRound(city(8...20) / DotGrid.dot + Double(h) * 0.08)
@@ -38,10 +40,15 @@ struct CityEffect: OutsideEffect {
                     wx += 2
                 }
             }
-            if i == crossAt, night { g.sprite(jsRound(bx + Double(bw) / 2), top, [".X.", "XXX", ".X.", ".X."], ["X": "bulb-1"]) }
+            if night, cross == nil, bx + Double(bw) / 2 > Double(w) * 0.6 { cross = (jsRound(bx + Double(bw) / 2), top) }
             bx += Double(bw + city.int(0, 2))
-            i += 1
         }
+        return cross
+    }
+
+    /// 십자가는 낮은 건물 옥상보다 높이 서 있어 가로수에 가리지 않는다.
+    static func drawCross(_ g: inout DotGrid, _ at: (x: Int, y: Int)) {
+        g.sprite(at.x, at.y, [".X.", "XXX", ".X.", ".X."], ["X": "bulb-1"])
     }
 
     /// 뒷산 능선. 한국 도시는 산을 등지고 있다.
