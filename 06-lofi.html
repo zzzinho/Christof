@@ -81,6 +81,9 @@
   <div id="components"></div>
   <h2>사람·고양이 상호작용</h2>
   <div id="interactions"></div>
+  <h2>겨울 고양이 목도리</h2>
+  <p class="meta">겨울에는 고양이가 목도리를 하고, 색은 요일마다 바뀐다. 크리스마스에는 빨간 목도리만 한다.</p>
+  <div id="scarves" class="sizes"></div>
   <h2>장면</h2>
   <div id="scenes"></div>
 </main>
@@ -304,6 +307,12 @@ function celestialPoint(altitude, azimuth) {
   return [clamp(0.5 + d / 135 * 0.45, 0.05, 0.95), base - Math.pow(clamp(altitude, 0, 75) / 75, 0.75) * (base - 0.1)];
 }
 
+// 겨울엔 고양이가 요일 색 목도리를 한다. 크리스마스의 빨간 목도리가 있으면 그것만 둔다.
+function catLooks(scene, looks) {
+  if (scene.season === 'winter' && !looks.cat.includes('scarf')) looks.cat.push('winterScarf');
+  return looks;
+}
+
 function sceneContext(scene) {
   const [month, day] = scene.date.match(/\d+/g).map(Number);
   const weather = scene.weather && {
@@ -324,7 +333,9 @@ function sceneContext(scene) {
     // ponytail: 평소 옷은 후보 셋(머스터드·세이지·코럴) 중 머스터드로 둔다. 하나를 고르면 나머지 후보는 지운다.
     outfit: OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'mustard',
     // 구성 요소마다 진행 중인 이벤트들이 고른 모양 이름
-    looks: Object.fromEntries(COMPONENTS.map(part => [part, [...new Set(scene.occasions.flatMap(id => [].concat(OCCASIONS[id].looks[part] ?? [])))]])),
+    looks: catLooks(scene, Object.fromEntries(COMPONENTS.map(part => [part, [...new Set(scene.occasions.flatMap(id => [].concat(OCCASIONS[id].looks[part] ?? [])))]]))),
+    // ponytail: 시안 장면에는 연도가 없어 2026년으로 친다. 0 = 일요일
+    weekday: new Date(2026, month - 1, day).getDay(),
     sunPoint: gloomy ? null : celestialPoint(sunAltitude, sunAzimuth),
     moonPoint: gloomy || sunAltitude >= 0 ? null : celestialPoint(scene.moon[1], scene.moon[2]),
     // 따뜻한 겨울(부산·제주)은 마른 풍경으로 두고, 눈이 오거나 영하일 때만 지붕에 눈을 얹는다.
@@ -369,7 +380,7 @@ function layout(W, H, s) {
 
 // ---- 스프라이트. 불빛(스탠드·트리)이 오른쪽에 있어 오른쪽 가장자리에 따뜻한 테두리 빛이 진다 ----
 
-// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 빨간 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
+// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
 // 다섯 자세 모두 머리 폭(테두리 포함 6~7칸)과 몸집을 맞춘다.
 // side, walk 는 오른쪽(사람·불빛 쪽)을 본다.
 const CATS = {
@@ -992,11 +1003,17 @@ const CAT_LOOKS = {
       g.set(left + width - 3 + dx, y + dy, color('hoodie-dark'));
     }
   },
-  scarf(g, spot) {
-    const { rows, scarf, scarfBottom } = CATS[spot.pose];
-    g.sprite(spot.x, spot.bottom - rows.length + scarfBottom, scarf, { S: 'santa' });
-  },
+  scarf: (g, spot) => drawCatScarf(g, spot, 'santa'),
+  winterScarf: (g, spot, s) => drawCatScarf(g, spot, WEEKDAY_SCARVES[s.weekday][1]),
 };
+
+// 일요일은 달력의 빨간 날, 토요일은 파란 날
+const WEEKDAY_SCARVES = [['일', 'santa'], ['월', 'hanbok-collar'], ['화', 'spring-1'], ['수', 'hanbok-jade'], ['목', 'summer-2'], ['금', 'hoodie'], ['토', 'pouch-knot']];
+
+function drawCatScarf(g, spot, scarfColor) {
+  const { rows, scarf, scarfBottom } = CATS[spot.pose];
+  g.sprite(spot.x, spot.bottom - rows.length + scarfBottom, scarf, { S: scarfColor });
+}
 
 // spot: { pose, x, bottom, arm }. 쓰다듬기(arm)는 사람 어깨에서 고양이 등으로 뻗는 팔을 고양이와 함께 그린다.
 function drawCat(g, s, spot) {
@@ -1301,6 +1318,16 @@ function interactions() {
 
 document.getElementById('components').append(matrix());
 document.getElementById('interactions').append(...interactions());
+
+// 요일마다 창밖 보는 고양이를 잘라 나란히 본다.
+document.getElementById('scarves').append(...WEEKDAY_SCARVES.map(([name], weekday) => {
+  const { g, L, canvas } = render(SCENES.find(scene => scene.title === '따뜻한 겨울 낮'), SIZES.medium, { catState: 'window', weekday });
+  const figure = document.createElement('figure');
+  figure.style.margin = '0';
+  figure.append(crop(canvas, L.boxes.cat, g.cols, g.rows, 3));
+  figure.insertAdjacentHTML('beforeend', `<figcaption class="meta">${name}요일</figcaption>`);
+  return figure;
+}));
 document.getElementById('scenes').append(...SCENES.map(scene => {
   const widgets = Object.keys(SIZES).map(size => widget(scene, size));
   const weather = scene.weather ? `${scene.weather[0]} · 기온 ${scene.weather[3]}°` : '날씨 없음';
