@@ -122,7 +122,7 @@ const OCCASIONS = {
   'KR.jeongwolDaeboreum': { name: '정월대보름', looks: { window: ['moonHalo', 'daljip'], person: 'moonPin', cat: 'walnut', room: 'bureom', clock: 'moonFace' }, moment: { hours: [7, 9], cat: 'eat', name: '부럼 깨기' } },
   'KR.buddhasBirthday': { name: '부처님오신날', looks: { window: 'lanterns', person: 'lotusPin', cat: 'lotus', room: 'lotusBowl', clock: 'lantern' }, moment: { hours: [19, 22], cat: 'beside', name: '연등 같이 보기' } },
   'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'pineBranch'], person: 'ribbonPin', cat: 'bojagi', room: 'songpyeon', clock: 'moonFace' }, moment: { hours: [19, 23], cat: 'beside', name: '보름달 같이 보기' } },
-  'KR.newYearsDay': { name: '새해 첫날', looks: { window: 'sunGlow', person: 'beanie', cat: 'beanie', room: 'greetingCards', clock: 'sparkles' }, moment: { hours: [6, 8], cat: 'beside', name: '첫 해 같이 보기' } },
+  'KR.newYearsDay': { name: '새해 첫날', looks: { window: 'sunGlow', person: 'beanie', cat: 'beanie', room: 'calendar', clock: 'sparkles' }, moment: { hours: [6, 8], cat: 'beside', name: '첫 해 같이 보기' } },
   'KR.halloween': { name: '할로윈', looks: { window: 'bats', person: 'witchHat', cat: 'batWings', room: 'pumpkin', clock: 'spider' }, moment: { hours: [19, 23], cat: 'walk', name: '고양이 혼자 밤 순찰' } },
   'KR.christmasEve': { name: '크리스마스 이브', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' }, moment: { hours: [20, 23], cat: 'shoulder', name: '어깨에서 잠든 고양이' } },
   'KR.christmas': { name: '크리스마스', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' }, moment: { hours: [8, 11], cat: 'pet', name: '크리스마스 아침 쓰다듬기' } },
@@ -563,7 +563,8 @@ const SPRITES = {
   songpyeon: ['.pWg.', 'pWgWp', 'MMMMM'],
   rice: ['.t.t.', '.www.', 'BBBBB', '.BBB.'],
   catBowl: ['.fff.', 'BBBBB'],
-  cards: ['P..W.', 'PP.WW', 'PP.WW'],
+  // 탁상 달력: 고리, 1월 빨간 머리띠, 날짜 칸(일요일 빨강·토요일 파랑), 받침
+  calendar: ['.k..k.', 'PPPPPP', 'rWWWWb', 'rWWWWb', 'MMMMMM'],
   kite: ['PPPPP', 'WWWWW', 'WW.WW', 'WWWWW', 'WWWWW'],
   bat: ['WW.WW', '.WWW.', '..W..'],
   fire: ['..Y..', '.YYY.', '.YOY.', 'YOOOY', 'OOOOO', 'bbbbb'],
@@ -1083,7 +1084,8 @@ function drawArm(g, [ax, ay], [bx, by], sleeve) {
 
 const ROOM_LOOKS = {
   tteokguk: { food: true, desk: (g, x, y) => g.sprite(x, y, SPRITES.tteokguk, { t: 'steam', c: 'hanbok-collar', g: 'summer-1', B: 'pouch-knot' }) },
-  greetingCards: { desk: (g, x, y) => g.sprite(x, y, SPRITES.cards, { P: 'pouch', W: 'hanbok-collar' }) },
+  // 새해 첫날: 새 탁상 달력. 연하장은 일본 넨가조로 읽혀서 쓰지 않는다.
+  calendar: { desk: (g, x, y) => g.sprite(x, y, SPRITES.calendar, { k: 'clock-hand', P: 'pouch', r: 'santa', W: 'hanbok-collar', b: 'pouch-knot', M: 'mug-dark' }) },
   bureom: { food: true, desk: (g, x, y) => g.sprite(x, y, SPRITES.bureom, { n: 'wood-light', N: 'branch', B: 'mug-dark' }) },
   songpyeon: { food: true, desk: (g, x, y) => g.sprite(x, y, SPRITES.songpyeon, { p: 'hanbok', W: 'hanbok-collar', g: 'summer-1', M: 'mug' }) },
   lotusBowl: { sill: (g, x, y) => g.sprite(x, y, SPRITES.lotusBowl, { P: 'spring-1', p: 'spring-2', l: 'plant', B: 'pouch-knot' }) },
@@ -1142,7 +1144,7 @@ function drawRoom(g, L, s) {
     ink(g, t => t.sprite(L.personX - pt(42), L.deskTop + 1, SPRITES.books, colors));
     drawMug(g, L.personX - pt(24), L.deskTop + 1, colors);
   }
-  // 밥이 아닌 책상 물건(연하장)도 밥 먹는 동안은 치운다.
+  // 밥이 아닌 책상 물건(달력)도 밥 먹는 동안은 치운다.
   // 책상 위 고양이(곁에서 보기·쓰다듬기)와 그 곁 물건(사람 기준 24칸)보다 왼쪽에 둔다.
   if (!dish) for (const look of looks) if (look.desk) ink(g, t => look.desk(t, L.personX - 30, L.deskTop + 1, s));
 
