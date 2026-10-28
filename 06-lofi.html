@@ -509,7 +509,8 @@ const SPRITES = {
   mug: ['.t.t...', 't.t....', '.t.t...', '.......', 'mmmmm..', 'mMMMmmm', 'mMMMm.m', 'mMMMmmm', '.mmm...'],
   books: ['.11111111.', '2222222222', '.33333333.', '1111111111'],
   plant: ['.l.l.', 'lLlLl', '.lLl.', 'ppppp', '.ppp.'],
-  lantern: ['.p.p.', 'ppPpp', 'pPPPp', 'ppPpp', '.lll.', '..p..'],
+  // 연꽃등: 끝이 뾰족한 꽃잎 두 겹, 아래에 연잎. 둥근 제등(일본)과 구분되게 꽃잎 끝을 살린다.
+  lantern: ['.p.p.p.', 'ppPpPpp', 'pPPPPPp', '.pPPPp.', 'lllllll', '.l.l.l.'],
   // 사람 위에 겹치는 모양. 폭 16 이라 사람과 왼쪽 끝이 같다. 사람 맨 윗줄 기준이다.
   santaHat: [
     '.............ww.',
@@ -909,13 +910,16 @@ function drawFog(g, w, h, s) {
 }
 
 // 창 위에 건 연등 줄. 해가 진 뒤에는 연등 속이 밝다. 줄은 가는 선이라 윤곽선 없이, 연등만 윤곽선을 두른다.
+const LANTERN_COLORS = ['lotus-lantern', 'bulb-2', 'bulb-3', 'bulb-1', 'bulb-4'];
+
 function drawLanterns(g, left, right, y, lit) {
   const sag = x => y + Math.round(Math.sin((x - left) / (right - left) * Math.PI) * 3);
-  const n = Math.max(3, Math.round((right - left) / pt(28)));
+  const n = Math.max(3, Math.round((right - left) / pt(32)));
   const at = i => Math.round(left + (right - left) * (i + 0.5) / n);
   ink(g, t => {
     for (let i = 0; i < n; i++) {
-      const bx = at(i), shade = `bulb-${i % 4 + 1}`;
+      // 오색 연등: 분홍 연꽃등을 앞세워 노랑·초록·빨강·파랑을 돌린다.
+      const bx = at(i), shade = LANTERN_COLORS[i % LANTERN_COLORS.length];
       t.sprite(bx, sag(bx) + 2 + SPRITES.lantern.length, SPRITES.lantern, { p: shade, P: lit ? 'lamp-light' : shade, l: 'plant' });
     }
   });
@@ -1214,10 +1218,10 @@ const CLOCK_LOOKS = {
   // 정월대보름: 달빛 문자판
   moonFace: { face: 'moon' },
   // 부처님오신날: 시계 아래 작은 연등
-  lantern: { draw(g, cx, cy, s) {
-    g.rect(cx, cy + 7, 1, 2, color('wire'));
-    g.sprite(cx, cy + 9 + SPRITES.lantern.length, SPRITES.lantern, { p: 'bulb-1', P: s.lightOn ? 'lamp-light' : 'bulb-1', l: 'plant' });
-  } },
+  lantern: {
+    draw: (g, cx, cy, s) => g.sprite(cx, cy + 9 + SPRITES.lantern.length, SPRITES.lantern, { p: 'lotus-lantern', P: s.lightOn ? 'lamp-light' : 'lotus-lantern', l: 'plant' }),
+    bare: (g, cx, cy) => g.rect(cx, cy + 7, 1, 2, color('wire')),
+  },
   // 추석: 달토끼 귀
   rabbitEars: { draw(g, cx, cy) {
     for (const x of [cx - 3, cx + 2]) {
