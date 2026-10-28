@@ -44,10 +44,17 @@ struct BatWings: CatLook {
     }
 }
 
-/// 빨간 목도리. 자세마다 따로 그려 두었다.
+/// 목도리. 자세마다 따로 그려 두었다. color 가 없으면 요일 색이다.
 struct CatScarf: CatLook {
+    var color: String?
+
     func draw(_ g: inout DotGrid, _ spot: CatSpot, _ s: DotScene) {
         let pose = spot.pose
-        g.sprite(spot.x, spot.bottom - pose.rows.count + pose.scarfBottom, pose.scarf, ["S": "santa"])
+        g.sprite(spot.x, spot.bottom - pose.rows.count + pose.scarfBottom, pose.scarf, ["S": color ?? Self.weekdayColors[s.weekday]])
     }
+
+    static let santa = CatScarf(color: "santa")
+    static let winter = CatScarf()
+    /// 0 = 일요일. 일요일은 달력의 빨간 날, 토요일은 파란 날
+    static let weekdayColors = ["santa", "hanbok-collar", "spring-1", "hanbok-jade", "summer-2", "hoodie", "pouch-knot"]
 }

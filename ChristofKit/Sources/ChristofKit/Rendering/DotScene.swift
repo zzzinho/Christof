@@ -49,6 +49,8 @@ struct DotScene {
     let headwear: Headwear
     let catState: CatState
     let hair: Double
+    /// 0 = 일요일
+    let weekday: Int
     let outfit: Outfit
     let looks: OccasionLooks
 
@@ -59,6 +61,7 @@ struct DotScene {
         calendar.timeZone = context.region.timeZone
         let parts = calendar.dateComponents([.month, .day, .hour, .minute], from: context.date)
         let month = parts.month ?? 1, day = parts.day ?? 1
+        weekday = calendar.component(.weekday, from: context.date) - 1
         hour = parts.hour ?? 0
         minute = parts.minute ?? 0
         season = context.season
@@ -74,7 +77,10 @@ struct DotScene {
         // 따뜻한 겨울(부산·제주)은 마른 풍경으로 두고, 눈이 오거나 영하일 때만 지붕에 눈을 얹는다.
         snowCovered = weather.map { $0.condition == .snow || (context.season == .winter && $0.temperatureCelsius <= 0) } ?? false
 
-        looks = .merged(context.occasions.map(\.looks))
+        var looks = OccasionLooks.merged(context.occasions.map(\.looks))
+        // 겨울엔 고양이가 요일 색 목도리를 한다. 크리스마스의 빨간 목도리가 있으면 그것만 둔다.
+        if season == .winter, !looks.cat.contains(where: { $0 is CatScarf }) { looks.cat.append(CatScarf.winter) }
+        self.looks = looks
         // 같은 날 같은 시각이면 늘 같은 모습이고, 한 시간마다 바뀐다. 순간이 덮어도 뽑는 순서(헤드폰 → 고양이)는 같다.
         var random = SeededRandom(seed: UInt64((month * 100 + day) * 100 + hour))
         headwear = Headwear.allCases[random.int(0, Headwear.allCases.count - 1)]

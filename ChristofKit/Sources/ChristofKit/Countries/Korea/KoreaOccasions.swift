@@ -31,7 +31,7 @@ public enum KoreaOccasions {
 
     private static func christmas(moment: OccasionMoment) -> OccasionLooks {
         OccasionLooks(
-            window: [Frost()], person: [PersonSprite.santaHat], outfit: .christmas, cat: [CatScarf()], room: [ChristmasTree()], clock: [Holly()],
+            window: [Frost()], person: [PersonSprite.santaHat], outfit: .christmas, cat: [CatScarf.santa], room: [ChristmasTree()], clock: [Holly()],
             moment: moment)
     }
 }

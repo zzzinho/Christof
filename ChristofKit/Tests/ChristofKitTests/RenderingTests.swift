@@ -60,6 +60,19 @@ func everyOccasionLookHasItsColors(_ id: String) throws {
     }
 }
 
+@Test func winterCatWearsWeekdayScarfExceptRedOnChristmas() throws {
+    // 2026-01-04 은 일요일이다. 요일마다 다른 색으로 끝까지 그려진다.
+    for day in 4...10 {
+        let context = scene(date: try Date("2026-01-\(String(format: "%02d", day))T10:00:00+09:00", strategy: .iso8601), season: .winter)
+        #expect(DotScene(context).weekday == day - 4)
+        #expect(SceneComposer.grid(for: context, cols: 122, rows: 57).cells.allSatisfy { $0 != nil })
+    }
+    let christmas = try #require(KoreaOccasions.all.first { $0.id == "KR.christmas" })
+    let scarves = DotScene(scene(date: try Date("2026-12-25T10:00:00+09:00", strategy: .iso8601), season: .winter, occasions: [christmas]))
+        .looks.cat.compactMap { $0 as? CatScarf }
+    #expect(scarves.map(\.color) == ["santa"])
+}
+
 @Test func seedPicksHeadwearAndCatStateLikeTheDesign() throws {
     // 시안 06-lofi.html 장면 설명줄과 같은 값. 오후 1시는 시각표로 "따로"다.
     let afternoon = DotScene(scene(date: try Date("2026-07-15T13:00:00+09:00", strategy: .iso8601)))

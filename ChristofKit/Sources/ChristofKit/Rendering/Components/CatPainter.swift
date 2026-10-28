@@ -24,7 +24,7 @@ enum CatPainter {
 }
 
 /// T 는 줄무늬. 다섯 자세 모두 머리 폭(테두리 포함 6~7칸)과 몸집을 맞춘다. side, walk 는 오른쪽(사람·불빛 쪽)을 본다.
-/// head: 머리 위 가운데 칸(귀 사이), scarf: 빨간 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
+/// head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
 struct CatPose {
     let rows: [String]
     let head: (x: Double, y: Int)
