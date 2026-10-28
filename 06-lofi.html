@@ -812,24 +812,13 @@ function drawLightning(g, w, h, s) {
   }
 }
 
-// 한국 도시: 뒤에 산 능선, 그 앞에 아파트 단지, 가까이 낮은 상가·빌라. 해가 진 뒤와 흐린 날은 창에 호박색 불이 켜진다.
+// 한국 도시: 먼 풍경(지역마다 다르다), 가까이 낮은 상가·빌라. 해가 진 뒤와 흐린 날은 창에 호박색 불이 켜진다.
 // 밤에 켜지는 교회 십자가 자리 [가운데, 바닥]를 돌려준다.
 function drawCity(g, w, h, s) {
   const city = new Rand(7);
   const lit = s.phase === 'day' ? 0 : s.phase === 'grey' ? 0.4 : 1;
   const farBottom = Math.round(h * 0.86);
-  drawMountains(g, w, h, s, farBottom);
-  // 아파트: 폭 넓은 판상형 동과 옥탑. 층은 두 칸, 집마다 창 두 칸이라 불 꺼진 창도 격자로 보인다.
-  for (let x = Math.round(city.range(-3, 0)); x < w;) {
-    const bw = city.int(Math.round(pt(30)), Math.round(pt(48)));
-    const top = farBottom - Math.round(pt(city.range(26, 40)) + h * 0.08);
-    g.rect(x, top, bw, h - top, pc(s, 'city-far'));
-    g.rect(x + city.int(2, bw - 6), top - 2, 4, 2, pc(s, 'city-far'));
-    for (let fy = top + 2; fy < h; fy += 2) {
-      for (let ux = x + 1; ux + 3 <= x + bw; ux += 3) g.rect(ux, fy, 2, 1, city.range(0, 1) < 0.3 * lit ? color('window-lit') : pc(s, 'city'));
-    }
-    x += bw + city.int(1, 3);
-  }
+  FAR_VIEWS[REGION_VIEWS[s.region] ?? 'apartments'](g, w, h, s, { city, lit, farBottom });
   // 가까운 낮은 건물. 밤에는 오른쪽 유리(창틀 고양이와 겹치지 않는 곳)의 첫 건물 옥상에 교회 빨간 네온 십자가가 켜진다.
   const night = s.phase === 'night' || s.phase === 'dusk';
   let cross = null;
@@ -847,13 +836,103 @@ function drawCity(g, w, h, s) {
   return cross;
 }
 
-// 뒷산 능선. 한국 도시는 산을 등지고 있다.
+// 지역마다 먼 풍경. 표에 없는 지역은 뒷산과 아파트 단지다.
+const REGION_VIEWS = { 서울: 'seoul', 부산: 'busan' };
+const FAR_VIEWS = {
+  apartments(g, w, h, s, far) {
+    drawMountains(g, w, h, s, far.farBottom);
+    drawApartments(g, w, h, s, far);
+  },
+  // 서울: 남산 봉우리 위 N서울타워(외국인이 꼽는 서울 랜드마크 1위)
+  seoul(g, w, h, s, far) {
+    const px = Math.round(w * 0.7), peak = drawMountains(g, w, h, s, far.farBottom, px);
+    drawNamsanTower(g, px, peak, s);
+    drawApartments(g, w, h, s, far);
+  },
+  // 부산: 아파트 자리가 바다다. 수평선 위 해운대 고층 빌딩(마린시티, 엘시티 세 동)과 그 앞을 가로지르는 광안대교.
+  busan(g, w, h, s, far) {
+    const horizon = far.farBottom - Math.round(pt(36));
+    drawSea(g, w, h, s, horizon);
+    drawHaeundae(g, w, s, far.lit, horizon);
+    drawGwanganBridge(g, w, s, horizon + 3);
+  },
+};
+
+// 아파트: 폭 넓은 판상형 동과 옥탑. 층은 두 칸, 집마다 창 두 칸이라 불 꺼진 창도 격자로 보인다.
+function drawApartments(g, w, h, s, { city, lit, farBottom }) {
+  for (let x = Math.round(city.range(-3, 0)); x < w;) {
+    const bw = city.int(Math.round(pt(30)), Math.round(pt(48)));
+    const top = farBottom - Math.round(pt(city.range(26, 40)) + h * 0.08);
+    g.rect(x, top, bw, h - top, pc(s, 'city-far'));
+    g.rect(x + city.int(2, bw - 6), top - 2, 4, 2, pc(s, 'city-far'));
+    for (let fy = top + 2; fy < h; fy += 2) {
+      for (let ux = x + 1; ux + 3 <= x + bw; ux += 3) g.rect(ux, fy, 2, 1, city.range(0, 1) < 0.3 * lit ? color('window-lit') : pc(s, 'city'));
+    }
+    x += bw + city.int(1, 3);
+  }
+}
+
+// 뒷산 능선. 한국 도시는 산을 등지고 있다. peakX 를 주면 그 자리에 봉우리(남산)를 올리고 봉우리 꼭대기 y 를 돌려준다.
 // ponytail: 봄 진달래를 능선에 점으로 찍어 봤더니 하늘에 뜬 꽃잎(벚꽃)처럼 보여서 뺐다.
-function drawMountains(g, w, h, s, farBottom) {
+function drawMountains(g, w, h, s, farBottom, peakX) {
   const base = farBottom - pt(52) - h * 0.08;
+  let peak = farBottom;
   for (let x = 0; x < w; x++) {
-    const top = Math.round(base - pt(8) * (0.6 * Math.sin(x * 0.07 + 1) + 0.4 * Math.sin(x * 0.19 + 2)));
+    const hill = peakX === undefined ? 0 : pt(9) * Math.max(0, 1 - ((x - peakX) / pt(30)) ** 2);
+    const top = Math.round(base - pt(8) * (0.6 * Math.sin(x * 0.07 + 1) + 0.4 * Math.sin(x * 0.19 + 2)) - hill);
     g.rect(x, top, 1, farBottom - top, pc(s, 'mountain'));
+    if (x === peakX) peak = top;
+  }
+  return peak;
+}
+
+// N서울타워: 가는 몸통, 전망대, 긴 안테나. 밤에는 경관 조명으로 몸통이 밝고, 전망대 창과 안테나 끝 빨간 항공등이 켜진다.
+// 밤 하늘과 산이 어두워서 실루엣만으로는 보이지 않는다.
+function drawNamsanTower(g, x, bottom, s) {
+  const night = s.phase === 'night' || s.phase === 'dusk', far = `${s.phase}-city-far`;
+  g.sprite(x, bottom, ['.r.', '.a.', '.a.', '.a.', 'ddd', 'lll', '.s.', '.s.', '.s.', '.s.', '.s.'], {
+    a: far, r: night ? 'bulb-1' : far, d: night ? 'lamp-light' : far, s: night ? 'lamp-light' : far,
+    l: night ? 'window-lit' : `${s.phase}-city`,
+  });
+}
+
+// 바다: 수평선 아래 바다색과 성긴 물결 반짝임
+function drawSea(g, w, h, s, horizon) {
+  g.rect(0, horizon, w, h - horizon, pc(s, 'sea'));
+  const waves = new Rand(31);
+  for (let i = 0; i < w * 0.25; i++) g.rect(Math.floor(waves.range(0, w)), Math.floor(waves.range(horizon + 1, h)), 2, 1, pc(s, 'sky-4'));
+}
+
+// 해운대 고층 빌딩: 마린시티 둘, 엘시티 세 동(411m 랜드마크 타워와 339m·333m 두 동). [가로 위치, 높이 pt, 폭]
+const HAEUNDAE_TOWERS = [[0.7, 30, 3], [0.75, 36, 3], [0.82, 54, 3], [0.88, 45, 3], [0.93, 44, 3]];
+
+function drawHaeundae(g, w, s, lit, horizon) {
+  const windows = new Rand(37);
+  for (const [fx, height, bw] of HAEUNDAE_TOWERS) {
+    const x = Math.round(w * fx) - 1, top = horizon - Math.round(pt(height));
+    g.rect(x, top + 1, bw, horizon - top - 1, pc(s, 'city'));
+    g.set(x + 1, top, pc(s, 'city'));
+    for (let y = top + 2; y < horizon; y += 2) for (let k = 0; k < bw; k++) if (windows.range(0, 1) < 0.3 * lit) g.set(x + k, y, color('window-lit'));
+  }
+}
+
+// 광안대교: 두 주탑 사이 현수 케이블과 복층 상판. 밤에는 케이블에 파란 경관 조명, 상판에 불빛이 켜지고 바다에 비친다.
+function drawGwanganBridge(g, w, s, deck) {
+  const night = s.phase === 'night' || s.phase === 'dusk', tall = Math.round(pt(18));
+  const p1 = Math.round(w * 0.3), p2 = Math.round(w * 0.6), mid = (p1 + p2) / 2;
+  const cable = x => {
+    if (x < p1) return deck - 1 - Math.round((tall - 1) * (x / p1) ** 2);
+    if (x > p2) return deck - 1 - Math.round((tall - 1) * ((w - 1 - x) / (w - 1 - p2)) ** 2);
+    return deck - 1 - Math.round((tall - 1) * ((x - mid) / (mid - p1)) ** 2);
+  };
+  for (const px of [p1, p2]) g.rect(px, deck - tall, 1, tall + 3, pc(s, 'city'));
+  g.rect(0, deck, w, 2, pc(s, 'city'));
+  for (let x = 0; x < w; x++) {
+    g.set(x, cable(x), night ? color('bulb-4') : pc(s, 'city'));
+    if (night && x % 3 === 1) {
+      g.set(x, deck, color('lamp-light'));
+      g.set(x, deck + 3, color('lamp'));
+    }
   }
 }
 
