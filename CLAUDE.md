@@ -20,6 +20,7 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 - 앱·위젯 빌드: `xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'generic/platform=iOS Simulator' build`, macOS는 `-destination 'platform=macOS'`. 개발 팀 없이 Sign to Run Locally로 서명하므로 서명 옵션을 덮어쓰지 않는다.
 - 시뮬레이터: 이 Mac에는 iOS 26.5 런타임만 있다(배포 타깃 26.0).
 - macOS 위젯은 LaunchServices에 등록된 앱 사본에서 뜬다. macOS 앱을 임시 `-derivedDataPath` 로 빌드하면 그 사본이 등록되어 데스크톱에 옛 위젯이 뜰 수 있다. macOS 빌드는 기본 DerivedData(Xcode와 같은 곳)로 하고, `pluginkit -m -v -p com.apple.widgetkit-extension` 으로 등록 경로를 확인한다.
+- 배포: `git tag v0.1.0 && git push origin v0.1.0`. `.github/workflows/release.yml` 이 GitHub 러너(`xcode-27`)에서 테스트하고 macOS 앱을 Release 로 빌드해(버전은 태그) zip 을 릴리스에 올린다. ad-hoc 서명이라 받는 쪽 설치 방법은 릴리스 노트에 적힌다. iOS 는 유료 개발자 계정 없이 배포할 수 없어 빠져 있다.
 
 ## 코드 규칙: SRP·OCP
 

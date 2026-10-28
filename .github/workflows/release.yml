@@ -1,0 +1,31 @@
+name: Release
+
+# v 로 시작하는 태그(v0.1.0)를 올리면 테스트를 돌리고 macOS 앱을 빌드해 GitHub 릴리스에 올린다.
+# ponytail: 개발자 인증서가 없어 ad-hoc 서명이라 받은 사람이 격리 속성을 지워야 열린다. 없애려면 유료 계정으로 Developer ID 서명·공증 단계를 더한다.
+# iOS 는 유료 계정 없이 기기에 설치할 길이 없어 올리지 않는다.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  macos:
+    runs-on: xcode-27
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - run: swift test --package-path ChristofKit
+      - run: >
+          xcodebuild -project Christof.xcodeproj -scheme Christof -configuration Release
+          -destination 'generic/platform=macOS' -derivedDataPath build
+          MARKETING_VERSION=${GITHUB_REF_NAME#v} build
+      - run: ditto -c -k --keepParent build/Build/Products/Release/Christof.app Christof-macOS.zip
+      - run: gh release create "$GITHUB_REF_NAME" Christof-macOS.zip --generate-notes --notes "$NOTES"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTES: |
+            ## macOS 설치 (macOS 26 이상)
+            1. `Christof-macOS.zip` 을 받아 풀고 `Christof.app` 을 응용 프로그램 폴더로 옮깁니다.
+            2. Apple 공증을 받지 않은 앱이라 터미널에서 격리 속성을 지워야 열립니다.
+               `xattr -dr com.apple.quarantine /Applications/Christof.app`
+            3. 앱을 한 번 열고, 데스크톱에서 "위젯 편집"으로 Christof 위젯을 놓습니다.
