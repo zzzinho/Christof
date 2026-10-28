@@ -121,7 +121,7 @@ const OCCASIONS = {
   'KR.seollal': { name: '설날', looks: { window: 'kite', person: 'daenggi', cat: 'pouch', room: 'tteokguk', clock: 'norigae' }, moment: { hours: [7, 10], cat: 'eat', name: '떡국 같이 먹기' } },
   'KR.jeongwolDaeboreum': { name: '정월대보름', looks: { window: ['moonHalo', 'daljip'], person: 'moonPin', cat: 'walnut', room: 'bureom', clock: 'moonFace' }, moment: { hours: [7, 9], cat: 'eat', name: '부럼 깨기' } },
   'KR.buddhasBirthday': { name: '부처님오신날', looks: { window: 'lanterns', person: 'lotusPin', cat: 'lotus', room: 'lotusBowl', clock: 'lantern' }, moment: { hours: [19, 22], cat: 'beside', name: '연등 같이 보기' } },
-  'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'persimmonBranch'], person: 'ribbonPin', cat: 'persimmon', room: 'songpyeon', clock: 'rabbitEars' }, moment: { hours: [19, 23], cat: 'beside', name: '보름달 같이 보기' } },
+  'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'pineBranch'], person: 'ribbonPin', cat: 'bojagi', room: 'songpyeon', clock: 'moonFace' }, moment: { hours: [19, 23], cat: 'beside', name: '보름달 같이 보기' } },
   'KR.newYearsDay': { name: '새해 첫날', looks: { window: 'sunGlow', person: 'beanie', cat: 'beanie', room: 'greetingCards', clock: 'sparkles' }, moment: { hours: [6, 8], cat: 'beside', name: '첫 해 같이 보기' } },
   'KR.halloween': { name: '할로윈', looks: { window: 'bats', person: 'witchHat', cat: 'batWings', room: 'pumpkin', clock: 'spider' }, moment: { hours: [19, 23], cat: 'walk', name: '고양이 혼자 밤 순찰' } },
   'KR.christmasEve': { name: '크리스마스 이브', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' }, moment: { hours: [20, 23], cat: 'shoulder', name: '어깨에서 잠든 고양이' } },
@@ -667,14 +667,14 @@ const WINDOW_LOOKS = {
     ring(g, x + 0.5, h - 3, 0, 5, color('moon-glow-1'));
     g.sprite(x, h, SPRITES.fire, { Y: 'lamp-light', O: 'lamp', b: 'branch' });
   } },
-  // 추석: 창 왼쪽 위로 들어온 감나무 가지
-  persimmonBranch: { ground(g, w) {
-    const end = Math.round(w * 0.35), y = x => 1 + Math.round(x * 0.25);
+  // 추석: 창 왼쪽 위로 들어온 소나무 가지. 송편을 솔잎에 찌고, 소나무와 보름달은 한국 옛 그림의 짝이다.
+  // 감나무·토끼·억새는 일본 츠키미로 읽혀서 쓰지 않는다.
+  pineBranch: { ground(g, w) {
+    const end = Math.round(w * 0.38), y = x => 1 + Math.round(x * 0.2);
     for (let x = 0; x < end; x++) g.set(x, y(x), color('branch'));
-    for (const t of [0.3, 0.6, 0.9]) {
-      const x = Math.round(end * t);
-      g.set(x + 1, y(x) - 1, color('plant-dark'));
-      g.rect(x - 1, y(x) + 1, 2, 2, color('autumn-1'));
+    for (const t of [0.35, 0.7, 1]) {
+      const x = Math.round(end * t) - 1;
+      g.sprite(x, y(x) + 2, ['n.n.n.n', 'nnnnnnn', '.NNNNN.'], { n: 'tree', N: 'tree-dark' });
     }
   } },
   // 할로윈: 하늘의 박쥐
@@ -737,8 +737,10 @@ function drawView(g, w, h, s, looks) {
   if (s.moonPoint) drawMoon(g, w, h, s);
   for (const look of looks) look.sky?.(g, w, h, s);
   if (s.weather?.condition === 'thunderstorm') drawLightning(g, w, h, s);
-  drawCity(g, w, h, s);
+  const cross = drawCity(g, w, h, s);
   drawStreetTrees(g, w, h, s);
+  // 십자가는 낮은 건물 옥상보다 높이 서 있어 가로수에 가리지 않는다.
+  if (cross) g.sprite(...cross, ['.X.', 'XXX', '.X.', '.X.'], { X: 'bulb-1' });
   for (const look of looks) look.ground?.(g, w, h, s);
   if (s.weather && RAIN.has(s.weather.condition)) drawRain(g, w, h, s);
   if (s.weather?.condition === 'snow') drawSnow(g, w, h, s);
@@ -810,6 +812,7 @@ function drawLightning(g, w, h, s) {
 }
 
 // 한국 도시: 뒤에 산 능선, 그 앞에 아파트 단지, 가까이 낮은 상가·빌라. 해가 진 뒤와 흐린 날은 창에 호박색 불이 켜진다.
+// 밤에 켜지는 교회 십자가 자리 [가운데, 바닥]를 돌려준다.
 function drawCity(g, w, h, s) {
   const city = new Rand(7);
   const lit = s.phase === 'day' ? 0 : s.phase === 'grey' ? 0.4 : 1;
@@ -826,9 +829,10 @@ function drawCity(g, w, h, s) {
     }
     x += bw + city.int(1, 3);
   }
-  // 가까운 낮은 건물. 밤에는 그중 하나의 옥상에 교회 빨간 네온 십자가가 켜진다.
-  const crossAt = city.int(1, 3), night = s.phase === 'night' || s.phase === 'dusk';
-  for (let x = city.range(-3, 0), i = 0; x < w; i++) {
+  // 가까운 낮은 건물. 밤에는 오른쪽 유리(창틀 고양이와 겹치지 않는 곳)의 첫 건물 옥상에 교회 빨간 네온 십자가가 켜진다.
+  const night = s.phase === 'night' || s.phase === 'dusk';
+  let cross = null;
+  for (let x = city.range(-3, 0); x < w;) {
     const bw = city.int(Math.round(pt(14)), Math.round(pt(30)));
     const top = Math.round(h * 0.95) - Math.round(pt(city.range(8, 20)) + h * 0.08);
     g.rect(x, top, bw, h - top, pc(s, 'city'));
@@ -836,9 +840,10 @@ function drawCity(g, w, h, s) {
     for (let wy = top + 2; wy < h; wy += 2) {
       for (let wx = Math.round(x) + 1; wx < x + bw - 1; wx += 2) if (city.range(0, 1) < 0.25 * lit) g.set(wx, wy, color('window-lit'));
     }
-    if (i === crossAt && night) g.sprite(Math.round(x + bw / 2), top, ['.X.', 'XXX', '.X.', '.X.'], { X: 'bulb-1' });
+    if (night && !cross && x + bw / 2 > w * 0.6) cross = [Math.round(x + bw / 2), top];
     x += bw + city.int(0, 2);
   }
+  return cross;
 }
 
 // 뒷산 능선. 한국 도시는 산을 등지고 있다.
@@ -1030,7 +1035,8 @@ const CAT_LOOKS = {
     const { head: [x, y] } = catAnchor(spot);
     g.sprite(x, y, SPRITES.catLotus, { P: 'spring-1', p: 'spring-2' });
   },
-  persimmon: (g, { item: [x, y] }) => g.sprite(x, y, ['.l.', 'ooo', 'ooo'], { l: 'plant-dark', o: 'autumn-1' }),
+  // 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
+  bojagi: (g, { item: [x, y] }) => g.sprite(x, y, ['k.k', '.k.', 'ABC', 'CAB'], { k: 'hanbok', A: 'hanbok', B: 'hanbok-jade', C: 'pouch-gold' }),
   // 등 양쪽에 펼친 박쥐 날개. 머리 줄 아래부터 몸 바깥으로 뻗는다.
   batWings(g, spot) {
     const { left, width, head: [, y] } = catAnchor(spot);
@@ -1215,20 +1221,13 @@ const CLOCK_LOOKS = {
       for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) g.set(cx + dx + ax, cy + dy + ay, color('star'));
     }
   } },
-  // 정월대보름: 달빛 문자판
+  // 정월대보름·추석: 달빛 문자판
   moonFace: { face: 'moon' },
   // 부처님오신날: 시계 아래 작은 연등
   lantern: {
     draw: (g, cx, cy, s) => g.sprite(cx, cy + 9 + SPRITES.lantern.length, SPRITES.lantern, { p: 'lotus-lantern', P: s.lightOn ? 'lamp-light' : 'lotus-lantern', l: 'plant' }),
     bare: (g, cx, cy) => g.rect(cx, cy + 7, 1, 2, color('wire')),
   },
-  // 추석: 달토끼 귀
-  rabbitEars: { draw(g, cx, cy) {
-    for (const x of [cx - 3, cx + 2]) {
-      g.rect(x, cy - 10, 2, 4, color('hanbok-collar'));
-      g.rect(x + (x < cx ? 1 : 0), cy - 9, 1, 2, color('hanbok'));
-    }
-  } },
   // 할로윈: 시계에 매달린 거미. 줄과 다리가 가늘어 윤곽선 없이(bare) 시계 위에 그린다.
   spider: { bare(g, cx, cy) {
     g.rect(cx + 4, cy + 6, 1, 5, color('star-dim'));
