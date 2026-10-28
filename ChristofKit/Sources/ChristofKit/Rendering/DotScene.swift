@@ -53,6 +53,7 @@ struct DotScene {
     let weekday: Int
     let outfit: Outfit
     let looks: OccasionLooks
+    let farView: any FarView
 
     var lightOn: Bool { phase != .day }
 
@@ -81,6 +82,7 @@ struct DotScene {
         // 겨울엔 고양이가 요일 색 목도리를 한다. 크리스마스의 빨간 목도리가 있으면 그것만 둔다.
         if season == .winter, !looks.cat.contains(where: { $0 is CatScarf }) { looks.cat.append(CatScarf.winter) }
         self.looks = looks
+        farView = context.region.looks.far
         // 같은 날 같은 시각이면 늘 같은 모습이고, 한 시간마다 바뀐다. 순간이 덮어도 뽑는 순서(헤드폰 → 고양이)는 같다.
         var random = SeededRandom(seed: UInt64((month * 100 + day) * 100 + hour))
         headwear = Headwear.allCases[random.int(0, Headwear.allCases.count - 1)]
