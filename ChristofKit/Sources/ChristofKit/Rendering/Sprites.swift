@@ -33,7 +33,7 @@ enum Sprites {
     static let plant = [".l.l.", "lLlLl", ".lLl.", "ppppp", ".ppp."]
     /// 김은 성긴 점이라 그릇 줄만 윤곽선을 두른다.
     static let rice = [".t.t.", ".www.", "BBBBB", ".BBB."]
-    // 주름진 입구, 금색 끈으로 묶은 목, 둥근 몸. 몸만 그리면 둥근 장식이나 사과처럼 보였다.
-    static let bokjumeoni = ["p.p.p", ".PPP.", ".ggg.", "PPPPP", "PpgpP", "PpppP", ".PPP."]
-    static let bokjumeoniColors: [Character: String] = ["P": "pouch", "p": "pouch-light", "g": "pouch-gold"]
+    // 오방색 두루주머니: 청·백 주름 입, 황 끈과 수, 흑 매듭, 적 몸통. 주름 잡은 입을 몸통보다 넓게 해야 꽃병이 아닌 주머니로 읽힌다.
+    static let bokjumeoni = ["BWBWBWB", ".WBWBW.", "..YKY..", ".RRRRR.", "RRRYRRR", "RRYRYRR", "RRRYRRR", ".RRRRR."]
+    static let bokjumeoniColors: [Character: String] = ["B": "pouch-knot", "R": "pouch", "Y": "pouch-gold", "W": "hanbok-collar", "K": "clock-hand"]
 }

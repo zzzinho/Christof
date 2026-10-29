@@ -43,7 +43,7 @@ struct RoomLayout {
     /// item 은 곁에 두는 이벤트 물건 자리 [가운데, 바닥]이다. 어깨 위 고양이는 곁에 바닥이 없어 창턱 고양이 자리에 둔다.
     func catSpot(_ state: DotScene.CatState) -> CatSpot {
         switch state {
-        case .window: CatSpot(pose: .back, x: cat.x, bottom: sill, item: (cat.x + 8, sill))
+        case .window: CatSpot(pose: .back, x: cat.x, bottom: sill, item: (cat.x + 9, sill))
         case .sleep: CatSpot(pose: .curled, x: x0 + 10, bottom: sill, item: (x0 + 20, sill))
         case .walk: CatSpot(pose: .walk, x: x0 + 12, bottom: sill, item: (x0 + 23, sill))
         case .pet:
