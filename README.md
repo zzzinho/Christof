@@ -53,7 +53,7 @@ macOS may keep the Christof folders in `~/Library/Containers`. They do no harm; 
 
 ## Design
 
-The look of the widget was designed with [hunsu](https://github.com/zzzinho/hunsu), a local tool for designing in HTML. The design files (`DESIGN.md`, `design.css`, `*.html`) are at the root of this repository.
+The look of the widget was designed with [hunsu](https://github.com/zzzinho/hunsu), a local tool for designing in HTML. The design files are in [`design/`](design/).
 
 ## Data
 

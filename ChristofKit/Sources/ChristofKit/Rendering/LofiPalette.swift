@@ -1,4 +1,4 @@
-// design.css 의 --lofi-* 토큰을 옮겼다. 시안이 색을 바꾸면 여기도 바꾼다(PaletteTests 가 둘이 같은지 확인한다).
+// design.css 의 --lofi-* 토큰을 옮겼다. 시안이 색을 바꾸면 여기도 바꾼다(Scripts/compare-design.mjs 가 둘이 같은지 확인한다).
 enum LofiPalette {
     static let colors: [String: UInt32] = [
         "star": 0xC8C3D6,

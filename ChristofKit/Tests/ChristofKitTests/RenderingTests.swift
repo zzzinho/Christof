@@ -24,16 +24,6 @@ private func scene(
         season: season, occasions: occasions)
 }
 
-@Test func paletteMatchesDesignTokens() throws {
-    let css = try String(contentsOf: URL(fileURLWithPath: #filePath).appending(path: "../../../../design.css").standardizedFileURL, encoding: .utf8)
-    var tokens: [String: UInt32] = [:]
-    for match in css.matches(of: /--lofi-([a-z0-9-]+):\s*#([0-9A-Fa-f]{6})/) {
-        tokens[String(match.1)] = UInt32(match.2, radix: 16)
-    }
-    #expect(!tokens.isEmpty)
-    #expect(LofiPalette.colors == tokens)
-}
-
 /// 때·날씨·계절·기온마다 쓰는 색 이름이 다르다. 팔레트에 없는 이름을 쓰면 여기서 멈춘다.
 @Test(arguments: [nil] + WeatherCondition.allCases)
 func everyPhaseAndWeatherHasItsColors(_ condition: WeatherCondition?) {

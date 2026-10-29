@@ -53,7 +53,7 @@ curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/uninstall.sh 
 
 ## 디자인
 
-위젯 그림은 HTML 로 디자인하는 로컬 도구 [hunsu](https://github.com/zzzinho/hunsu)로 만들었습니다. 시안(`DESIGN.md`, `design.css`, `*.html`)은 저장소 루트에 있습니다.
+위젯 그림은 HTML 로 디자인하는 로컬 도구 [hunsu](https://github.com/zzzinho/hunsu)로 만들었습니다. 시안은 [`design/`](design/) 폴더에 있습니다.
 
 ## 데이터
 
