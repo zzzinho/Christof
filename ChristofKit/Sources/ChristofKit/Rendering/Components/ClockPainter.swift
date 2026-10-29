@@ -19,8 +19,9 @@ enum ClockPainter {
                 }
             }
         }
-        drawHand(Double(s.minute) / 60, 5, 1)
-        drawHand((Double(s.hour % 12) + Double(s.minute) / 60) / 12, 3, 2)
+        // 위젯은 5분마다 다시 그려진다. 분침은 5분 눈금, 시침은 정시 자리에만 둔다.
+        drawHand(Double(s.minute / 5) / 12, 5, 1)
+        drawHand(Double(s.hour % 12) / 12, 3, 2)
         for look in s.looks.clock { look.draw(&g, cx, cy, s) }
     }
 }

@@ -26,12 +26,14 @@ struct WindowTimelineProvider: AppIntentTimelineProvider {
         let now = Date.now
         // 예보 실패(오프라인 등)는 날씨 없는 장면으로 그리고, 30분 뒤 다시 시도한다(하루 48회, 리로드 예산 40~70회 안).
         let forecast = try? await weather.forecast(for: region)
-        let minuteStart = Date(timeIntervalSinceReferenceDate: (now.timeIntervalSinceReferenceDate / 60).rounded(.down) * 60)
+        // 시계 분침이 5분 눈금이라 5분 경계마다 다시 그린다.
+        let step = 5.0 * 60
+        let start = Date(timeIntervalSinceReferenceDate: (now.timeIntervalSinceReferenceDate / step).rounded(.down) * step)
         // 리로드는 1시간 뒤 요청하지만 시스템이 미룰 수 있어, 엔트리를 3시간치 만들어 그동안 시계가 멈추지 않게 한다.
         // 시각을 고정했으면 장면이 바뀌지 않으므로 하나면 된다.
-        let count = settings.fixedDate == nil ? 180 : 1
-        let entries = (0..<count).map { minute in
-            entry(at: minuteStart.addingTimeInterval(Double(minute) * 60), region: region, forecast: forecast, settings: settings)
+        let count = settings.fixedDate == nil ? 36 : 1
+        let entries = (0..<count).map { i in
+            entry(at: start.addingTimeInterval(Double(i) * step), region: region, forecast: forecast, settings: settings)
         }
         let policy: TimelineReloadPolicy = .after(now.addingTimeInterval((forecast == nil ? 30 : 60) * 60))
         return Timeline(entries: entries, policy: policy)
