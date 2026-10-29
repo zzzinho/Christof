@@ -16,7 +16,7 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 - 패키지 테스트: `swift test --package-path ChristofKit`
 - 일부 테스트만: `swift test --package-path ChristofKit --filter <테스트 파일 이름 또는 함수 이름>` (예: `--filter OccasionTests`)
 - 장면 스냅샷 PNG: `swift run --package-path ChristofKit ChristofSnapshots <출력 폴더>`. 실제 지역·날짜를 `SceneContextFactory` 에 넣고 날씨만 가짜로 준다. 그리기를 바꾸면 PNG를 직접 열어 확인한다.
-- 시안과 칸 단위 비교: 스냅샷을 뽑은 뒤 `node ChristofKit/Scripts/compare-design.mjs <출력 폴더>`. 스냅샷 도구가 함께 쓴 격자(`.grid`)와 장면 입력(`scenes.json`)을 `06-lofi.html` 의 그리기 JS 로 다시 그려 견준다. 그리기를 옮기거나 고치면 모든 격자가 같아야 한다.
+- 시안과 칸 단위 비교: 스냅샷을 뽑은 뒤 `node ChristofKit/Scripts/compare-design.mjs <출력 폴더> <시안 html>`. 스냅샷 도구가 함께 쓴 격자(`.grid`)와 장면 입력(`scenes.json`)을 시안의 그리기 JS 로 다시 그려 견주고, 시안 옆 `design.css` 의 `--lofi-*` 색과 `LofiPalette` 도 견준다. 그리기를 옮기거나 고치면 팔레트와 모든 격자가 같아야 한다. 코드는 시안 위치를 들고 있지 않는다. 시안 경로는 디자인 세션이 넘길 때 알린다(지금은 `design/06-lofi.html`).
 - 앱·위젯 빌드: `xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'generic/platform=iOS Simulator' build`, macOS는 `-destination 'platform=macOS'`. 개발 팀 없이 Sign to Run Locally로 서명하므로 서명 옵션을 덮어쓰지 않는다.
 - 시뮬레이터: 이 Mac에는 iOS 26.5 런타임만 있다(배포 타깃 26.0).
 - macOS 위젯은 LaunchServices에 등록된 앱 사본에서 뜬다. macOS 앱을 임시 `-derivedDataPath` 로 빌드하면 그 사본이 등록되어 데스크톱에 옛 위젯이 뜰 수 있다. macOS 빌드는 기본 DerivedData(Xcode와 같은 곳)로 하고, `pluginkit -m -v -p com.apple.widgetkit-extension` 으로 등록 경로를 확인한다.
@@ -42,7 +42,7 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 
 디자인 세션과 개발 세션을 나눠 쓴다. 세션을 열고 첫 입력으로 스킬을 불러 범위를 정한다.
 
-- 디자인: `claude -n 디자인` 으로 열고 `/design`. 시안(`DESIGN.md`, `design.css`, `*.html`)만 고친다.
+- 디자인: `claude -n 디자인` 으로 열고 `/design`. 시안(`design/`)만 고친다.
 - 개발: `claude -n 개발` 로 열고 `/dev`. 앱·위젯 코드만 고친다.
 - 두 세션은 같은 작업 트리를 쓴다. 커밋할 때 자기 범위 파일만 경로를 적어 올린다.
 - 범위와 확인 방법은 `.claude/skills/design/SKILL.md`, `.claude/skills/dev/SKILL.md` 에 있다.
@@ -55,9 +55,9 @@ macOS·iOS용 위젯. 위젯은 창문 모양이고, 사용자가 고른 지역�
 
 - `ChristofKit/`: 로직과 그리기를 모두 담은 로컬 Swift 패키지. 앱과 위젯이 함께 쓴다.
   - 흐름: `Region` + 날짜 + `WeatherForecast` → `SceneContextFactory` → `SceneContext` (순수 값, 타임라인 엔트리에 담김) → `SceneComposer` 가 `DotScene`(때·시드 변화)과 `RoomLayout`(자리)으로 구성 요소를 정해진 순서로 3pt 도트 격자(`DotGrid`)에 칠한다 → `WindowView` 가 격자를 Canvas 사각형으로 그린다.
-  - 그리기는 시안 `06-lofi.html` 의 JS 를 같은 이름·순서로 옮긴 것이다. 반올림·hypot·난수도 JS 와 같게 계산해서 같은 칸이 나온다.
+  - 그리기는 시안(`design/06-lofi.html`)의 JS 를 같은 이름·순서로 옮긴 것이다. 반올림·hypot·난수도 JS 와 같게 계산해서 같은 칸이 나온다.
   - `Occasions/`: 이벤트 모델과 날짜 규칙 타입. 음력 명절은 `Calendar(identifier: .dangi)` 로 계산한다.
   - `Countries/`: 국가 프로필과 레지스트리. 국가와 무관한 하늘 이벤트는 `CelestialOccasions`.
   - `Rendering/Components`: 구성 요소(벽, 시계, 창문, 고양이, 방 안, 사람). `Rendering/Layers`: 창밖 효과. `Rendering/Looks`: 구성 요소별 이벤트 모양(시안의 `*_LOOKS`). `LofiPalette` 는 design.css 의 `--lofi-*` 색이다.
 - `Christof/`: 컨테이너 앱. `ChristofWidget/`: 위젯 익스텐션. 둘 다 iOS·macOS 멀티플랫폼 타깃이다.
-- 루트의 `DESIGN.md`, `design.css`, `*.html`: hunsu(저장소 루트에서 `hunsu` 실행)로 만드는 위젯 시안. 디자인 세션이 고치고, 고른 시안은 개발 세션이 `Rendering/` 에 옮긴다.
+- `design/`(`DESIGN.md`, `design.css`, `*.html`): hunsu(`design/` 에서 `hunsu` 실행)로 만드는 위젯 시안. 디자인 세션이 고치고, 고른 시안은 개발 세션이 `Rendering/` 에 옮긴다.
