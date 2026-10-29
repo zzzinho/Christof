@@ -17,14 +17,14 @@ struct ClockFace: ClockLook {
     let face: String?
 }
 
-/// 시계 아래 매듭 노리개
-struct Norigae: ClockLook {
+/// 시계 아래 끈에 매단 복주머니. 술 달린 매듭 노리개는 중국 매듭으로도 읽혀서 바꿨다.
+struct Bokjumeoni: ClockLook {
     func draw(_ g: inout DotGrid, _ cx: Int, _ cy: Int, _ s: DotScene) {
-        let red = LofiPalette.color("pouch")
-        g.rect(cx, cy + 7, 1, 2, red)
-        g.rect(cx - 1, cy + 9, 3, 3, red)
-        g.set(cx, cy + 10, LofiPalette.color("pouch-gold"))
-        for dx in [-1, 0, 1] { g.rect(cx + dx, cy + 12, 1, 4 - abs(dx), red) }
+        g.sprite(cx, cy + 9 + Sprites.bokjumeoni.count, Sprites.bokjumeoni, Sprites.bokjumeoniColors)
+    }
+
+    func bare(_ g: inout DotGrid, _ cx: Int, _ cy: Int, _ s: DotScene) {
+        g.rect(cx, cy + 7, 1, 2, LofiPalette.color("wire"))
     }
 }
 

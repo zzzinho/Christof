@@ -12,7 +12,7 @@ struct CatItem: CatLook {
         g.sprite(spot.item.x, spot.item.y, rows, colors)
     }
 
-    static let pouch = CatItem(rows: ["..p..", ".PPP.", "PpgpP", "PpppP", ".PPP."], colors: ["P": "pouch", "p": "pouch-light", "g": "pouch-gold"])
+    static let pouch = CatItem(rows: Sprites.bokjumeoni, colors: Sprites.bokjumeoniColors)
     static let walnut = CatItem(rows: ["nNn", "NnN"], colors: ["n": "wood-light", "N": "branch"])
     /// 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
     static let bojagi = CatItem(rows: ["k.k", ".k.", "ABC", "CAB"], colors: ["k": "hanbok", "A": "hanbok", "B": "hanbok-jade", "C": "pouch-gold"])
