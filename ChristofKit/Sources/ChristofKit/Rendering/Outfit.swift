@@ -17,8 +17,8 @@ struct Outfit: Sendable {
         }
     }
 
-    /// 평소 옷: 무늬 없는 세이지 극세사 잠옷
-    static let pajamaSage = Outfit(base: "pajama-sage", shade: "pajama-sage-dark", rim: "pajama-sage-rim")
+    /// 평소 옷: 무늬 없는 오트밀 극세사 잠옷
+    static let pajama = Outfit(base: "pajama", shade: "pajama-dark", rim: "pajama-rim")
     /// 설날 색동 한복: 첫 줄은 깃, 소매 두 칸은 줄마다 색동
     static let seollal = Outfit(base: "hanbok", shade: "hanbok", skirt: "pouch") { _, i, k, row in
         collar(k) ?? (isSleeve(i, row) ? saekdong[k % saekdong.count] : nil)

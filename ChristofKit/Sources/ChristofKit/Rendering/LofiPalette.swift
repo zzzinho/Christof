@@ -152,15 +152,9 @@ enum LofiPalette {
         "clock-rim": 0x5A4440,
         "clock-face": 0xB8AD98,
         "clock-hand": 0x2A2430,
-        "pajama-sage": 0x76857A,
-        "pajama-sage-dark": 0x5F6C63,
-        "pajama-sage-rim": 0x9EAA9C,
-        "pajama-oat": 0x8C8276,
-        "pajama-oat-dark": 0x71685E,
-        "pajama-oat-rim": 0xB0A493,
-        "pajama-mauve": 0x85787F,
-        "pajama-mauve-dark": 0x6B6067,
-        "pajama-mauve-rim": 0xA9999F,
+        "pajama": 0x8C8276,
+        "pajama-dark": 0x71685E,
+        "pajama-rim": 0xB0A493,
         "santa-dark": 0x86393E,
     ]
 }

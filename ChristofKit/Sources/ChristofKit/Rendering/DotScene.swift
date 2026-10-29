@@ -91,8 +91,7 @@ struct DotScene {
         catState = moment?.cat ?? picked
         // 봄(3월 1일)에 턱선 단발로 자르고 겨울 끝(2월 말)까지 자란다.
         hair = (Double((month + 9) % 12) + Double(day - 1) / 31) / 12
-        // ponytail: 평소 옷은 시안의 극세사 잠옷 색 후보 셋(세이지·오트밀·모브) 중 시안이 쓰는 세이지만 옮겼다.
-        outfit = looks.outfit ?? .pajamaSage
+        outfit = looks.outfit ?? .pajama
     }
 
     /// 때마다 다른 색
