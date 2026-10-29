@@ -38,7 +38,8 @@ Christof 는 macOS·iOS 위젯이다. 고른 지역의 날씨·시간·이벤트
 
 ## 고치는 범위
 
-- 루트의 `DESIGN.md`, `design.css`, `*.html`, `assets/` 만 고친다.
+- `design/` 폴더(`DESIGN.md`, `design.css`, `*.html`, `assets/`)만 고친다. 시안은 hunsu 로 이 폴더에서 연다.
+- 개발 세션에 넘길 때 시안 경로(`design/06-lofi.html`)를 메시지에 적는다. 앱 코드는 시안 위치를 박아 두지 않고 넘겨받은 경로를 쓴다.
 - `Christof/`, `ChristofKit/`, `ChristofWidget/`, `Config/`, `Christof.xcodeproj/`, `CLAUDE.md` 는 앱 코드다. 읽기만 하고 고치지 않는다.
 
 ## 페이지
