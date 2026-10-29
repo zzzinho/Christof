@@ -43,8 +43,8 @@ struct DotScene {
     let weather: WeatherSample?
     let sunAltitude: Double
     let moonPhase: Double
-    let sunPoint: UnitPoint?
-    let moonPoint: UnitPoint?
+    let sunPoint: CelestialPosition.Point?
+    let moonPoint: CelestialPosition.Point?
     let snowCovered: Bool
     let headwear: Headwear
     let catState: CatState

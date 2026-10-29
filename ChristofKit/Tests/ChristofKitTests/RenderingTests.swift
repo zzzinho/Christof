@@ -96,7 +96,7 @@ func everyOccasionLookHasItsColors(_ id: String) throws {
     #expect(try #require(CelestialPosition.moon(moon(altitude: 39, azimuth: 84), latitude: seoul.latitude)).x < 0.5)
     let south = try #require(CelestialPosition.moon(moon(altitude: 50, azimuth: 180), latitude: seoul.latitude))
     #expect(abs(south.x - 0.5) < 1e-9)
-    #expect(south.y < CelestialPosition.horizon)
+    #expect(south.rise > 0)
     #expect(CelestialPosition.moon(moon(altitude: -5, azimuth: 270), latitude: seoul.latitude) == nil)
 }
 

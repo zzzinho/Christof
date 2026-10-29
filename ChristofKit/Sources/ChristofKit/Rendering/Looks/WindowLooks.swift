@@ -57,9 +57,10 @@ struct Daljip: WindowLook {
 
 /// 추석: 창 왼쪽 위로 들어온 소나무 가지. 송편을 솔잎에 찌고, 소나무와 보름달은 한국 옛 그림의 짝이다.
 /// 감나무·토끼·억새는 일본 츠키미로 읽혀서 쓰지 않는다.
+/// 가지는 왼쪽 위 모서리에서 짧게 뻗어 달 가장자리만 살짝 가린다. 길게 뻗으면 보름달 위쪽 절반을 덮었다.
 struct PineBranch: WindowLook {
     func ground(_ g: inout DotGrid, _ w: Int, _ h: Int, _ s: DotScene) {
-        let end = jsRound(Double(w) * 0.38)
+        let end = jsRound(Double(w) * 0.25)
         func y(_ x: Int) -> Int { 1 + jsRound(Double(x) * 0.2) }
         for x in 0..<end { g.set(x, y(x), LofiPalette.color("branch")) }
         for t in [0.35, 0.7, 1] {
