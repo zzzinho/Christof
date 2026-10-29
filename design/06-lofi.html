@@ -358,8 +358,8 @@ function sceneContext(scene) {
     minute: Number(scene.time.split(':')[1]),
     ...variety(month, day, scene.hour, scene.occasions),
     hair: hairLength(month, day),
-    // ponytail: 평소 옷은 잠옷 후보 셋(물방울·줄무늬·극세사) 중 물방울로 둔다. 하나를 고르면 나머지 후보는 지운다.
-    outfit: OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'pajamaDot',
+    // ponytail: 평소 옷은 극세사 잠옷 색 후보 셋(세이지·오트밀·모브) 중 세이지로 둔다. 하나를 고르면 나머지 후보는 지운다.
+    outfit: OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'pajamaSage',
     // 구성 요소마다 진행 중인 이벤트들이 고른 모양 이름
     looks: catLooks(scene, Object.fromEntries(COMPONENTS.map(part => [part, [...new Set(scene.occasions.flatMap(id => [].concat(OCCASIONS[id].looks[part] ?? [])))]]))),
     // ponytail: 시안 장면에는 연도가 없어 2026년으로 친다. 0 = 일요일
@@ -576,7 +576,8 @@ const SPRITES = {
   ],
   catPouch: ['..p..', '.PPP.', 'PpgpP', 'PpppP', '.PPP.'],
   catBeanie: ['..w..', '.BBB.', 'BBBBB'],
-  catLotus: ['.P.', 'PpP'],
+  // 잎받침 위에 핀 연꽃. 3×2 로는 이마의 얼룩처럼 보였다.
+  catLotus: ['..P..', '.PPP.', 'PpPpP', '.ggg.'],
   // 끝이 꺾인 고깔과 금색 별, 귀를 덮는 챙
   catWizardHat: ['....WW.', '...WW..', '..WWW..', '..WgW..', 'WWWWWWW'],
   pumpkin: [
@@ -1087,14 +1088,13 @@ function isSleeve(ch, i, row, p) {
   return i <= cloth[0] + 1 || i >= cloth[cloth.length - 1] - 1;
 }
 
-// 평소 옷: 잠옷 후보. 옷깃 줄(k = 0)에는 무늬를 넣지 않는다. 체크는 식탁보처럼 보여 뺐다.
-const pajama = (name, tone, paint) => ({ event: '평소', name, o: `pajama-${tone}`, d: `pajama-${tone}-dark`, rim: `pajama-${tone}-rim`, paint });
+// 평소 옷: 무늬 없는 극세사 잠옷. 색만 후보다.
+const pajama = (name, tone) => ({ event: '평소', name, o: `pajama-${tone}`, d: `pajama-${tone}-dark`, rim: `pajama-${tone}-rim` });
 
 const OUTFITS = {
-  // 물방울은 세 줄마다 네 칸 간격으로 찍고 줄마다 두 칸씩 엇갈린다.
-  pajamaDot: pajama('분홍 물방울 잠옷', 'rose', (ch, i, k) => (k > 0 && k % 3 === 1 && (i + (k % 6 === 1 ? 0 : 2)) % 4 === 1 ? 'hanbok-collar' : null)),
-  pajamaStripe: pajama('파랑 줄무늬 잠옷', 'blue', (ch, i, k) => (k > 0 && i % 3 === 0 ? 'pajama-blue-rim' : null)),
-  pajamaFleece: pajama('세이지 극세사 잠옷', 'sage'),
+  pajamaSage: pajama('세이지 극세사 잠옷', 'sage'),
+  pajamaOat: pajama('오트밀 극세사 잠옷', 'oat'),
+  pajamaMauve: pajama('모브 극세사 잠옷', 'mauve'),
   seollal: { event: '설날', name: '색동 한복', o: 'hanbok', d: 'hanbok', skirt: 'pouch',
     paint: (ch, i, k, row, p) => collar(k) ?? (isSleeve(ch, i, row, p) ? SAEKDONG[k % SAEKDONG.length] : null) },
   daeboreum: { event: '정월대보름', name: '쪽빛 저고리', o: 'pouch-knot', d: 'curtain-dark', skirt: 'lamp-body', paint: (ch, i, k) => collar(k) },
@@ -1166,7 +1166,7 @@ const CAT_LOOKS = {
   walnut: (g, { item: [x, y] }) => g.sprite(x, y, ['nNn', 'NnN'], { n: 'wood-light', N: 'branch' }),
   lotus(g, spot) {
     const { head: [x, y] } = catAnchor(spot);
-    g.sprite(x, y, SPRITES.catLotus, { P: 'spring-1', p: 'spring-2' });
+    g.sprite(x, y, SPRITES.catLotus, { P: 'lotus-lantern', p: 'spring-1', g: 'plant' });
   },
   // 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
   bojagi: (g, { item: [x, y] }) => g.sprite(x, y, ['k.k', '.k.', 'ABC', 'CAB'], { k: 'hanbok', A: 'hanbok', B: 'hanbok-jade', C: 'pouch-gold' }),
@@ -1517,11 +1517,11 @@ const INTENTS = {
     part: '창이 주인공이라 사람은 창을 가리지 않는 작은 뒷모습으로 둔다. 머리 길이·헤드폰·옷이 날짜와 시각에 따라 바뀌어 같은 방에서도 시간이 흐르는 게 보인다.',
     헤드폰: { row: '같은 사람도 시각마다 조금씩 달라 보이게 한다. 누구나 헤드폰으로 알아보게 에어팟 맥스를 본떴다(납작한 직사각형 귀덮개, 머리띠 한 줄).' },
     '머리 길이': { row: '한 해 동안 머리가 자라 계절이 사람에게서도 보이게 한다. 봄에 자르고 겨울에 가장 길다. 실제 자라는 속도(한 달 1cm)에 맞춰 한 해 6줄만 자란다.' },
-    '평소 옷 후보': { row: '이벤트가 없는 날은 집에서 쉬는 모습이라 포근한 잠옷을 입힌다. 체크는 식탁보처럼 보여 뺐다.', cells: {
-      '분홍 물방울 잠옷': '잠옷 하면 떠오르는 물방울 무늬', '파랑 줄무늬 잠옷': '고전 파자마의 세로 줄무늬', '세이지 극세사 잠옷': '겨울 수면잠옷. 무늬가 없어 니트와 비슷하다' } },
+    '평소 옷 후보': { row: '이벤트가 없는 날은 집에서 쉬는 모습이라 포근한 극세사 잠옷을 입힌다. 차분한 색으로 방의 남색과 스탠드 불빛을 넘지 않게 한다. 체크·물방울·줄무늬는 무늬가 눈에 띄어 뺐다.', cells: {
+      '세이지 극세사 잠옷': '탁한 녹회색', '오트밀 극세사 잠옷': '따뜻한 회갈색', '모브 극세사 잠옷': '회색 섞인 보라 분홍' } },
     불: { row: '해가 지면 스탠드 불빛이 사람 오른쪽에 테두리 빛을 만들어 밤의 아늑함을 낸다. 낮에는 꺼서 창밖 빛만 남긴다.' },
     이벤트: { row: '옷과 머리 장식만 보고도 그날이 무슨 날인지 알게 한다.', cells: {
-      기본: '평소 잠옷', 설날: '설날 아침 차림의 색동 한복과 댕기', '새해 첫날': '해맞이 나가는 털모자·목도리', 정월대보름: '대보름달을 닮은 달 머리핀',
+      기본: '평소 극세사 잠옷', 설날: '설날 아침 차림의 색동 한복과 댕기', '새해 첫날': '해맞이 나가는 털모자·목도리', 정월대보름: '대보름달을 닮은 달 머리핀',
       부처님오신날: '연등회 연꽃을 머리핀으로', 추석: '옥색 한복. 머리가 어깨 길이라 댕기 대신 리본 핀', 할로윈: '마녀 모자와 줄무늬 니트',
       '크리스마스 이브': '산타 모자와 노르딕 니트', 크리스마스: '산타 모자와 노르딕 니트' } },
   },
@@ -1532,7 +1532,7 @@ const INTENTS = {
     '겨울 목도리': { row: '겨울을 고양이에게서도 느끼게 하고, 요일마다 색을 바꿔 매일 조금씩 다른 그림이 되게 한다. 일요일 빨강·토요일 파랑은 달력을 따랐다.' },
     이벤트: { row: '사람과 같은 이벤트를 고양이도 함께 즐긴다. 머리에 쓰거나 곁에 둔다.', cells: {
       기본: '장식 없음', 설날: '세뱃돈 받는 복주머니를 곁에', '새해 첫날': '사람과 같은 털모자', 정월대보름: '부럼 깨기의 호두를 곁에',
-      부처님오신날: '연등회 연꽃을 머리에', 추석: '조각보로 싼 선물 보자기를 곁에', 할로윈: '사람 마녀 모자와 짝인 작은 마법사 모자',
+      부처님오신날: '연등회 연꽃을 머리에. 잎받침을 받쳐 꽃으로 읽히게 했다', 추석: '조각보로 싼 선물 보자기를 곁에', 할로윈: '사람 마녀 모자와 짝인 작은 마법사 모자',
       '크리스마스 이브': '빨간 목도리', 크리스마스: '빨간 목도리' } },
   },
   'part-outside': {
@@ -1568,7 +1568,7 @@ const INTENTS = {
 partRows('part-person', L => L.boxes.person, 4, [
   ['헤드폰', '날짜·시각을 시드로 하나 고른다', Object.entries(HEADWEAR).map(([headwear, name]) => [name, '초승달 밤', {}, { ...FIXED, headwear }])],
   ['머리 길이', '봄(3월 1일)에 턱선 단발로 자르고 겨울 끝(2월 말)까지 한 해 6줄 자란다', ['3월 1일', '6월 1일', '9월 1일', '12월 1일', '2월 28일'].map(date => [date, '초승달 밤', { date }, { ...FIXED, headwear: 'bare' }])],
-  ['평소 옷 후보', '포근한 잠옷. 지금은 물방울. 하나를 고르면 나머지 후보는 지운다', ['pajamaDot', 'pajamaStripe', 'pajamaFleece'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
+  ['평소 옷 후보', '무늬 없는 극세사 잠옷. 색은 지금 세이지. 하나를 고르면 나머지 후보는 지운다', ['pajamaSage', 'pajamaOat', 'pajamaMauve'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
   ['불', '해가 진 뒤·흐린 날은 스탠드를 켜서 오른쪽에 테두리 빛이 진다', [['켬', '초승달 밤', {}, FIXED], ['끔', '여름 낮 · 맑음', {}, FIXED]]],
   ['이벤트', '옷과 머리 장식', eventCells],
 ]);

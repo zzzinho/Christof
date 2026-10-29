@@ -261,17 +261,17 @@
   --lofi-clock-face: #B8AD98;
   --lofi-clock-hand: #2A2430;
 
-  /* lofi 사람 옷 (07-composition). 평소 잠옷 후보 셋(체크 줄은 rim 색)과 크리스마스 니트 그늘, 얼굴 그늘.
+  /* lofi 사람 옷 (07-composition). 평소 극세사 잠옷 색 후보 셋과 크리스마스 니트 그늘, 얼굴 그늘.
      이벤트 옷은 위 장식 색(한복, 산타, 호박 등)을 함께 쓴다. */
-  --lofi-pajama-rose: #B88A88;
-  --lofi-pajama-rose-dark: #96706F;
-  --lofi-pajama-rose-rim: #D6ABA5;
-  --lofi-pajama-blue: #8394AC;
-  --lofi-pajama-blue-dark: #67778F;
-  --lofi-pajama-blue-rim: #AEB9CB;
-  --lofi-pajama-sage: #7F9C82;
-  --lofi-pajama-sage-dark: #637F68;
-  --lofi-pajama-sage-rim: #A8BFA0;
+  --lofi-pajama-sage: #76857A;
+  --lofi-pajama-sage-dark: #5F6C63;
+  --lofi-pajama-sage-rim: #9EAA9C;
+  --lofi-pajama-oat: #8C8276;
+  --lofi-pajama-oat-dark: #71685E;
+  --lofi-pajama-oat-rim: #B0A493;
+  --lofi-pajama-mauve: #85787F;
+  --lofi-pajama-mauve-dark: #6B6067;
+  --lofi-pajama-mauve-rim: #A9999F;
   --lofi-santa-dark: #86393E;
 }
 
