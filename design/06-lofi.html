@@ -311,7 +311,8 @@ function variety(month, day, hour, occasions) {
 }
 
 // 머리 길이 0~1. 7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다.
-const hairLength = (month, day) => ((month + 5) % 12 + (day - 1) / 31) / 12;
+// 봄(3월 1일)에 턱선 단발로 자르고 겨울 끝(2월 말)까지 자란다.
+const hairLength = (month, day) => ((month + 9) % 12 + (day - 1) / 31) / 12;
 
 // 창은 남쪽을 바라본다. 결과는 [유리 가로 0~1, 높이 0(지평선)~1(고도 75°)]. 높이를 칸으로 바꾸는 건 bodyCircle 이다.
 function celestialPoint(altitude, azimuth) {
@@ -592,7 +593,8 @@ const SPRITE_COLORS = {
 const UNLIT_COLORS = { ...SPRITE_COLORS, H: 'hair-brown', S: 'skin', R: 'cheese', Y: 'lamp' };
 
 // 사람 뒷모습. body: 옷이 시작하는 줄(o 기본, d 그늘, r 테두리 빛, j 바지·치마), neck: 목에 건 헤드폰,
-// bare: 헤드폰을 벗었을 때 머리띠(n 정수리, k 옆)·귀덮개(K) 자리 색, fall: 머리가 길어지면 내려오는 자리.
+// bare: 헤드폰을 벗었을 때 머리띠(n 정수리, k 옆)·귀덮개(K) 자리 색.
+// fall: 늘어진 머리. 단발 끝줄(start)부터 한 해에 rows 줄 자라고, 폭은 머리 폭(cols)이다. 어깨 줄(shoulder)부터 한 칸씩 퍼지고, strands 는 끝의 결 자리다.
 // 머리띠 옆 칸까지 머리색으로 채우면 관자놀이가 귀덮개 자리보다 넓어져 양쪽이 튀어나와 보인다. 정수리 칸만 머리가 된다.
 const PERSON = {
     rows: [
@@ -607,8 +609,8 @@ const PERSON = {
       '.KKhhhhhhhhhHKK.',
       '.KKhhhhhhhhhHKK.',
       '...hhhhhhhhhH...',
+      '...hhhhhhhhhH...',
       '....hhhhhhhH....',
-      '.....hhhhhh.....',
       '......sssS......',
       '...dddddddddd...',
       '.ooddddddddddoo.',
@@ -627,7 +629,7 @@ const PERSON = {
     neck: ['..KK........KK..', '..KK........KK..'],
     neckBottom: 16,
     bare: { n: 'hair-brown', k: null, K: null },
-    fall: { start: 13, cols: [[4, 11]], rows: 10 },
+    fall: { start: 12, shoulder: 15, cols: [3, 12], strands: [5, 9], rows: 6 },
 };
 
 // 김은 성긴 점이라 윤곽선을 두르면 검은 덩어리가 된다. 잔만 두른다.
@@ -1047,7 +1049,7 @@ const PERSON_LOOKS = {
   moonPin: (g, x, top) => g.sprite(x + 3, top + 7, ['MM', 'M.', 'MM'], { M: 'moon' }),
   // 연꽃 머리핀: 달 머리핀과 같은 오른쪽 옆머리 자리
   lotusPin: (g, x, top) => g.sprite(x + 3, top + 7, ['P.P', 'PpP'], { P: 'spring-1', p: 'spring-2' }),
-  // 리본 핀: 추석 무렵엔 머리가 짧아 댕기가 옷깃에 묻히므로 옆머리에 꽂는다
+  // 리본 핀: 추석 무렵엔 머리가 어깨 길이라 댕기가 옷깃에 묻히므로 옆머리에 꽂는다
   ribbonPin: (g, x, top) => g.sprite(x + 3, top + 7, ['P.P', 'PgP', 'P.P'], { P: 'pouch', g: 'pouch-gold' }),
   witchHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.witchHat, { W: 'witch', b: 'pumpkin' }),
   santaHat: (g, x, top) => g.sprite(x, top + 5, SPRITES.santaHat, { R: 'santa', w: 'santa-trim' }),
@@ -1102,14 +1104,21 @@ function drawPerson(g, L, s) {
     const name = j >= p.body && 'odrj'.includes(ch) ? clothing(wear, p, cloth, i, j - p.body, row) : colors[ch];
     if (name) g.set(left + i, top + j, color(name));
   }));
-  if (s.headwear === 'neck') g.sprite(L.personX, top + p.neckBottom, p.neck, lit);
-  // 늘어진 머리. 양 끝 칸을 한 줄 짧게 해 끝을 둥글게 하고, 가장 오른쪽 칸은 테두리 빛이다.
-  const length = Math.round(s.hair * p.fall.rows), right = Math.max(...p.fall.cols.flat());
-  for (const [i0, i1] of p.fall.cols) {
+  // 늘어진 머리는 목에서 좁아지지 않고 머리 폭 그대로 내려와 어깨에 얹히며 한 칸씩 퍼진다. 끝 두 줄을 한 칸씩 깎아 둥글게 하고(단발은 한 줄),
+  // 네 줄 넘게 자라면 끝 세 줄에 진한 결을 넣고 결 자리 끝을 비워 머리끝이 갈라져 보이게 한다. 오른쪽 끝 칸은 테두리 빛이다.
+  // 머리는 한 달에 1cm 남짓 자라서 한 해 6줄(3pt 한 줄이 2cm 쯤)이다. 더 길게 늘이거나 매끈한 판으로 두면 등에 붙인 판처럼 보였다.
+  const rows = 1 + Math.round(s.hair * p.fall.rows), [c0, c1] = p.fall.cols;
+  for (let j = 0; j < rows; j++) {
+    const y = p.fall.start + j, fromEnd = rows - 1 - j, flare = y >= p.fall.shoulder ? 1 : 0;
+    const inset = Math.max(0, (rows >= 3 ? 2 : 1) - fromEnd), i0 = c0 - flare + inset, i1 = c1 + flare - inset;
     for (let i = i0; i <= i1; i++) {
-      for (let j = 0; j < length - (i === i0 || i === i1 ? 1 : 0); j++) g.set(left + i, top + p.fall.start + j, color(i === right ? lit.H : lit.h));
+      const strand = rows >= 4 && fromEnd <= 3 && p.fall.strands.includes(i);
+      if (strand && fromEnd === 0) continue;
+      g.set(left + i, top + y, color(strand ? 'hair-brown-dark' : i === i1 ? lit.H : lit.h));
     }
   }
+  // 목에 건 헤드폰은 늘어진 머리 위에 걸친다.
+  if (s.headwear === 'neck') g.sprite(L.personX, top + p.neckBottom, p.neck, lit);
   for (const name of s.looks.person) PERSON_LOOKS[name](g, L.personX, top, s);
 }
 
@@ -1478,7 +1487,7 @@ const catBox = (L, s) => { const { x, bottom } = L.cats[s.catState]; return [x -
 
 partRows('part-person', L => L.boxes.person, 4, [
   ['헤드폰', '날짜·시각을 시드로 하나 고른다', Object.entries(HEADWEAR).map(([headwear, name]) => [name, '초승달 밤', {}, { ...FIXED, headwear }])],
-  ['머리 길이', '7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다', ['7월 1일', '10월 1일', '1월 1일', '4월 1일', '6월 30일'].map(date => [date, '초승달 밤', { date }, { ...FIXED, headwear: 'bare' }])],
+  ['머리 길이', '봄(3월 1일)에 턱선 단발로 자르고 겨울 끝(2월 말)까지 한 해 6줄 자란다', ['3월 1일', '6월 1일', '9월 1일', '12월 1일', '2월 28일'].map(date => [date, '초승달 밤', { date }, { ...FIXED, headwear: 'bare' }])],
   ['평소 옷 후보', '지금은 머스터드. 하나를 고르면 나머지 후보는 지운다', ['mustard', 'sage', 'coral'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
   ['불', '해가 진 뒤·흐린 날은 스탠드를 켜서 오른쪽에 테두리 빛이 진다', [['켬', '초승달 밤', {}, FIXED], ['끔', '여름 낮 · 맑음', {}, FIXED]]],
   ['이벤트', '옷과 머리 장식', eventCells],
