@@ -1,4 +1,4 @@
-/// 도트 한 칸(3pt)에 색 하나. 06-lofi.html 의 Grid 를 옮겼고, 같은 입력이면 시안과 같은 칸을 칠한다.
+/// 도트 한 칸(3pt)에 색 하나. 시안의 Grid 를 옮겼고, 같은 입력이면 시안과 같은 칸을 칠한다.
 public struct DotGrid: Sendable {
     public static let dot = 3.0
 

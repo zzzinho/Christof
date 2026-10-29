@@ -91,7 +91,7 @@ let scenarios: [Scenario] = [
 let output = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first ?? "snapshots", isDirectory: true)
 try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
 
-/// 시안(06-lofi.html)의 SCENES 한 줄과 같은 모양. 계산한 해·달 값을 그대로 넘겨 같은 입력으로 그리게 한다.
+/// 시안의 SCENES 한 줄과 같은 모양. 계산한 해·달 값을 그대로 넘겨 같은 입력으로 그리게 한다.
 func designScene(_ name: String, _ context: SceneContext) -> [String: Any] {
     var calendar = Calendar(identifier: .gregorian)
     calendar.timeZone = context.region.timeZone
