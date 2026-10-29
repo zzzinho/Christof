@@ -1,3 +1,4 @@
+import CoreLocation
 import Foundation
 import Testing
 @testable import ChristofKit
@@ -77,4 +78,18 @@ func koreaOccasionIDs() {
     let ids = KoreaProfile().occasions.map(\.id)
     #expect(Set(ids).count == ids.count)
     #expect(ids.allSatisfy { $0.hasPrefix("KR.") })
+}
+
+@Test("서울 안이면 서울, 그 밖이나 위치를 모르면 부산이다", arguments: [
+    (37.566, 126.978, "KR.seoul"),   // 서울시청
+    (37.498, 127.028, "KR.seoul"),   // 강남역
+    (37.654, 127.056, "KR.seoul"),   // 노원
+    (35.163, 129.164, "KR.busan"),   // 해운대
+    (36.351, 127.385, "KR.busan"),   // 대전
+    (37.263, 127.029, "KR.busan"),   // 수원
+    (40.713, -74.006, "KR.busan"),   // 뉴욕
+])
+func regionAtLocation(_ latitude: Double, _ longitude: Double, _ expected: String) {
+    #expect(CountryRegistry.standard.region(at: CLLocation(latitude: latitude, longitude: longitude)).id == expected)
+    #expect(CountryRegistry.standard.region(at: nil).id == "KR.busan")
 }

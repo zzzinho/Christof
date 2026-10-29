@@ -8,15 +8,18 @@ public struct Region: Hashable, Sendable, Identifiable {
     public let latitude: Double
     public let longitude: Double
     public let timeZone: TimeZone
+    /// 위치로 지역을 고를 때 중심에서 이 거리(미터) 안이면 이 지역이다. 0 이면 위치로 고르지 않는다.
+    public let radius: Double
     public let looks: RegionLooks
 
-    public init(id: String, name: LocalizedName, countryCode: String, latitude: Double, longitude: Double, timeZone: TimeZone, looks: RegionLooks = .none) {
+    public init(id: String, name: LocalizedName, countryCode: String, latitude: Double, longitude: Double, timeZone: TimeZone, radius: Double = 0, looks: RegionLooks = .none) {
         self.id = id
         self.name = name
         self.countryCode = countryCode
         self.latitude = latitude
         self.longitude = longitude
         self.timeZone = timeZone
+        self.radius = radius
         self.looks = looks
     }
 

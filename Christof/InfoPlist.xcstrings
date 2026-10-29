@@ -1,0 +1,42 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSLocationUsageDescription" : {
+      "comment" : "위치 권한을 물을 때 보이는 이유",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Christof uses your location to show the view of the region you're in."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "있는 곳에 맞는 지역의 창밖 풍경을 보여 주려고 위치를 씁니다."
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "위치 권한을 물을 때 보이는 이유",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Christof uses your location to show the view of the region you're in."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "있는 곳에 맞는 지역의 창밖 풍경을 보여 주려고 위치를 씁니다."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

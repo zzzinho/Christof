@@ -1,4 +1,4 @@
-import Foundation
+import CoreLocation
 
 public struct CountryRegistry: Sendable {
     public let profiles: [any CountryProfile]
@@ -23,5 +23,11 @@ public struct CountryRegistry: Sendable {
 
     public var defaultRegion: Region {
         regions[0]
+    }
+
+    /// 위치를 모르거나 어느 지역에도 들지 않으면 기본 지역이다.
+    public func region(at location: CLLocation?) -> Region {
+        guard let location else { return defaultRegion }
+        return regions.first { location.distance(from: CLLocation(latitude: $0.latitude, longitude: $0.longitude)) <= $0.radius } ?? defaultRegion
     }
 }

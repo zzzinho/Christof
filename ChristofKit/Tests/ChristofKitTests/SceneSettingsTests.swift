@@ -49,3 +49,13 @@ func settingsWithoutLanguageDecodeAsEnglish() throws {
     let settings = try JSONDecoder().decode(SceneSettings.self, from: try JSONSerialization.data(withJSONObject: object))
     #expect(settings == SceneSettings(forcedWeather: .snow))
 }
+
+@Test("위치로 고른 지역을 다시 읽고, 고른 적이 없으면 기본 지역이다")
+func locatedRegionRoundTrip() {
+    let suite = "christof.tests.\(UUID().uuidString)"
+    defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
+    let store = SceneSettingsStore(suiteName: suite)
+    #expect(store.loadLocatedRegion() == CountryRegistry.standard.defaultRegion)
+    store.saveLocatedRegion(seoul)
+    #expect(store.loadLocatedRegion() == seoul)
+}

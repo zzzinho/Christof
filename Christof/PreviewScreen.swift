@@ -7,23 +7,28 @@ struct PreviewScreen: View {
     @State private var saved: SceneSettings
     @State private var settings: PreviewSettings
     @State private var realForecast: Result<WeatherForecast, any Error>?
+    @State private var located: Region
     private let weather: any WeatherProviding = .standard
     private let factory = SceneContextFactory()
 
     init() {
-        let saved = SceneSettingsStore().load()
+        let store = SceneSettingsStore()
+        let saved = store.load()
         _saved = State(initialValue: saved)
         _settings = State(initialValue: PreviewSettings(saved: saved))
+        _located = State(initialValue: store.loadLocatedRegion())
     }
+
+    private var region: Region { settings.region ?? located }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                SettingsPanel(settings: $settings, forecastStatus: forecastStatus)
+                SettingsPanel(settings: $settings, located: located, forecastStatus: forecastStatus)
                 SaveBar(hasChanges: settings.sceneSettings != saved, save: save)
                 TimelineView(.everyMinute) { timeline in
                     // 실패는 위 상태 문구로 보여주고, 장면은 날씨 없이 그린다.
-                    let context = factory.context(now: timeline.date, region: settings.region, realForecast: try? realForecast?.get(), settings: settings.sceneSettings)
+                    let context = factory.context(now: timeline.date, region: region, realForecast: try? realForecast?.get(), settings: settings.sceneSettings)
                     WindowPreviews(context: context)
                 }
                 WidgetGuide()
@@ -33,11 +38,20 @@ struct PreviewScreen: View {
         }
         // 화면 문구(String Catalog)와 날짜 형식이 저장 전에도 고른 언어를 따른다.
         .environment(\.locale, settings.language.locale)
-        .task(id: settings.region) {
+        // 위젯의 "자동" 지역은 앱을 열 때 위치로 고른다.
+        .task {
+            let here = CountryRegistry.standard.region(at: await DeviceLocation.current())
+            store.saveLocatedRegion(here)
+            if here != located {
+                located = here
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        }
+        .task(id: region) {
             realForecast = nil
             let result: Result<WeatherForecast, any Error>
             do {
-                result = .success(try await weather.forecast(for: settings.region))
+                result = .success(try await weather.forecast(for: region))
             } catch {
                 result = .failure(error)
             }
@@ -62,7 +76,7 @@ struct PreviewScreen: View {
 
     private func status(of forecast: WeatherForecast) -> Text {
         guard let first = forecast.samples.first, let last = forecast.samples.last else { return Text("The real forecast is empty.") }
-        let format = Date.FormatStyle(date: .abbreviated, time: .shortened, locale: settings.language.locale, timeZone: settings.region.timeZone)
+        let format = Date.FormatStyle(date: .abbreviated, time: .shortened, locale: settings.language.locale, timeZone: region.timeZone)
         let range = Text("Real forecast: \(first.time.formatted(format)) to \(last.time.formatted(format))")
         guard !settings.usesCurrentTime, forecast.sample(at: settings.customDate) == nil else { return range }
         return range + Text(verbatim: "\n") + Text("The chosen time is outside the forecast, so the scene has no weather. Choose the weather yourself.")
@@ -71,12 +85,14 @@ struct PreviewScreen: View {
 
 private struct SettingsPanel: View {
     @Binding var settings: PreviewSettings
+    let located: Region
     let forecastStatus: Text
 
     private static let occasions = CountryRegistry.standard.profiles.flatMap(\.occasions)
 
     var body: some View {
         let language = settings.language
+        let region = settings.region ?? located
         VStack(alignment: .leading, spacing: 12) {
             LabeledContent("Language") {
                 Picker("Language", selection: $settings.language) {
@@ -87,7 +103,8 @@ private struct SettingsPanel: View {
             }
             LabeledContent("Region") {
                 Picker("Region", selection: $settings.region) {
-                    ForEach(CountryRegistry.standard.regions) { Text($0.name[language]).tag($0) }
+                    Text("Auto (\(located.name[language]))").tag(Region?.none)
+                    ForEach(CountryRegistry.standard.regions) { Text($0.name[language]).tag(Optional($0)) }
                 }
                 .labelsHidden()
             }
@@ -102,8 +119,8 @@ private struct SettingsPanel: View {
             }
             if !settings.usesCurrentTime {
                 // 지역 시간대로 보여줘야 "서울 저녁 7시" 처럼 고를 수 있다.
-                DatePicker("Time in \(settings.region.name[language])", selection: $settings.customDate)
-                    .environment(\.timeZone, settings.region.timeZone)
+                DatePicker("Time in \(region.name[language])", selection: $settings.customDate)
+                    .environment(\.timeZone, region.timeZone)
             }
             LabeledContent("Weather") {
                 Picker("Weather", selection: $settings.forcedCondition) {

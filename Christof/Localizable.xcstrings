@@ -21,6 +21,16 @@
         }
       }
     },
+    "Auto (%@)" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자동 (%@)"
+          }
+        }
+      }
+    },
     "Couldn't load the real forecast: %@" : {
       "localizations" : {
         "ko" : {

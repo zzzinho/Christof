@@ -10,6 +10,7 @@ public struct SceneSettingsStore: Sendable {
     public static let sharedSuite = "group.com.christof.Christof"
     #endif
     private static let key = "sceneSettings"
+    private static let locatedRegionKey = "locatedRegionID"
 
     private let suiteName: String
 
@@ -31,5 +32,14 @@ public struct SceneSettingsStore: Sendable {
 
     public func save(_ settings: SceneSettings) {
         defaults.set(try? JSONEncoder().encode(settings), forKey: Self.key)
+    }
+
+    /// 앱이 위치로 마지막에 고른 지역. 고른 적이 없으면 기본 지역이다.
+    public func loadLocatedRegion(from registry: CountryRegistry = .standard) -> Region {
+        defaults.string(forKey: Self.locatedRegionKey).flatMap(registry.region(id:)) ?? registry.defaultRegion
+    }
+
+    public func saveLocatedRegion(_ region: Region) {
+        defaults.set(region.id, forKey: Self.locatedRegionKey)
     }
 }
