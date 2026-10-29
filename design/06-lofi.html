@@ -344,8 +344,8 @@ function sceneContext(scene) {
     minute: Number(scene.time.split(':')[1]),
     ...variety(month, day, scene.hour, scene.occasions),
     hair: hairLength(month, day),
-    // ponytail: 평소 옷은 후보 셋(머스터드·세이지·코럴) 중 머스터드로 둔다. 하나를 고르면 나머지 후보는 지운다.
-    outfit: OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'mustard',
+    // ponytail: 평소 옷은 잠옷 후보 셋(분홍·파랑·세이지) 중 분홍으로 둔다. 하나를 고르면 나머지 후보는 지운다.
+    outfit: OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'pajamaRose',
     // 구성 요소마다 진행 중인 이벤트들이 고른 모양 이름
     looks: catLooks(scene, Object.fromEntries(COMPONENTS.map(part => [part, [...new Set(scene.occasions.flatMap(id => [].concat(OCCASIONS[id].looks[part] ?? [])))]]))),
     // ponytail: 시안 장면에는 연도가 없어 2026년으로 친다. 0 = 일요일
@@ -1077,10 +1077,18 @@ function isSleeve(ch, i, row, p) {
   return i <= cloth[0] + 1 || i >= cloth[cloth.length - 1] - 1;
 }
 
+// 평소 옷: 체크 플란넬 잠옷. 다섯 칸마다 가로·세로 줄(rim 색)이 지나고 겹친 칸은 크림색이다. 옷깃 줄은 무늬 없이 접힌 그늘이다.
+const flannel = line => (ch, i, k) => {
+  if (k === 0) return null;
+  const v = i % 5 === 2, h = k % 5 === 3;
+  return v && h ? 'hanbok-collar' : v || h ? line : null;
+};
+const pajama = (name, tone) => ({ event: '평소', name, o: `pajama-${tone}`, d: `pajama-${tone}-dark`, rim: `pajama-${tone}-rim`, paint: flannel(`pajama-${tone}-rim`) });
+
 const OUTFITS = {
-  mustard: { event: '평소', name: '머스터드 니트', o: 'knit-mustard', d: 'knit-mustard-dark', rim: 'knit-mustard-rim' },
-  sage: { event: '평소', name: '세이지 니트', o: 'knit-sage', d: 'knit-sage-dark', rim: 'knit-sage-rim' },
-  coral: { event: '평소', name: '코럴 니트', o: 'knit-coral', d: 'knit-coral-dark', rim: 'knit-coral-rim' },
+  pajamaRose: pajama('분홍 체크 잠옷', 'rose'),
+  pajamaBlue: pajama('파랑 체크 잠옷', 'blue'),
+  pajamaSage: pajama('세이지 체크 잠옷', 'sage'),
   seollal: { event: '설날', name: '색동 한복', o: 'hanbok', d: 'hanbok', skirt: 'pouch',
     paint: (ch, i, k, row, p) => collar(k) ?? (isSleeve(ch, i, row, p) ? SAEKDONG[k % SAEKDONG.length] : null) },
   daeboreum: { event: '정월대보름', name: '쪽빛 저고리', o: 'pouch-knot', d: 'curtain-dark', skirt: 'lamp-body', paint: (ch, i, k) => collar(k) },
@@ -1502,7 +1510,7 @@ const catBox = (L, s) => { const { x, bottom } = L.cats[s.catState]; return [x -
 partRows('part-person', L => L.boxes.person, 4, [
   ['헤드폰', '날짜·시각을 시드로 하나 고른다', Object.entries(HEADWEAR).map(([headwear, name]) => [name, '초승달 밤', {}, { ...FIXED, headwear }])],
   ['머리 길이', '봄(3월 1일)에 턱선 단발로 자르고 겨울 끝(2월 말)까지 한 해 6줄 자란다', ['3월 1일', '6월 1일', '9월 1일', '12월 1일', '2월 28일'].map(date => [date, '초승달 밤', { date }, { ...FIXED, headwear: 'bare' }])],
-  ['평소 옷 후보', '지금은 머스터드. 하나를 고르면 나머지 후보는 지운다', ['mustard', 'sage', 'coral'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
+  ['평소 옷 후보', '포근한 체크 플란넬 잠옷. 지금은 분홍. 하나를 고르면 나머지 후보는 지운다', ['pajamaRose', 'pajamaBlue', 'pajamaSage'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
   ['불', '해가 진 뒤·흐린 날은 스탠드를 켜서 오른쪽에 테두리 빛이 진다', [['켬', '초승달 밤', {}, FIXED], ['끔', '여름 낮 · 맑음', {}, FIXED]]],
   ['이벤트', '옷과 머리 장식', eventCells],
 ]);
