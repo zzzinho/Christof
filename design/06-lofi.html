@@ -62,6 +62,20 @@
     gap: 12px 16px;
     align-items: center;
   }
+  .part-intent {
+    margin: -12px 0 0;
+    font-size: 0.875rem;
+  }
+  .scene > .intent {
+    margin: -8px 0 12px;
+    font-size: 0.8125rem;
+  }
+  /* 칸 의도는 그림 폭에 맞춰 줄바꿈한다(width 0 이라 칸 폭을 늘리지 않는다). */
+  .part figcaption .intent {
+    display: block;
+    width: 0;
+    min-width: 100%;
+  }
   .matrix .head {
     color: var(--page-muted);
     font-size: 0.8125rem;
@@ -137,7 +151,7 @@ const OCCASIONS = {
   'KR.buddhasBirthday': { name: '부처님오신날', looks: { window: 'lanterns', person: 'lotusPin', cat: 'lotus', room: 'lotusBowl', clock: 'lantern' }, moment: { hours: [19, 22], cat: 'beside', name: '연등 같이 보기' } },
   'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'pineBranch'], person: 'ribbonPin', cat: 'bojagi', room: 'songpyeon', clock: 'moonFace' }, moment: { hours: [19, 23], cat: 'beside', name: '보름달 같이 보기' } },
   'KR.newYearsDay': { name: '새해 첫날', looks: { window: 'sunGlow', person: 'beanie', cat: 'beanie', room: 'calendar', clock: 'sparkles' }, moment: { hours: [6, 8], cat: 'beside', name: '첫 해 같이 보기' } },
-  'KR.halloween': { name: '할로윈', looks: { window: 'bats', person: 'witchHat', cat: 'devilWings', room: 'pumpkin', clock: 'spider' }, moment: { hours: [19, 23], cat: 'walk', name: '고양이 혼자 밤 순찰' } },
+  'KR.halloween': { name: '할로윈', looks: { window: 'bats', person: 'witchHat', cat: 'wizardHat', room: 'pumpkin', clock: 'spider' }, moment: { hours: [19, 23], cat: 'walk', name: '고양이 혼자 밤 순찰' } },
   'KR.christmasEve': { name: '크리스마스 이브', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' }, moment: { hours: [20, 23], cat: 'shoulder', name: '어깨에서 잠든 고양이' } },
   'KR.christmas': { name: '크리스마스', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' }, moment: { hours: [8, 11], cat: 'pet', name: '크리스마스 아침 쓰다듬기' } },
   'sky.sunrise': { name: '일출', looks: {}, moment: { hours: [0, 23], cat: 'beside', name: '해돋이 같이 보기' } },
@@ -394,7 +408,7 @@ function layout(W, H, s) {
 
 // ---- 스프라이트. 불빛(스탠드·트리)이 오른쪽에 있어 오른쪽 가장자리에 따뜻한 테두리 빛이 진다 ----
 
-// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄, wings: 할로윈 날개 뿌리(등 가운데).
+// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
 // 다섯 자세 모두 머리 폭(테두리 포함 6~7칸)과 몸집을 맞춘다.
 // side, walk 는 오른쪽(사람·불빛 쪽)을 본다.
 const CATS = {
@@ -416,7 +430,6 @@ const CATS = {
     ],
     scarf: ['..SSSSS....', '..S........', '..S........', '.S.........'],
     scarfBottom: 9,
-    wings: [[2, 8, -1], [5, 8, 1]],
   },
   front: {
     head: [4, 2],
@@ -454,7 +467,6 @@ const CATS = {
     ],
     scarf: ['......SSSS..', '......S.....'],
     scarfBottom: 5,
-    wings: [[5, 7, -1, true], [3, 8, -1]],
   },
   walk: {
     head: [12.5, 1],
@@ -472,7 +484,6 @@ const CATS = {
     ],
     scarf: ['..........SSS...', '...........S....'],
     scarfBottom: 4,
-    wings: [[7, 4, -1, true], [5, 4, -1]],
   },
   // 걷는 자세에서 고개만 밥그릇으로 숙였다. 머리는 앞다리 앞, 어깨보다 낮다. 그릇은 고양이 다음에 그려 입을 가린다.
   eat: {
@@ -491,7 +502,6 @@ const CATS = {
     ],
     scarf: ['...........SS....', '...........S.....'],
     scarfBottom: 8,
-    wings: [[7, 4, -1, true], [5, 4, -1]],
   },
   // 감은 눈, 꼬리를 앞으로 감았다.
   curled: {
@@ -507,7 +517,6 @@ const CATS = {
     ],
     scarf: ['.SSSS.........', '..S...........'],
     scarfBottom: 5,
-    wings: [[6, 2, 1, true], [8, 2, 1]],
   },
 };
 
@@ -568,8 +577,8 @@ const SPRITES = {
   catPouch: ['..p..', '.PPP.', 'PpgpP', 'PpppP', '.PPP.'],
   catBeanie: ['..w..', '.BBB.', 'BBBBB'],
   catLotus: ['.P.', 'PpP'],
-  // 왼쪽 날개. 오른쪽 아래 칸이 뿌리다. B 뼈대, m 막(아래 끝이 톱니).
-  devilWing: ['B......', 'mB.....', 'mmBB...', 'mmmmBB.', 'm.m.m.B'],
+  // 끝이 꺾인 고깔과 금색 별, 귀를 덮는 챙
+  catWizardHat: ['....WW.', '...WW..', '..WWW..', '..WgW..', 'WWWWWWW'],
   pumpkin: [
     '....s....',
     '.ooosooo.',
@@ -1161,13 +1170,10 @@ const CAT_LOOKS = {
   },
   // 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
   bojagi: (g, { item: [x, y] }) => g.sprite(x, y, ['k.k', '.k.', 'ABC', 'CAB'], { k: 'hanbok', A: 'hanbok', B: 'hanbok-jade', C: 'pouch-gold' }),
-  // 등 가운데에 단 악마 날개 한 쌍. wings: 날개마다 [뿌리 열, 뿌리 줄, 방향(-1 왼쪽, 1 오른쪽), 먼 날개]. 날개는 뿌리에서 위 바깥으로 뻗는다.
-  // 옆모습은 머리와 겹치지 않게 두 날개 모두 꼬리 쪽으로 뻗고, 먼 날개는 앞으로 비켜 그늘색으로 먼저 그린다.
-  devilWings(g, spot) {
-    const { left, top } = catAnchor(spot), wing = SPRITES.devilWing, w = wing[0].length, h = wing.length;
-    for (const [x, y, dir, far] of CATS[spot.pose].wings) wing.forEach((row, j) => [...row].forEach((ch, i) => {
-      if (ch !== '.') g.set(left + x + dir * (w - 1 - i), top + y - (h - 1) + j, color(far || ch === 'B' ? 'santa-dark' : 'santa'));
-    }));
+  // 챙을 귀 줄에 얹는다
+  wizardHat(g, spot) {
+    const { head: [x, y] } = catAnchor(spot);
+    g.sprite(x, y, SPRITES.catWizardHat, { W: 'witch', g: 'pouch-gold' });
   },
   scarf: (g, spot) => drawCatScarf(g, spot, 'santa'),
   winterScarf: (g, spot, s) => drawCatScarf(g, spot, WEEKDAY_SCARVES[s.weekday][1]),
@@ -1480,15 +1486,17 @@ function interactions() {
 // 구성 요소 섹션. 줄마다 한 가지만 바꿔 그 구성 요소 자리만 잘라 보인다.
 // 칸: [설명, 장면 제목, 장면에서 바꿀 값, 시드 대신 쓸 모습, 크기]. box(L, s): 잘라 보일 영역.
 function partRows(id, box, scale, rows) {
-  document.getElementById(id).append(...rows.map(([name, note, cells]) => {
-    const section = document.createElement('section');
+  const host = document.getElementById(id), intents = INTENTS[id];
+  host.insertAdjacentHTML('beforebegin', `<p class="part-intent">의도: ${intents.part}</p>`);
+  host.append(...rows.map(([name, note, cells]) => {
+    const section = document.createElement('section'), intent = intents[name];
     section.className = 'scene';
-    section.innerHTML = `<h2>${name}</h2><p class="meta">${note}</p><div class="sizes"></div>`;
+    section.innerHTML = `<h2>${name}</h2><p class="meta">${note}</p><p class="intent">의도: ${intent.row}</p><div class="sizes"></div>`;
     section.querySelector('.sizes').append(...cells.map(([caption, title, edit = {}, look = {}, size = 'medium']) => {
       const { s, g, L, canvas } = render({ ...SCENES.find(scene => scene.title === title), ...edit }, SIZES[size], look);
-      const figure = document.createElement('figure');
+      const figure = document.createElement('figure'), why = intent.cells?.[caption];
       figure.append(crop(canvas, box(L, s), g.cols, g.rows, scale));
-      figure.insertAdjacentHTML('beforeend', `<figcaption class="meta">${caption}</figcaption>`);
+      figure.insertAdjacentHTML('beforeend', `<figcaption class="meta">${caption}${why ? `<span class="intent">${why}</span>` : ''}</figcaption>`);
       return figure;
     }));
     return section;
@@ -1501,6 +1509,61 @@ const eventCells = MATRIX_ROWS.map(([label, title]) => [label, title, {}, FIXED]
 const plain = { region: '대구', occasions: [] };
 const phaseCells = [['밤', '초승달 밤'], ['해 질 녘', '일몰'], ['낮', '여름 낮 · 맑음'], ['흐린 낮', '비 오는 오후']].map(([caption, title]) => [caption, title, plain, FIXED]);
 const catBox = (L, s) => { const { x, bottom } = L.cats[s.catState]; return [x - 12, bottom - 17, x + 13, bottom + 2]; };
+
+// 디자인 의도. 구성 요소마다 part 는 섹션 전체, 줄 이름마다 row 는 그 줄, cells 는 칸 이름별 의도다.
+// 줄이나 이벤트 모양을 더하거나 바꾸면 여기에 의도도 적는다.
+const INTENTS = {
+  'part-person': {
+    part: '창이 주인공이라 사람은 창을 가리지 않는 작은 뒷모습으로 둔다. 머리 길이·헤드폰·옷이 날짜와 시각에 따라 바뀌어 같은 방에서도 시간이 흐르는 게 보인다.',
+    헤드폰: { row: '같은 사람도 시각마다 조금씩 달라 보이게 한다. 누구나 헤드폰으로 알아보게 에어팟 맥스를 본떴다(납작한 직사각형 귀덮개, 머리띠 한 줄).' },
+    '머리 길이': { row: '한 해 동안 머리가 자라 계절이 사람에게서도 보이게 한다. 봄에 자르고 겨울에 가장 길다. 실제 자라는 속도(한 달 1cm)에 맞춰 한 해 6줄만 자란다.' },
+    '평소 옷 후보': { row: '이벤트가 없는 날은 집에서 쉬는 모습이라 포근한 잠옷을 입힌다. 체크는 식탁보처럼 보여 뺐다.', cells: {
+      '분홍 물방울 잠옷': '잠옷 하면 떠오르는 물방울 무늬', '파랑 줄무늬 잠옷': '고전 파자마의 세로 줄무늬', '세이지 극세사 잠옷': '겨울 수면잠옷. 무늬가 없어 니트와 비슷하다' } },
+    불: { row: '해가 지면 스탠드 불빛이 사람 오른쪽에 테두리 빛을 만들어 밤의 아늑함을 낸다. 낮에는 꺼서 창밖 빛만 남긴다.' },
+    이벤트: { row: '옷과 머리 장식만 보고도 그날이 무슨 날인지 알게 한다.', cells: {
+      기본: '평소 잠옷', 설날: '설날 아침 차림의 색동 한복과 댕기', '새해 첫날': '해맞이 나가는 털모자·목도리', 정월대보름: '대보름달을 닮은 달 머리핀',
+      부처님오신날: '연등회 연꽃을 머리핀으로', 추석: '옥색 한복. 머리가 어깨 길이라 댕기 대신 리본 핀', 할로윈: '마녀 모자와 줄무늬 니트',
+      '크리스마스 이브': '산타 모자와 노르딕 니트', 크리스마스: '산타 모자와 노르딕 니트' } },
+  },
+  'part-cat': {
+    part: '혼자 있는 방에 생기를 더한다. 시각마다 사람과 따로·같이·밥을 오가며 하루의 흐름을 보인다. 검은 고양이는 밤 벽에 묻혀서 치즈 고양이로 했다.',
+    상태: { row: '낮에는 창턱에서 혼자, 밤에는 사람 곁에서 같이, 끼니때는 함께 밥을 먹어 하루의 리듬이 보인다.', cells: {
+      '같이 밥 먹기': '걷는 자세에서 고개만 그릇으로 숙였다. 웅크린 안은 몸과 머리 연결이 어색했다' } },
+    '겨울 목도리': { row: '겨울을 고양이에게서도 느끼게 하고, 요일마다 색을 바꿔 매일 조금씩 다른 그림이 되게 한다. 일요일 빨강·토요일 파랑은 달력을 따랐다.' },
+    이벤트: { row: '사람과 같은 이벤트를 고양이도 함께 즐긴다. 머리에 쓰거나 곁에 둔다.', cells: {
+      기본: '장식 없음', 설날: '세뱃돈 받는 복주머니를 곁에', '새해 첫날': '사람과 같은 털모자', 정월대보름: '부럼 깨기의 호두를 곁에',
+      부처님오신날: '연등회 연꽃을 머리에', 추석: '조각보로 싼 선물 보자기를 곁에', 할로윈: '사람 마녀 모자와 짝인 작은 마법사 모자',
+      '크리스마스 이브': '빨간 목도리', 크리스마스: '빨간 목도리' } },
+  },
+  'part-outside': {
+    part: '글자 없이 날씨·때·계절·지역·해달을 풍경으로 읽게 한다. 위젯이 보여 주는 정보는 대부분 창밖에 있다.',
+    때: { row: '해 고도로 정해 그 지역의 실제 하늘과 같은 때를 보인다. 흐린 날은 낮에도 어둑하게 한다.' },
+    날씨: { row: '글자 대신 하늘로 날씨를 읽게 한다. 날씨를 못 받으면 틀린 날씨 대신 맑은 하늘을 둔다.' },
+    '계절 가로수': { row: '계절을 가로수로 보인다. 벚꽃은 일본으로 읽혀서 개나리·은행나무를 쓴다.' },
+    '지역 먼 풍경': { row: '고른 지역을 랜드마크 하나로 알아보게 한다. 위젯이 작아 한 지역에 하나만 그린다.' },
+    '해·달': { row: '실제 고도·방위각으로 그려 창밖이 그 시각의 진짜 하늘이 되게 한다. 고도 0° 는 뒷산 능선이다.' },
+    이벤트: { row: '이벤트를 하늘과 창에서 먼저 알아보게 한다.', cells: {
+      기본: '장식 없음', 설날: '하늘의 방패연', '새해 첫날': '첫 해 둘레 빛(해맞이)', 정월대보름: '보름달 빛과 달집 불',
+      부처님오신날: '창 위 오색 연꽃등. 둥근 제등은 일본으로 읽힌다', 추석: '보름달 빛과 소나무 가지(송편은 솔잎에 찐다)', 할로윈: '하늘을 나는 박쥐',
+      '크리스마스 이브': '유리에 낀 성에', 크리스마스: '유리에 낀 성에' } },
+  },
+  'part-clock': {
+    part: '글자 없이 시각을 알리는 유일한 장치라 장면에서 문자판만 밝게 둔다. 지름 13칸보다 작으면 바늘이 구분되지 않는다.',
+    시각: { row: '위젯이 5분마다 다시 그려지므로 분침도 5분 단위로 맞춰 실제 시각과 어긋나 보이지 않게 한다.' },
+    이벤트: { row: '문자판과 작은 장식으로 이벤트를 더한다.', cells: {
+      기본: '장식 없음', 설날: '노리개', '새해 첫날': '반짝이', 정월대보름: '달빛 문자판', 부처님오신날: '작은 연꽃등', 추석: '달빛 문자판',
+      할로윈: '시계에 매달린 거미', '크리스마스 이브': '호랑가시', 크리스마스: '호랑가시' } },
+  },
+  'part-room': {
+    part: '차가운 남색 방에 따뜻한 불빛 한 곳으로 lofi 분위기를 만든다. 명암 차를 작게 두어 홈 화면에 오래 두어도 피로하지 않게 한다.',
+    때: { row: '벽색이 창밖과 같은 때를 따라 방과 창이 한 장면으로 이어진다.' },
+    크기: { row: '도트 크기는 그대로 두고 큰 위젯은 방을 넓힌다. 빈 벽은 선반으로 채운다.' },
+    책상: { row: '끼니때는 책·머그를 치우고 밥공기를 놓아 사람도 고양이와 함께 밥을 먹는다.' },
+    이벤트: { row: '방 안 물건으로 그날을 맞은 집처럼 보이게 한다.', cells: {
+      기본: '평소 책·머그·화분', 설날: '떡국', '새해 첫날': '새 탁상 달력. 연하장은 일본 넨가조로 읽혀서 쓰지 않는다', 정월대보름: '부럼 그릇',
+      부처님오신날: '창턱 연꽃 화분', 추석: '송편 접시', 할로윈: '창턱 호박 등과 거미줄', '크리스마스 이브': '스탠드 대신 트리와 선물', 크리스마스: '스탠드 대신 트리와 선물' } },
+  },
+};
 
 partRows('part-person', L => L.boxes.person, 4, [
   ['헤드폰', '날짜·시각을 시드로 하나 고른다', Object.entries(HEADWEAR).map(([headwear, name]) => [name, '초승달 밤', {}, { ...FIXED, headwear }])],
