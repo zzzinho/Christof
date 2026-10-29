@@ -313,12 +313,11 @@ function variety(month, day, hour, occasions) {
 // 머리 길이 0~1. 7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다.
 const hairLength = (month, day) => ((month + 5) % 12 + (day - 1) / 31) / 12;
 
-// 창은 남쪽을 바라본다. 결과는 유리 기준 0~1 좌표.
+// 창은 남쪽을 바라본다. 결과는 [유리 가로 0~1, 높이 0(지평선)~1(고도 75°)]. 높이를 칸으로 바꾸는 건 bodyCircle 이다.
 function celestialPoint(altitude, azimuth) {
   if (altitude <= -2) return null;
   const d = ((azimuth % 360) + 360) % 360 - 180;
-  const base = 0.72 - 0.035;
-  return [clamp(0.5 + d / 135 * 0.45, 0.05, 0.95), base - Math.pow(clamp(altitude, 0, 75) / 75, 0.75) * (base - 0.1)];
+  return [clamp(0.5 + d / 135 * 0.45, 0.05, 0.95), Math.pow(clamp(altitude, 0, 75) / 75, 0.75)];
 }
 
 // 겨울엔 고양이가 요일 색 목도리를 한다. 크리스마스의 빨간 목도리가 있으면 그것만 둔다.
@@ -685,8 +684,9 @@ const WINDOW_LOOKS = {
   } },
   // 추석: 창 왼쪽 위로 들어온 소나무 가지. 송편을 솔잎에 찌고, 소나무와 보름달은 한국 옛 그림의 짝이다.
   // 감나무·토끼·억새는 일본 츠키미로 읽혀서 쓰지 않는다.
+  // 가지는 왼쪽 위 모서리에서 짧게 뻗어 달 가장자리만 살짝 가린다. 길게 뻗으면 보름달 위쪽 절반을 덮었다.
   pineBranch: { ground(g, w) {
-    const end = Math.round(w * 0.38), y = x => 1 + Math.round(x * 0.2);
+    const end = Math.round(w * 0.25), y = x => 1 + Math.round(x * 0.2);
     for (let x = 0; x < end; x++) g.set(x, y(x), color('branch'));
     for (const t of [0.35, 0.7, 1]) {
       const x = Math.round(end * t) - 1;
@@ -772,7 +772,10 @@ function drawStars(g, w, h) {
   }
 }
 
-const bodyCircle = (point, w, h, radius) => [Math.floor(point[0] * w) + 0.5, Math.floor(point[1] * h) + 0.5, pt(radius) + 0.3];
+// 지평선(고도 0°)은 뒷산 능선 꼭대기(drawMountains 의 base − pt(8))에, 고도 75° 는 유리 높이 10% 에 둔다.
+// 지평선을 유리 비율로 두었더니 medium·small 에서 능선이 하늘 절반을 덮어 고도 30° 보름달이 산 뒤에 숨었다.
+const skyline = h => Math.round(h * 0.86) - pt(60) - h * 0.08;
+const bodyCircle = ([x, rise], w, h, radius) => [Math.floor(x * w) + 0.5, Math.floor(skyline(h) - rise * (skyline(h) - h * 0.1)) + 0.5, pt(radius) + 0.3];
 const sunCircle = (s, w, h) => bodyCircle(s.sunPoint, w, h, 9);
 const moonCircle = (s, w, h) => bodyCircle(s.moonPoint, w, h, 10);
 
