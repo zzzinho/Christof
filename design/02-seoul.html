@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서울</title>
+<link rel="stylesheet" href="design.css">
+</head>
+<body>
+<header>
+  <h1>서울</h1>
+  <p>서울 지역 페이지. 뒷산 능선 오른쪽에 남산 봉우리와 N서울타워가 서고, 앞은 아파트 단지다. 사람·고양이·방 안·이벤트와 그리기 코드는 00-base 와 같다.</p>
+</header>
+<main>
+  <h2>먼 풍경</h2>
+  <div id="far" class="part"></div>
+  <h2>장면</h2>
+  <div id="scenes"></div>
+</main>
+
+<script>
+// 지역 설정만 둔다. 그리기 코드와 페이지 모양은 00-base.html 에서 받아 쓴다(hunsu 는 따로 둔 .js 를 서빙하지 못한다).
+const REGION = {
+  region: '서울',
+  intents: {
+    part: '서울을 한눈에 알아보게 뒷산 능선 오른쪽에 남산 봉우리를 올리고 그 위에 N서울타워를 세운다. 외국인이 꼽은 서울 랜드마크 1위다.',
+    때: { row: '밤에는 타워 몸통과 전망대를 경관 조명으로 밝히고 안테나 끝에 빨간 항공등을 켠다. 실루엣만으로는 어두운 밤 하늘과 산에 묻혔다.' },
+    날씨: { row: '비·눈·안개에서도 타워가 읽혀야 한다.' },
+    '기본과 비교': { row: '같은 장면에서 먼 풍경만 바뀌는지 기본과 나란히 본다.' },
+  },
+};
+
+fetch('00-base.html').then(response => response.text()).then(html => {
+  document.head.insertAdjacentHTML('beforeend', html.match(/<style>[\s\S]*?<\/style>/)[0]);
+  const script = document.createElement('script');
+  script.textContent = `${html.match(/<script>([\s\S]*)<\/script>/)[1].split('// ---- 00-base 페이지 ----')[0]}\nregionPage(REGION);`;
+  document.body.append(script);
+});
+</script>
+</body>
+</html>

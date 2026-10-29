@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부산</title>
+<link rel="stylesheet" href="design.css">
+</head>
+<body>
+<header>
+  <h1>부산</h1>
+  <p>부산 지역 페이지. 아파트 자리가 바다이고, 수평선에 해운대 고층 빌딩, 그 앞을 광안대교가 가로지른다. 사람·고양이·방 안·이벤트와 그리기 코드는 00-base 와 같다.</p>
+</header>
+<main>
+  <h2>먼 풍경</h2>
+  <div id="far" class="part"></div>
+  <h2>장면</h2>
+  <div id="scenes"></div>
+</main>
+
+<script>
+// 지역 설정만 둔다. 그리기 코드와 페이지 모양은 00-base.html 에서 받아 쓴다(hunsu 는 따로 둔 .js 를 서빙하지 못한다).
+const REGION = {
+  region: '부산',
+  intents: {
+    part: '부산을 한눈에 알아보게 아파트 자리를 바다로 바꾸고, 수평선에 해운대 고층 빌딩(마린시티 둘, 엘시티 세 동)과 그 앞을 가로지르는 광안대교를 둔다. 랜드마크는 하나만 둔다(위젯이 작아 둘을 넣으면 둘 다 읽히지 않는다).',
+    때: { row: '밤에는 광안대교 케이블의 파란 경관 조명과 상판 불빛이 바다에 비쳐 부산의 밤으로 읽힌다.' },
+    날씨: { row: '비·눈·안개에서도 바다와 다리가 읽혀야 한다.' },
+    '기본과 비교': { row: '같은 장면에서 먼 풍경만 바뀌는지 기본과 나란히 본다.' },
+  },
+};
+
+fetch('00-base.html').then(response => response.text()).then(html => {
+  document.head.insertAdjacentHTML('beforeend', html.match(/<style>[\s\S]*?<\/style>/)[0]);
+  const script = document.createElement('script');
+  script.textContent = `${html.match(/<script>([\s\S]*)<\/script>/)[1].split('// ---- 00-base 페이지 ----')[0]}\nregionPage(REGION);`;
+  document.body.append(script);
+});
+</script>
+</body>
+</html>

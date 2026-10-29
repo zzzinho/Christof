@@ -98,7 +98,7 @@
   --pouch-dark: #B01C36;
   --pouch-gold: #F2C14E;
 
-  /* lofi 방 (06-lofi). 방 안 물건·인물·장식은 때와 관계없이 같은 색이다. */
+  /* lofi 방 (00-base). 방 안 물건·인물·장식은 때와 관계없이 같은 색이다. */
   --lofi-star: #C8C3D6;
   --lofi-star-dim: #6F6C88;
   --lofi-moon: #EDE3C8;
@@ -153,7 +153,7 @@
   --lofi-tree: #3A5646;
   --lofi-tree-dark: #2A4036;
 
-  /* lofi 장면 (06-lofi). 창밖과 벽은 때마다 바뀌고, 방 안 물건은 늘 같은 색이다.
+  /* lofi 장면 (00-base). 창밖과 벽은 때마다 바뀌고, 방 안 물건은 늘 같은 색이다.
      때: night(해 -6° 아래), dusk(-6~6°), day(6° 위), grey(흐리거나 비·눈·안개인 낮).
      비·눈·안개·구름 덮개는 night 와 grey 에만 나온다. day 는 불을 켜지 않아 벽 불빛 색이 없다. */
   --lofi-night-sky-1: #1A1C33;
