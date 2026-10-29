@@ -6,8 +6,8 @@ A macOS widget that shows the weather, time, and holidays of a place you choose 
 
 | | |
 |---|---|
-| ![Clear summer day](docs/images/busan-summer-day.png) | ![Sunset](docs/images/busan-sunset.png) |
-| ![Chuseok full moon night](docs/images/busan-chuseok-night.png) | ![Christmas Eve night](docs/images/busan-christmas-eve.png) |
+| ![Everyday](docs/images/busan-everyday.png) | ![Seollal](docs/images/busan-seollal.png) |
+| ![Halloween](docs/images/busan-halloween.png) | ![Christmas](docs/images/busan-christmas.png) |
 
 ## What it shows
 

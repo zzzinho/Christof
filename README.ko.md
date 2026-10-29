@@ -6,8 +6,8 @@
 
 | | |
 |---|---|
-| ![여름 맑은 낮](docs/images/busan-summer-day.png) | ![일몰](docs/images/busan-sunset.png) |
-| ![추석 보름달 밤](docs/images/busan-chuseok-night.png) | ![크리스마스 이브 밤](docs/images/busan-christmas-eve.png) |
+| ![평소](docs/images/busan-everyday.png) | ![설날](docs/images/busan-seollal.png) |
+| ![할로윈](docs/images/busan-halloween.png) | ![크리스마스](docs/images/busan-christmas.png) |
 
 ## 보여 주는 것
 
