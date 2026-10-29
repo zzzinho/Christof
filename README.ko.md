@@ -55,6 +55,10 @@ curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/uninstall.sh 
 
 위젯 그림은 HTML 로 디자인하는 로컬 도구 [hunsu](https://github.com/zzzinho/hunsu)로 만들었습니다. 시안은 [`design/`](design/) 폴더에 있습니다.
 
+## 지역 추가
+
+지역이나 나라를 더하는 방법은 [지역 추가하기](docs/adding-a-region.ko.md)에 있습니다.
+
 ## 데이터
 
 날씨는 [Open-Meteo](https://open-meteo.com/)에서 받습니다(CC BY 4.0). 해와 달의 위치는 기기에서 계산합니다.

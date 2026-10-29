@@ -55,6 +55,10 @@ macOS may keep the Christof folders in `~/Library/Containers`. They do no harm; 
 
 The look of the widget was designed with [hunsu](https://github.com/zzzinho/hunsu), a local tool for designing in HTML. The design files are in [`design/`](design/).
 
+## Adding a region
+
+To add a region or a country, see [Adding a region](docs/adding-a-region.md).
+
 ## Data
 
 Weather comes from [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Sun and moon positions are calculated on the device.
