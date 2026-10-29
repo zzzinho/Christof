@@ -576,7 +576,7 @@ const SPRITES = {
   ],
   catPouch: ['..p..', '.PPP.', 'PpgpP', 'PpppP', '.PPP.'],
   catBeanie: ['..w..', '.BBB.', 'BBBBB'],
-  // 잎받침 위에 핀 연꽃. 3×2 로는 이마의 얼룩처럼 보였다.
+  // 잎받침 위에 핀 연꽃
   catLotus: ['..P..', '.PPP.', 'PpPpP', '.ggg.'],
   // 끝이 꺾인 고깔과 금색 별, 귀를 덮는 챙
   catWizardHat: ['....WW.', '...WW..', '..WWW..', '..WgW..', 'WWWWWWW'],
@@ -1164,10 +1164,7 @@ const CAT_LOOKS = {
     g.sprite(x, y + 1, SPRITES.catBeanie, { w: 'santa-trim', B: 'beanie' });
   },
   walnut: (g, { item: [x, y] }) => g.sprite(x, y, ['nNn', 'NnN'], { n: 'wood-light', N: 'branch' }),
-  lotus(g, spot) {
-    const { head: [x, y] } = catAnchor(spot);
-    g.sprite(x, y, SPRITES.catLotus, { P: 'lotus-lantern', p: 'spring-1', g: 'plant' });
-  },
+  lotus: (g, { item: [x, y] }) => g.sprite(x, y, SPRITES.catLotus, { P: 'lotus-lantern', p: 'spring-1', g: 'plant' }),
   // 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
   bojagi: (g, { item: [x, y] }) => g.sprite(x, y, ['k.k', '.k.', 'ABC', 'CAB'], { k: 'hanbok', A: 'hanbok', B: 'hanbok-jade', C: 'pouch-gold' }),
   // 챙을 귀 줄에 얹는다
@@ -1532,7 +1529,7 @@ const INTENTS = {
     '겨울 목도리': { row: '겨울을 고양이에게서도 느끼게 하고, 요일마다 색을 바꿔 매일 조금씩 다른 그림이 되게 한다. 일요일 빨강·토요일 파랑은 달력을 따랐다.' },
     이벤트: { row: '사람과 같은 이벤트를 고양이도 함께 즐긴다. 머리에 쓰거나 곁에 둔다.', cells: {
       기본: '장식 없음', 설날: '세뱃돈 받는 복주머니를 곁에', '새해 첫날': '사람과 같은 털모자', 정월대보름: '부럼 깨기의 호두를 곁에',
-      부처님오신날: '연등회 연꽃을 머리에. 잎받침을 받쳐 꽃으로 읽히게 했다', 추석: '조각보로 싼 선물 보자기를 곁에', 할로윈: '사람 마녀 모자와 짝인 작은 마법사 모자',
+      부처님오신날: '연등회 연꽃을 곁에. 잎받침을 받쳐 꽃으로 읽히게 했다', 추석: '조각보로 싼 선물 보자기를 곁에', 할로윈: '사람 마녀 모자와 짝인 작은 마법사 모자',
       '크리스마스 이브': '빨간 목도리', 크리스마스: '빨간 목도리' } },
   },
   'part-outside': {
