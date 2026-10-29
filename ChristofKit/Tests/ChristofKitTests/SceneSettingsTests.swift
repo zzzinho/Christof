@@ -36,7 +36,16 @@ func storeRoundTrip() {
     defer { UserDefaults.standard.removePersistentDomain(forName: suite) }
     let store = SceneSettingsStore(suiteName: suite)
     #expect(store.load() == .live)
-    let settings = SceneSettings(fixedDate: kst(2026, 9, 25, 21), forcedWeather: .clear, occasion: .manual(occasionID: "KR.chuseok"))
+    let settings = SceneSettings(fixedDate: kst(2026, 9, 25, 21), forcedWeather: .clear, occasion: .manual(occasionID: "KR.chuseok"), language: .korean)
     store.save(settings)
     #expect(store.load() == settings)
+}
+
+@Test("언어가 없던 버전이 저장한 설정은 영어로 읽는다")
+func settingsWithoutLanguageDecodeAsEnglish() throws {
+    let saved = try JSONEncoder().encode(SceneSettings(forcedWeather: .snow, language: .korean))
+    var object = try #require(try JSONSerialization.jsonObject(with: saved) as? [String: Any])
+    object["language"] = nil
+    let settings = try JSONDecoder().decode(SceneSettings.self, from: try JSONSerialization.data(withJSONObject: object))
+    #expect(settings == SceneSettings(forcedWeather: .snow))
 }

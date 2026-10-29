@@ -3,7 +3,7 @@ import Testing
 @testable import ChristofKit
 
 private let seoulTimeZone = TimeZone(identifier: "Asia/Seoul")!
-private let seoul = Region(id: "test.seoul", name: "서울", countryCode: "KR", latitude: 37.566, longitude: 126.9784, timeZone: seoulTimeZone)
+private let seoul = Region(id: "test.seoul", name: LocalizedName(en: "Seoul", ko: "서울"), countryCode: "KR", latitude: 37.566, longitude: 126.9784, timeZone: seoulTimeZone)
 
 private func kst(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 12, _ minute: Int = 0) -> Date {
     var calendar = Calendar(identifier: .gregorian)
@@ -60,13 +60,13 @@ func sunEventRuleWindow(_ event: SunEventRule.Event, _ offset: (minutes: Double,
     ("레이캬비크 하지 무렵 23:45, 일몰 17분 전", Date(timeIntervalSince1970: 1782000111 - 17 * 60), true),
 ])
 func sunEventRuleAcrossMidnight(_ label: String, _ date: Date, _ expected: Bool) {
-    let reykjavik = Region(id: "test.reykjavik", name: "레이캬비크", countryCode: "IS", latitude: 64.1355, longitude: -21.8954, timeZone: TimeZone(identifier: "Atlantic/Reykjavik")!)
+    let reykjavik = Region(id: "test.reykjavik", name: LocalizedName(en: "Reykjavik", ko: "레이캬비크"), countryCode: "IS", latitude: 64.1355, longitude: -21.8954, timeZone: TimeZone(identifier: "Atlantic/Reykjavik")!)
     #expect(SunEventRule(.sunset, window: 30 * 60).isActive(at: date, in: reykjavik) == expected, "\(label)")
 }
 
 @Test("극야로 해가 뜨지 않는 날은 일출 이벤트가 없다")
 func sunEventRuleWithoutSunrise() {
-    let longyearbyen = Region(id: "test.svalbard", name: "롱위에아르뷔엔", countryCode: "NO", latitude: 78.2232, longitude: 15.6267, timeZone: TimeZone(identifier: "Arctic/Longyearbyen")!)
+    let longyearbyen = Region(id: "test.svalbard", name: LocalizedName(en: "Longyearbyen", ko: "롱위에아르뷔엔"), countryCode: "NO", latitude: 78.2232, longitude: 15.6267, timeZone: TimeZone(identifier: "Arctic/Longyearbyen")!)
     #expect(!SunEventRule(.sunrise, window: 30 * 60).isActive(at: kst(2026, 12, 21), in: longyearbyen))
 }
 

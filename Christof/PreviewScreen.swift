@@ -31,6 +31,8 @@ struct PreviewScreen: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        // 화면 문구(String Catalog)와 날짜 형식이 저장 전에도 고른 언어를 따른다.
+        .environment(\.locale, settings.language.locale)
         .task(id: settings.region) {
             realForecast = nil
             let result: Result<WeatherForecast, any Error>
@@ -50,41 +52,49 @@ struct PreviewScreen: View {
         WidgetCenter.shared.reloadAllTimelines()
     }
 
-    private var forecastStatus: String {
+    private var forecastStatus: Text {
         switch realForecast {
-        case nil: "실제 예보 불러오는 중…"
+        case nil: Text("Loading the real forecast…")
         case .success(let forecast): status(of: forecast)
-        case .failure(let error): "실제 예보를 가져오지 못했습니다: \(error.localizedDescription)"
+        case .failure(let error): Text("Couldn't load the real forecast: \(error.localizedDescription)")
         }
     }
 
-    private func status(of forecast: WeatherForecast) -> String {
-        guard let first = forecast.samples.first, let last = forecast.samples.last else { return "실제 예보가 비어 있습니다" }
-        let format = Date.FormatStyle(date: .abbreviated, time: .shortened, timeZone: settings.region.timeZone)
-        let range = "실제 예보 \(first.time.formatted(format)) ~ \(last.time.formatted(format))"
+    private func status(of forecast: WeatherForecast) -> Text {
+        guard let first = forecast.samples.first, let last = forecast.samples.last else { return Text("The real forecast is empty.") }
+        let format = Date.FormatStyle(date: .abbreviated, time: .shortened, locale: settings.language.locale, timeZone: settings.region.timeZone)
+        let range = Text("Real forecast: \(first.time.formatted(format)) to \(last.time.formatted(format))")
         guard !settings.usesCurrentTime, forecast.sample(at: settings.customDate) == nil else { return range }
-        return range + "\n지정한 시각이 예보 범위 밖이라 날씨 없이 그립니다. 날씨를 직접 고르세요."
+        return range + Text(verbatim: "\n") + Text("The chosen time is outside the forecast, so the scene has no weather. Choose the weather yourself.")
     }
 }
 
 private struct SettingsPanel: View {
     @Binding var settings: PreviewSettings
-    let forecastStatus: String
+    let forecastStatus: Text
 
     private static let occasions = CountryRegistry.standard.profiles.flatMap(\.occasions)
 
     var body: some View {
+        let language = settings.language
         VStack(alignment: .leading, spacing: 12) {
-            LabeledContent("지역") {
-                Picker("지역", selection: $settings.region) {
-                    ForEach(CountryRegistry.standard.regions) { Text($0.name).tag($0) }
+            LabeledContent("Language") {
+                Picker("Language", selection: $settings.language) {
+                    // 언어 이름은 그 언어로 쓴다.
+                    ForEach(AppLanguage.allCases, id: \.self) { Text(verbatim: $0.locale.localizedString(forLanguageCode: $0.rawValue) ?? $0.rawValue).tag($0) }
                 }
                 .labelsHidden()
             }
-            LabeledContent("시각") {
-                Picker("시각", selection: $settings.usesCurrentTime) {
-                    Text("지금").tag(true)
-                    Text("직접 지정").tag(false)
+            LabeledContent("Region") {
+                Picker("Region", selection: $settings.region) {
+                    ForEach(CountryRegistry.standard.regions) { Text($0.name[language]).tag($0) }
+                }
+                .labelsHidden()
+            }
+            LabeledContent("Time") {
+                Picker("Time", selection: $settings.usesCurrentTime) {
+                    Text("Auto").tag(true)
+                    Text("Custom").tag(false)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
@@ -92,30 +102,30 @@ private struct SettingsPanel: View {
             }
             if !settings.usesCurrentTime {
                 // 지역 시간대로 보여줘야 "서울 저녁 7시" 처럼 고를 수 있다.
-                DatePicker("\(settings.region.name) 시각", selection: $settings.customDate)
+                DatePicker("Time in \(settings.region.name[language])", selection: $settings.customDate)
                     .environment(\.timeZone, settings.region.timeZone)
             }
-            LabeledContent("날씨") {
-                Picker("날씨", selection: $settings.forcedCondition) {
-                    Text("실제").tag(WeatherCondition?.none)
-                    ForEach(WeatherCondition.allCases, id: \.self) { Text($0.koreanName).tag(Optional($0)) }
+            LabeledContent("Weather") {
+                Picker("Weather", selection: $settings.forcedCondition) {
+                    Text("Auto").tag(WeatherCondition?.none)
+                    ForEach(WeatherCondition.allCases, id: \.self) { Text($0.name[language]).tag(Optional($0)) }
                 }
                 .labelsHidden()
             }
             if settings.forcedCondition == nil {
-                Text(forecastStatus)
+                forecastStatus
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
-            LabeledContent("이벤트") {
-                Picker("이벤트", selection: $settings.occasion) {
-                    Text("자동").tag(OccasionSelection.automatic)
-                    ForEach(Self.occasions) { Text($0.name).tag(OccasionSelection.manual(occasionID: $0.id)) }
+            LabeledContent("Event") {
+                Picker("Event", selection: $settings.occasion) {
+                    Text("Auto").tag(OccasionSelection.automatic)
+                    ForEach(Self.occasions) { Text($0.name[language]).tag(OccasionSelection.manual(occasionID: $0.id)) }
                 }
                 .labelsHidden()
             }
             if settings.occasion != .automatic {
-                Text("고른 명절을 날짜와 상관없이 보여줍니다. 일출·일몰·보름달은 계속 자동입니다.")
+                Text("Shows the chosen holiday whatever the date. Sunrise, sunset, and full moon stay automatic.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -129,10 +139,12 @@ private struct SaveBar: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Button("저장", action: save)
+            Button("Save", action: save)
                 .buttonStyle(.borderedProminent)
                 .disabled(!hasChanges)
-            Text(hasChanges ? "저장하면 시각·날씨·이벤트가 위젯에 반영됩니다. 지역은 위젯마다 위젯 편집에서 고릅니다." : "위젯에 반영된 설정입니다.")
+            (hasChanges
+                ? Text("Save to apply the language, time, weather, and event to the widget. Each widget picks its region in Edit Widget.")
+                : Text("These settings are on the widget."))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
@@ -141,6 +153,7 @@ private struct SaveBar: View {
 
 private struct WindowPreviews: View {
     let context: SceneContext
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -151,11 +164,10 @@ private struct WindowPreviews: View {
         }
     }
 
+    // 위젯 VoiceOver 가 읽는 문장 앞에 날짜를 붙인다.
     private var summary: String {
-        let time = context.date.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, timeZone: context.region.timeZone))
-        let weather = context.weather?.condition.koreanName ?? "없음"
-        let occasions = context.occasions.isEmpty ? "없음" : context.occasions.map(\.name).joined(separator: ", ")
-        return "\(context.region.name) \(time) · 날씨 \(weather) · 이벤트 \(occasions)"
+        let date = context.date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale, timeZone: context.region.timeZone))
+        return "\(date) · \(WindowView.accessibilityLabel(context, locale: locale))"
     }
 
     private func preview(style: WindowSize) -> some View {
@@ -169,11 +181,11 @@ private struct WindowPreviews: View {
         }
     }
 
-    private static func title(of style: WindowSize) -> String {
+    private static func title(of style: WindowSize) -> LocalizedStringKey {
         switch style {
-        case .compact: "작게"
-        case .regular: "중간"
-        case .expanded: "크게"
+        case .compact: "Small"
+        case .regular: "Medium"
+        case .expanded: "Large"
         }
     }
 }
@@ -181,18 +193,17 @@ private struct WindowPreviews: View {
 private struct WidgetGuide: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("위젯 추가 방법")
+            Text("Adding the widget")
                 .font(.headline)
             #if os(macOS)
-            Text("바탕화면을 우클릭 → 위젯 편집 → Christof 를 찾아 바탕화면에 놓습니다.")
-            Text("지역은 위젯을 우클릭 → 위젯 편집에서 고릅니다.")
-            Text("위젯을 누르면 이 앱이 열립니다. 시각·날씨·이벤트를 바꾸고 저장하면 위젯에 반영됩니다.")
+            Text("Right-click the desktop → Edit Widgets → find Christof and place it on the desktop.")
+            Text("To choose the region, right-click the widget → Edit Widget.")
             #else
-            Text("홈 화면을 길게 누르기 → 편집 → 위젯 추가 → Christof 를 고릅니다.")
-            Text("지역은 위젯을 길게 눌러 위젯 편집에서 고릅니다.")
-            Text("위젯을 누르면 이 앱이 열립니다. 시각·날씨·이벤트를 바꾸고 저장하면 위젯에 반영됩니다.")
+            Text("Touch and hold the Home Screen → Edit → Add Widget → choose Christof.")
+            Text("To choose the region, touch and hold the widget → Edit Widget.")
             #endif
-            Text("버전 \(Self.info("CFBundleShortVersionString")) (\(Self.info("CFBundleVersion")))")
+            Text("Selecting the widget opens this app. Change the language, time, weather, or event here and save to apply them to the widget.")
+            Text("Version \(Self.info("CFBundleShortVersionString")) (\(Self.info("CFBundleVersion")))")
                 .foregroundStyle(.secondary)
         }
         .font(.callout)

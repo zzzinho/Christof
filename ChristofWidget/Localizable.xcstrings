@@ -1,0 +1,56 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Choose Region" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지역 선택"
+          }
+        }
+      }
+    },
+    "Choose the region to show outside the window." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "창밖 풍경을 보여줄 지역을 고릅니다."
+          }
+        }
+      }
+    },
+    "Christof Window" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Christof 창문"
+          }
+        }
+      }
+    },
+    "Region" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지역"
+          }
+        }
+      }
+    },
+    "Shows the weather, time, and holidays of the chosen region as the view outside a window." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고른 지역의 날씨와 시간, 명절을 창밖 풍경으로 보여줍니다."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

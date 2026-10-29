@@ -3,16 +3,16 @@ import Foundation
 public enum WeatherCondition: Sendable, Hashable, CaseIterable, Codable {
     case clear, partlyCloudy, overcast, fog, drizzle, rain, snow, thunderstorm
 
-    public var koreanName: String {
+    public var name: LocalizedName {
         switch self {
-        case .clear: "맑음"
-        case .partlyCloudy: "구름 조금"
-        case .overcast: "흐림"
-        case .fog: "안개"
-        case .drizzle: "이슬비"
-        case .rain: "비"
-        case .snow: "눈"
-        case .thunderstorm: "뇌우"
+        case .clear: LocalizedName(en: "Clear", ko: "맑음")
+        case .partlyCloudy: LocalizedName(en: "Partly Cloudy", ko: "구름 조금")
+        case .overcast: LocalizedName(en: "Overcast", ko: "흐림")
+        case .fog: LocalizedName(en: "Fog", ko: "안개")
+        case .drizzle: LocalizedName(en: "Drizzle", ko: "이슬비")
+        case .rain: LocalizedName(en: "Rain", ko: "비")
+        case .snow: LocalizedName(en: "Snow", ko: "눈")
+        case .thunderstorm: LocalizedName(en: "Thunderstorm", ko: "뇌우")
         }
     }
 }

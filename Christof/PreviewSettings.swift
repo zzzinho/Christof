@@ -8,15 +8,17 @@ struct PreviewSettings: Equatable {
     var customDate: Date
     var forcedCondition: WeatherCondition?
     var occasion: OccasionSelection
+    var language: AppLanguage
 
     init(saved: SceneSettings) {
         usesCurrentTime = saved.fixedDate == nil
         customDate = saved.fixedDate ?? .now
         forcedCondition = saved.forcedWeather
         occasion = saved.occasion
+        language = saved.language
     }
 
     var sceneSettings: SceneSettings {
-        SceneSettings(fixedDate: usesCurrentTime ? nil : customDate, forcedWeather: forcedCondition, occasion: occasion)
+        SceneSettings(fixedDate: usesCurrentTime ? nil : customDate, forcedWeather: forcedCondition, occasion: occasion, language: language)
     }
 }

@@ -13,7 +13,7 @@ private let seoulFixture = Data("""
 """.utf8)
 
 private func seoul(latitude: Double = 37.5665) -> Region {
-    Region(id: "KR.seoul", name: "서울", countryCode: "KR", latitude: latitude, longitude: 126.978, timeZone: TimeZone(identifier: "Asia/Seoul")!)
+    Region(id: "KR.seoul", name: LocalizedName(en: "Seoul", ko: "서울"), countryCode: "KR", latitude: latitude, longitude: 126.978, timeZone: TimeZone(identifier: "Asia/Seoul")!)
 }
 
 @Test func requestURLAsksForCurrentAndTwoDaysOfHourlyInUnixTime() throws {

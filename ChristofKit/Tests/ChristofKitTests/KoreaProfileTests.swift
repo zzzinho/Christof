@@ -53,13 +53,13 @@ func chuseokEndsAtMidnight(_ date: Date, _ expected: Bool) throws {
     (kst(2026, 9, 11, 0, 30), true, false), // UTC 로는 9/10 15:30, 아직 기간 전
 ])
 func judgesInRegionTimeZone(_ date: Date, _ inSeoul: Bool, _ inUTC: Bool) throws {
-    let utcRegion = Region(id: "test.utc", name: "UTC", countryCode: "KR", latitude: seoul.latitude, longitude: seoul.longitude, timeZone: TimeZone(identifier: "UTC")!)
+    let utcRegion = Region(id: "test.utc", name: LocalizedName(en: "UTC", ko: "UTC"), countryCode: "KR", latitude: seoul.latitude, longitude: seoul.longitude, timeZone: TimeZone(identifier: "UTC")!)
     let chuseok = try occasion("KR.chuseok")
     #expect(chuseok.isActive(at: date, in: seoul) == inSeoul)
     #expect(chuseok.isActive(at: date, in: utcRegion) == inUTC)
 }
 
-@Test("한국 지역은 id 가 고유하고 한국 안에 있으며 서울이 기본 지역이다")
+@Test("한국 지역은 id 가 고유하고 한국 안에 있으며 부산이 기본 지역이다")
 func koreaRegions() {
     let regions = KoreaProfile().regions
     #expect(Set(regions.map(\.id)).count == regions.count)
@@ -69,7 +69,7 @@ func koreaRegions() {
         // 남한 범위: 마라도 33.1°N ~ 강원 북단 38.6°N, 서해 124.6°E ~ 독도 131.9°E
         #expect((33.0...38.7).contains(region.latitude) && (124.5...132.0).contains(region.longitude), "\(region.id)")
     }
-    #expect(CountryRegistry.standard.defaultRegion.id == "KR.seoul")
+    #expect(CountryRegistry.standard.defaultRegion.id == "KR.busan")
 }
 
 @Test("한국 이벤트 id 는 고유하다")

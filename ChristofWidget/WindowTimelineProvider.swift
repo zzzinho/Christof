@@ -4,6 +4,7 @@ import WidgetKit
 struct WindowEntry: TimelineEntry {
     let date: Date
     let context: SceneContext
+    let language: AppLanguage
 }
 
 struct WindowTimelineProvider: AppIntentTimelineProvider {
@@ -42,6 +43,6 @@ struct WindowTimelineProvider: AppIntentTimelineProvider {
     }
 
     private func entry(at date: Date, region: Region, forecast: WeatherForecast?, settings: SceneSettings) -> WindowEntry {
-        WindowEntry(date: date, context: factory.context(now: date, region: region, realForecast: forecast, settings: settings))
+        WindowEntry(date: date, context: factory.context(now: date, region: region, realForecast: forecast, settings: settings), language: settings.language)
     }
 }

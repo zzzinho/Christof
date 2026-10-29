@@ -3,7 +3,7 @@ import SwiftUI
 import Testing
 @testable import ChristofKit
 
-private let seoul = Region(id: "KR.seoul", name: "서울", countryCode: "KR", latitude: 37.5665, longitude: 126.9780, timeZone: TimeZone(identifier: "Asia/Seoul")!)
+private let seoul = Region(id: "KR.seoul", name: LocalizedName(en: "Seoul", ko: "서울"), countryCode: "KR", latitude: 37.5665, longitude: 126.9780, timeZone: TimeZone(identifier: "Asia/Seoul")!)
 
 private struct AlwaysActive: OccasionRule {
     func isActive(at date: Date, in region: Region) -> Bool { true }
@@ -74,11 +74,16 @@ func everyOccasionLookHasItsColors(_ id: String) throws {
 }
 
 @Test func accessibilityLabelReadsRegionTimeWeatherAndOccasions() throws {
-    let occasions = [Occasion(id: "chuseok", name: "추석", rule: AlwaysActive()), Occasion(id: "fullMoon", name: "보름달", rule: AlwaysActive())]
+    let occasions = [
+        Occasion(id: "chuseok", name: LocalizedName(en: "Chuseok", ko: "추석"), rule: AlwaysActive()),
+        Occasion(id: "fullMoon", name: LocalizedName(en: "Full Moon", ko: "보름달"), rule: AlwaysActive()),
+    ]
     let context = scene(weather: sample(.rain, temperature: 19), date: try Date("2026-09-25T12:00:00Z", strategy: .iso8601), occasions: occasions)
     // 서울은 1988년 이후 일광 절약 시간이 없어 UTC+9 고정이다.
-    #expect(WindowView.accessibilityLabel(context, locale: Locale(identifier: "en_GB")) == "서울, 21:00, 비, 추석, 보름달")
-    #expect(WindowView.accessibilityLabel(scene(weather: nil, date: try Date("2026-09-25T12:00:00Z", strategy: .iso8601)), locale: Locale(identifier: "ko_KR")) == "서울, 오후 9:00")
+    #expect(WindowView.accessibilityLabel(context, locale: Locale(identifier: "en_GB")) == "Seoul, 21:00, Rain, Chuseok, Full Moon")
+    #expect(WindowView.accessibilityLabel(context, locale: Locale(identifier: "ko_KR")) == "서울, 오후 9:00, 비, 추석, 보름달")
+    // 고를 수 없는 언어는 영어 이름으로 읽는다.
+    #expect(WindowView.accessibilityLabel(scene(weather: nil, date: try Date("2026-09-25T12:00:00Z", strategy: .iso8601)), locale: Locale(identifier: "fr_FR")) == "Seoul, 21:00")
 }
 
 @MainActor @Test func sameSceneRendersIdenticalPixels() throws {

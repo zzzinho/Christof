@@ -1,0 +1,276 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Adding the widget" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯 추가 방법"
+          }
+        }
+      }
+    },
+    "Auto" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자동"
+          }
+        }
+      }
+    },
+    "Couldn't load the real forecast: %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실제 예보를 가져오지 못했습니다: %@"
+          }
+        }
+      }
+    },
+    "Custom" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "직접 지정"
+          }
+        }
+      }
+    },
+    "Event" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이벤트"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언어"
+          }
+        }
+      }
+    },
+    "Large" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "크게"
+          }
+        }
+      }
+    },
+    "Loading the real forecast…" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실제 예보 불러오는 중…"
+          }
+        }
+      }
+    },
+    "Medium" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중간"
+          }
+        }
+      }
+    },
+    "Real forecast: %@ to %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실제 예보 %1$@ ~ %2$@"
+          }
+        }
+      }
+    },
+    "Region" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지역"
+          }
+        }
+      }
+    },
+    "Right-click the desktop → Edit Widgets → find Christof and place it on the desktop." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "바탕화면을 우클릭 → 위젯 편집 → Christof 를 찾아 바탕화면에 놓습니다."
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장"
+          }
+        }
+      }
+    },
+    "Save to apply the language, time, weather, and event to the widget. Each widget picks its region in Edit Widget." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장하면 언어·시각·날씨·이벤트가 위젯에 반영됩니다. 지역은 위젯마다 위젯 편집에서 고릅니다."
+          }
+        }
+      }
+    },
+    "Selecting the widget opens this app. Change the language, time, weather, or event here and save to apply them to the widget." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯을 누르면 이 앱이 열립니다. 언어·시각·날씨·이벤트를 바꾸고 저장하면 위젯에 반영됩니다."
+          }
+        }
+      }
+    },
+    "Shows the chosen holiday whatever the date. Sunrise, sunset, and full moon stay automatic." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고른 명절을 날짜와 상관없이 보여줍니다. 일출·일몰·보름달은 계속 자동입니다."
+          }
+        }
+      }
+    },
+    "Small" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "작게"
+          }
+        }
+      }
+    },
+    "The chosen time is outside the forecast, so the scene has no weather. Choose the weather yourself." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지정한 시각이 예보 범위 밖이라 날씨 없이 그립니다. 날씨를 직접 고르세요."
+          }
+        }
+      }
+    },
+    "The real forecast is empty." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실제 예보가 비어 있습니다."
+          }
+        }
+      }
+    },
+    "These settings are on the widget." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯에 반영된 설정입니다."
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시각"
+          }
+        }
+      }
+    },
+    "Time in %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 시각"
+          }
+        }
+      }
+    },
+    "To choose the region, right-click the widget → Edit Widget." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지역은 위젯을 우클릭 → 위젯 편집에서 고릅니다."
+          }
+        }
+      }
+    },
+    "To choose the region, touch and hold the widget → Edit Widget." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지역은 위젯을 길게 눌러 위젯 편집에서 고릅니다."
+          }
+        }
+      }
+    },
+    "Touch and hold the Home Screen → Edit → Add Widget → choose Christof." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈 화면을 길게 누르기 → 편집 → 위젯 추가 → Christof 를 고릅니다."
+          }
+        }
+      }
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전 %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "Weather" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "날씨"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

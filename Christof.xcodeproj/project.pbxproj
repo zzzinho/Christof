@@ -172,9 +172,10 @@
 				};
 			};
 			buildConfigurationList = CF0000000000000000000021 /* Build configuration list for PBXProject "Christof" */;
-			developmentRegion = ko;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				en,
 				ko,
 				Base,
 			);

@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct WindowView: View {
     private let context: SceneContext
+    @Environment(\.locale) private var locale
 
     public init(context: SceneContext) {
         self.context = context
@@ -34,7 +35,7 @@ public struct WindowView: View {
         }
         .accessibilityElement()
         .accessibilityAddTraits(.isImage)
-        .accessibilityLabel(Self.accessibilityLabel(context))
+        .accessibilityLabel(Self.accessibilityLabel(context, locale: locale))
     }
 
     private static func color(_ hex: UInt32) -> Color {
@@ -42,9 +43,10 @@ public struct WindowView: View {
     }
 
     /// 위젯에 글자를 쓰지 않는다. 시각·날씨·이벤트는 그림으로 보이고, 같은 내용을 접근성 라벨로만 둔다.
-    nonisolated static func accessibilityLabel(_ context: SceneContext, locale: Locale = .autoupdatingCurrent) -> String {
+    public nonisolated static func accessibilityLabel(_ context: SceneContext, locale: Locale) -> String {
+        let language = AppLanguage(locale)
         let time = context.date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: locale, timeZone: context.region.timeZone))
-        return ([context.region.name, time, context.weather?.condition.koreanName].compactMap { $0 } + context.occasions.map(\.name))
+        return ([context.region.name[language], time, context.weather?.condition.name[language]].compactMap { $0 } + context.occasions.map { $0.name[language] })
             .joined(separator: ", ")
     }
 }

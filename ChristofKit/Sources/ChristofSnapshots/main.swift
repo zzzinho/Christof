@@ -57,32 +57,35 @@ func localTime(_ region: Region, _ month: Int, _ day: Int, _ hour: Int, _ minute
 func sunTime(_ region: Region, _ month: Int, _ day: Int, _ event: KeyPath<SunState, Date?>) -> Date {
     let noon = localTime(region, month, day, 12)
     guard let time = SolarCalculator.state(at: noon, latitude: region.latitude, longitude: region.longitude, timeZone: region.timeZone)[keyPath: event] else {
-        fatalError("\(region.name) \(month)/\(day) 에는 일출·일몰이 없다")
+        fatalError("\(region.name.ko) \(month)/\(day) 에는 일출·일몰이 없다")
     }
     return time
 }
 
 let seoul = region("KR.seoul")
+let busan = region("KR.busan")
+// 목록에 없는 지역의 먼 풍경(뒷산과 아파트)도 그려 본다. 시안은 한국어 이름으로 먼 풍경을 고른다.
+let daegu = Region(id: "test.daegu", name: LocalizedName(en: "Daegu", ko: "대구"), countryCode: "KR", latitude: 35.87028, longitude: 128.59111, timeZone: seoul.timeZone)
 let scenarios: [Scenario] = [
     Scenario("01-summer-clear-day", seoul, localTime(seoul, 7, 15, 13), (.clear, 0, 0.1, 31)),
-    Scenario("02-spring-forsythia-day", region("KR.daegu"), localTime(region("KR.daegu"), 4, 5, 11), (.partlyCloudy, 0, 0.3, 17)),
+    Scenario("02-spring-forsythia-day", daegu, localTime(daegu, 4, 5, 11), (.partlyCloudy, 0, 0.3, 17)),
     Scenario("03-sunrise", seoul, sunTime(seoul, 10, 18, \.sunrise), (.clear, 0, 0.2, 9), occasion: "sky.sunrise"),
-    Scenario("04-sunset", region("KR.busan"), sunTime(region("KR.busan"), 6, 21, \.sunset), (.partlyCloudy, 0, 0.35, 24), occasion: "sky.sunset"),
+    Scenario("04-sunset", busan, sunTime(busan, 6, 21, \.sunset), (.partlyCloudy, 0, 0.35, 24), occasion: "sky.sunset"),
     Scenario("05-crescent-night", seoul, localTime(seoul, 3, 22, 20), (.clear, 0, 0, 5)),
     Scenario("06-chuseok-full-moon", seoul, localTime(seoul, 9, 25, 21), (.clear, 0, 0.05, 19), occasion: "KR.chuseok"),
-    Scenario("07-rainy-afternoon", region("KR.gwangju"), localTime(region("KR.gwangju"), 7, 10, 15), (.rain, 0.6, 0.95, 24)),
-    Scenario("08-thunderstorm", region("KR.daejeon"), localTime(region("KR.daejeon"), 8, 5, 17), (.thunderstorm, 0.8, 1, 27)),
-    Scenario("09-foggy-morning", region("KR.chuncheon"), localTime(region("KR.chuncheon"), 11, 5, 7, 30), (.fog, 0.7, 0.6, 6)),
+    Scenario("07-rainy-afternoon", busan, localTime(busan, 7, 10, 15), (.rain, 0.6, 0.95, 24)),
+    Scenario("08-thunderstorm", seoul, localTime(seoul, 8, 5, 17), (.thunderstorm, 0.8, 1, 27)),
+    Scenario("09-foggy-morning", seoul, localTime(seoul, 11, 5, 7, 30), (.fog, 0.7, 0.6, 6)),
     Scenario("10-snowy-christmas-day", seoul, localTime(seoul, 12, 25, 10), (.snow, 0.6, 0.9, -2), occasion: "KR.christmas"),
     Scenario("11-christmas-eve-night", seoul, localTime(seoul, 12, 24, 21), (.clear, 0, 0.1, -5), occasion: "KR.christmasEve"),
     Scenario("12-halloween-night", seoul, localTime(seoul, 10, 31, 20), (.partlyCloudy, 0, 0.4, 12), occasion: "KR.halloween"),
     Scenario("13-seollal-morning", seoul, localTime(seoul, 2, 17, 8), (.clear, 0, 0.1, -3), occasion: "KR.seollal"),
     Scenario("14-buddha-birthday-sunset", seoul, sunTime(seoul, 5, 24, \.sunset), (.clear, 0, 0.1, 20), occasion: "KR.buddhasBirthday"),
-    Scenario("15-autumn-foliage-day", region("KR.jeonju"), localTime(region("KR.jeonju"), 10, 25, 14), (.clear, 0, 0.15, 16)),
-    Scenario("16-offline-night", region("KR.jeju"), localTime(region("KR.jeju"), 1, 10, 23), nil),
+    Scenario("15-autumn-foliage-day", seoul, localTime(seoul, 10, 25, 14), (.clear, 0, 0.15, 16)),
+    Scenario("16-offline-night", busan, localTime(busan, 1, 10, 23), nil),
     Scenario("17-jeongwol-daeboreum-night", seoul, localTime(seoul, 3, 3, 21), (.clear, 0, 0.05, 2), occasion: "KR.jeongwolDaeboreum"),
-    Scenario("18-new-year-sunrise", region("KR.gangneung"), sunTime(region("KR.gangneung"), 1, 1, \.sunrise), (.clear, 0, 0.1, -6), occasion: "KR.newYearsDay"),
-    Scenario("19-warm-winter-clear-day", region("KR.busan"), localTime(region("KR.busan"), 1, 15, 14), (.clear, 0, 0.1, 8)),
+    Scenario("18-new-year-sunrise", busan, sunTime(busan, 1, 1, \.sunrise), (.clear, 0, 0.1, -6), occasion: "KR.newYearsDay"),
+    Scenario("19-warm-winter-clear-day", busan, localTime(busan, 1, 15, 14), (.clear, 0, 0.1, 8)),
 ]
 
 let output = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first ?? "snapshots", isDirectory: true)
@@ -94,7 +97,7 @@ func designScene(_ name: String, _ context: SceneContext) -> [String: Any] {
     calendar.timeZone = context.region.timeZone
     let t = calendar.dateComponents([.month, .day, .hour, .minute], from: context.date)
     return [
-        "title": name, "region": context.region.name,
+        "title": name, "region": context.region.name.ko,
         "date": "\(t.month!)월 \(t.day!)일", "time": "\(t.hour!):\(String(format: "%02d", t.minute!))", "hour": t.hour!,
         "season": "\(context.season)",
         "sun": [context.sun.altitude, context.sun.azimuth],
@@ -119,7 +122,7 @@ for scenario in scenarios {
     }
     let time = context.date.formatted(Date.FormatStyle(date: .numeric, time: .shortened, timeZone: context.region.timeZone))
     print(
-        "\(scenario.name): \(context.region.name) \(time)",
+        "\(scenario.name): \(context.region.name.ko) \(time)",
         "해 \(Int(context.sun.altitude.rounded()))°/\(Int(context.sun.azimuth.rounded()))°",
         "달 위상 \((context.moon.phase * 100).rounded() / 100) \(Int(context.moon.altitude.rounded()))°/\(Int(context.moon.azimuth.rounded()))°",
         "이벤트 \(context.occasions.map(\.id))")

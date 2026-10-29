@@ -15,8 +15,8 @@ struct ChristofWindowWidget: Widget {
         AppIntentConfiguration(kind: Self.kind, intent: SelectRegionIntent.self, provider: WindowTimelineProvider()) { entry in
             WindowEntryView(entry: entry)
         }
-        .configurationDisplayName("Christof 창문")
-        .description("고른 지역의 날씨와 시간, 명절을 창밖 풍경으로 보여줍니다.")
+        .configurationDisplayName("Christof Window")
+        .description("Shows the weather, time, and holidays of the chosen region as the view outside a window.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .contentMarginsDisabled()
     }
