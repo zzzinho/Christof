@@ -146,7 +146,7 @@ const SCENES = [
 // looks: 구성 요소마다 그 이벤트에 쓸 모양 이름. 이름은 각 구성 요소의 *_LOOKS 키다.
 // moment: 그 이벤트다운 사람·고양이 순간. hours(양 끝 포함) 동안 시각으로 고른 상호작용을 덮는다.
 const OCCASIONS = {
-  'KR.seollal': { name: '설날', looks: { window: 'kite', person: 'daenggi', cat: 'pouch', room: 'tteokguk', clock: 'norigae' }, moment: { hours: [7, 10], cat: 'eat', name: '떡국 같이 먹기' } },
+  'KR.seollal': { name: '설날', looks: { window: 'kite', person: 'daenggi', cat: 'pouch', room: 'tteokguk', clock: 'bokjumeoni' }, moment: { hours: [7, 10], cat: 'eat', name: '떡국 같이 먹기' } },
   'KR.jeongwolDaeboreum': { name: '정월대보름', looks: { window: ['moonHalo', 'daljip'], person: 'moonPin', cat: 'walnut', room: 'bureom', clock: 'moonFace' }, moment: { hours: [7, 9], cat: 'eat', name: '부럼 깨기' } },
   'KR.buddhasBirthday': { name: '부처님오신날', looks: { window: 'lanterns', person: 'lotusPin', cat: 'lotus', room: 'lotusBowl', clock: 'lantern' }, moment: { hours: [19, 22], cat: 'beside', name: '연등 같이 보기' } },
   'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'pineBranch'], person: 'ribbonPin', cat: 'bojagi', room: 'songpyeon', clock: 'moonFace' }, moment: { hours: [19, 23], cat: 'beside', name: '보름달 같이 보기' } },
@@ -573,7 +573,8 @@ const SPRITES = {
     '..........ff....',
     '..........ff....',
   ],
-  catPouch: ['..p..', '.PPP.', 'PpgpP', 'PpppP', '.PPP.'],
+  // 주름진 입구, 금색 끈으로 묶은 목, 둥근 몸. 몸만 그리면 둥근 장식이나 사과처럼 보였다.
+  bokjumeoni: ['p.p.p', '.PPP.', '.ggg.', 'PPPPP', 'PpgpP', 'PpppP', '.PPP.'],
   catBeanie: ['..w..', '.BBB.', 'BBBBB'],
   // 잎받침 위에 핀 연꽃
   catLotus: ['..P..', '.PPP.', 'PpPpP', '.ggg.'],
@@ -1153,7 +1154,7 @@ function catAnchor(spot) {
 }
 
 const CAT_LOOKS = {
-  pouch: (g, { item: [x, y] }) => g.sprite(x, y, SPRITES.catPouch, { P: 'pouch', p: 'pouch-light', g: 'pouch-gold' }),
+  pouch: (g, { item: [x, y] }) => g.sprite(x, y, SPRITES.bokjumeoni, BOKJUMEONI_COLORS),
   beanie(g, spot) {
     const { head: [x, y] } = catAnchor(spot);
     g.sprite(x, y + 1, SPRITES.catBeanie, { w: 'santa-trim', B: 'beanie' });
@@ -1329,14 +1330,14 @@ function drawShelf(g, x0, x1, y) {
 // ---- 구성 요소 5: 시계 ----
 // 글자 대신 벽시계로 시각을 보인다. 이벤트 모양은 문자판 색(face)을 바꾸거나 둘레에 더한다(draw).
 
+const BOKJUMEONI_COLORS = { P: 'pouch', p: 'pouch-light', g: 'pouch-gold' };
+
 const CLOCK_LOOKS = {
-  // 설날: 시계 아래 매듭 노리개
-  norigae: { draw(g, cx, cy) {
-    g.rect(cx, cy + 7, 1, 2, color('pouch'));
-    g.rect(cx - 1, cy + 9, 3, 3, color('pouch'));
-    g.set(cx, cy + 10, color('pouch-gold'));
-    for (const dx of [-1, 0, 1]) g.rect(cx + dx, cy + 12, 1, 4 - Math.abs(dx), color('pouch'));
-  } },
+  // 설날: 시계 아래 끈에 매단 복주머니. 술 달린 매듭 노리개는 중국 매듭으로도 읽혀서 바꿨다.
+  bokjumeoni: {
+    draw: (g, cx, cy) => g.sprite(cx, cy + 9 + SPRITES.bokjumeoni.length, SPRITES.bokjumeoni, BOKJUMEONI_COLORS),
+    bare: (g, cx, cy) => g.rect(cx, cy + 7, 1, 2, color('wire')),
+  },
   // 새해 첫날: 시계 둘레 반짝이
   sparkles: { draw(g, cx, cy) {
     for (const [dx, dy] of [[-9, -5], [9, -3], [8, 8]]) {
@@ -1542,7 +1543,7 @@ const INTENTS = {
     part: '글자 없이 시각을 알리는 유일한 장치라 장면에서 문자판만 밝게 둔다. 지름 13칸보다 작으면 바늘이 구분되지 않는다.',
     시각: { row: '위젯이 5분마다 다시 그려지므로 분침도 5분 단위로 맞춰 실제 시각과 어긋나 보이지 않게 한다.' },
     이벤트: { row: '문자판과 작은 장식으로 이벤트를 더한다.', cells: {
-      기본: '장식 없음', 설날: '노리개', '새해 첫날': '반짝이', 정월대보름: '달빛 문자판', 부처님오신날: '작은 연꽃등', 추석: '달빛 문자판',
+      기본: '장식 없음', 설날: '끈에 매단 복주머니. 술 달린 매듭 노리개는 중국 매듭으로도 읽혔다', '새해 첫날': '반짝이', 정월대보름: '달빛 문자판', 부처님오신날: '작은 연꽃등', 추석: '달빛 문자판',
       할로윈: '시계에 매달린 거미', '크리스마스 이브': '호랑가시', 크리스마스: '호랑가시' } },
   },
   'part-room': {

@@ -23,9 +23,10 @@ Christof 는 macOS·iOS 위젯이다. 고른 지역의 날씨·시간·이벤트
 | 새해 연하장 (일본 넨가조의 대표 풍속) | 해맞이(첫 해), 새 달력 | [넨가조](https://web-japan.org/kidsweb/explore/calendar/december/nengajo.html), [해맞이·제야의 종](https://mediahub.seoul.go.kr/archives/1501806) |
 | 둥근 제등 | 연꽃 모양 연등(오색) | [연등회 전통등](https://mediahub.seoul.go.kr/archives/2007987), [연꽃등 만들기](https://bizforms.co.kr/form_view/form_40635.asp) |
 | 봄 가로수 벚꽃 | 봄 개나리(노랑)·진달래(분홍 보라), 가을 은행나무(노랑) | [서울 가로수 은행나무 1위](https://mediahub.seoul.go.kr/archives/144926), [가로수 수종 2023](https://hangyo.com/news/article.html?no=103473), [개나리](https://www.earth.com/plant-encyclopedia/Angiosperms/Oleaceae/forsythia-koreana/en/) |
+| 술 달린 붉은 매듭 장식 (중국 춘절의 중국 매듭) | 복주머니(주름진 입구, 끈으로 묶은 목) | [중국 매듭](https://www.scmp.com/lifestyle/chinese-culture/article/3297117/what-are-chinese-knots-history-good-luck-symbol-popular-lunar-new-year), [복주머니](https://www.yugacrew.com/yugawiki/%EB%B3%B5%EC%A3%BC%EB%A8%B8%EB%8B%88) |
 | 낮은 지붕 골목, 나무 십자 창살 | 아파트 단지, 뒤의 산 능선, 밤의 빨간 네온 십자가, 아파트 샷시 창 | [빨간 십자가](https://www.koreatimes.co.kr/southkorea/20120615/church-crosses-in-the-dark), [한국 아파트](https://wiki.openstreetmap.org/wiki/Ko:Korea_Apartments) |
 
-- 설날(방패연, 색동 한복, 댕기, 복주머니, 떡국, 노리개)과 정월대보름(달집, 부럼)은 이미 한국 풍속이라 그대로 둔다. [설](https://ko.wikisource.org/wiki/%EA%B8%80%EB%A1%9C%EB%B2%8C_%EC%84%B8%EA%B3%84_%EB%8C%80%EB%B0%B1%EA%B3%BC%EC%82%AC%EC%A0%84/%EB%AC%B8%ED%99%94%C2%B7%EB%AF%BC%EC%86%8D/%EA%B5%AD%EA%B2%BD%EC%9D%BC-%EA%B3%B5%ED%9C%B4%EC%9D%BC-%EA%B8%B0%EB%85%90%EC%9D%BC%EA%B3%BC_%EB%AF%BC%EC%86%8D/%EB%AA%85%EC%A0%88%EA%B3%BC_%EB%86%80%EC%9D%B4%C2%B7%EC%9D%8C%EC%8B%9D/%EC%84%A4), [정월대보름](https://theme.archives.go.kr/next/pages/new_newsletter/2023/html/vol_133/sub01.html)
+- 설날(방패연, 색동 한복, 댕기, 복주머니, 떡국)과 정월대보름(달집, 부럼)은 이미 한국 풍속이라 그대로 둔다. [설](https://ko.wikisource.org/wiki/%EA%B8%80%EB%A1%9C%EB%B2%8C_%EC%84%B8%EA%B3%84_%EB%8C%80%EB%B0%B1%EA%B3%BC%EC%82%AC%EC%A0%84/%EB%AC%B8%ED%99%94%C2%B7%EB%AF%BC%EC%86%8D/%EA%B5%AD%EA%B2%BD%EC%9D%BC-%EA%B3%B5%ED%9C%B4%EC%9D%BC-%EA%B8%B0%EB%85%90%EC%9D%BC%EA%B3%BC_%EB%AF%BC%EC%86%8D/%EB%AA%85%EC%A0%88%EA%B3%BC_%EB%86%80%EC%9D%B4%C2%B7%EC%9D%8C%EC%8B%9D/%EC%84%A4), [정월대보름](https://theme.archives.go.kr/next/pages/new_newsletter/2023/html/vol_133/sub01.html)
 - 할로윈·크리스마스는 나라와 관계없는 모양이라 그대로 둔다.
 - 다른 나라를 더할 때도 그 나라 풍경과 풍속으로 따로 그린다. 나라끼리 모양을 섞지 않는다.
 
@@ -172,7 +173,7 @@ Christof 는 macOS·iOS 위젯이다. 고른 지역의 날씨·시간·이벤트
 
 | 이벤트 | 창문 | 사람 | 고양이 | 방 안 | 시계 |
 | --- | --- | --- | --- | --- | --- |
-| 설날 | 방패연 | 색동 한복, 댕기 | 복주머니 | 떡국 | 노리개 |
+| 설날 | 방패연 | 색동 한복, 댕기 | 복주머니 | 떡국 | 시계 아래 끈에 매단 복주머니 |
 | 새해 첫날 | 첫 해 둘레 빛 | 털모자, 목도리 | 털모자 | 탁상 달력(일요일 빨강, 토요일 파랑) | 반짝이 |
 | 정월대보름 | 보름달 빛, 달집 불 | 달 머리핀 | 호두(부럼) | 부럼 그릇 | 달빛 문자판 |
 | 부처님오신날 | 창 위 오색 연꽃등 줄 | 연꽃 머리핀 | 곁에 둔 연꽃(분홍 꽃잎과 초록 잎받침 5×4칸). 머리 위 3×2칸은 이마의 얼룩처럼 보였고, 키워도 머리 위보다 곁이 낫다(사용자 요청) | 창턱 연꽃 화분 | 작은 연꽃등 |
