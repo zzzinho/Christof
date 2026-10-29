@@ -31,24 +31,8 @@ struct CatHeadItem: CatLook {
 
     static let beanie = CatHeadItem(rows: ["..w..", ".BBB.", "BBBBB"], colors: ["w": "santa-trim", "B": "beanie"], dy: 1)
     static let lotus = CatHeadItem(rows: [".P.", "PpP"], colors: ["P": "spring-1", "p": "spring-2"])
-}
-
-/// 등 가운데에 단 악마 날개 한 쌍. 날개는 뿌리(pose.wings)에서 위 바깥으로 뻗는다.
-/// 옆모습은 머리와 겹치지 않게 두 날개 모두 꼬리 쪽으로 뻗고, 먼 날개는 앞으로 비켜 그늘색으로 먼저 그린다.
-struct DevilWings: CatLook {
-    /// 왼쪽 날개. 오른쪽 아래 칸이 뿌리다. B 뼈대, m 막(아래 끝이 톱니).
-    static let wing = ["B......", "mB.....", "mmBB...", "mmmmBB.", "m.m.m.B"]
-
-    func draw(_ g: inout DotGrid, _ spot: CatSpot, _ s: DotScene) {
-        let top = spot.bottom - spot.pose.rows.count, w = Self.wing[0].count, h = Self.wing.count
-        for (x, y, dir, far) in spot.pose.wings {
-            for (j, row) in Self.wing.enumerated() {
-                for (i, ch) in row.enumerated() where ch != "." {
-                    g.set(spot.left + x + dir * (w - 1 - i), top + y - (h - 1) + j, LofiPalette.color(far || ch == "B" ? "santa-dark" : "santa"))
-                }
-            }
-        }
-    }
+    /// 할로윈: 끝이 꺾인 고깔과 금색 별. 챙이 귀 줄을 덮는다.
+    static let wizardHat = CatHeadItem(rows: ["....WW.", "...WW..", "..WWW..", "..WgW..", "WWWWWWW"], colors: ["W": "witch", "g": "pouch-gold"])
 }
 
 /// 목도리. 자세마다 따로 그려 두었다. color 가 없으면 요일 색이다.
