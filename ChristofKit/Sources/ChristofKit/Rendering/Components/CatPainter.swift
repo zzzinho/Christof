@@ -84,18 +84,18 @@ struct CatPose {
         "..cc.c...cc.R...",
         "..c..c...c..c...",
     ], head: (12.5, 1), scarf: ["..........SSS...", "...........S...."], scarfBottom: 4)
-    /// 밥그릇에 머리를 숙였다.
+    /// 웅크려 어깨뼈가 솟고, 목을 앞아래로 뻗어 밥그릇에 머리를 박았다.
     static let eat = CatPose(rows: [
-        "c................",
-        "c................",
-        ".c...............",
-        ".ccTccTccTcR.....",
-        "..cTccTccTccR.c.c",
-        "..ccccccccccccccc",
-        "..ccccccccc..cTec",
-        "..cc.c...cc..cccR",
-        "..c..c...c.......",
-    ], head: (15, 4), scarf: ["...........SS....", "...........S....."], scarfBottom: 6)
+        ".................",
+        "........ccR......",
+        "....cTccTccR.....",
+        "..cTccTccTcR.c..c",
+        ".cccccccccccccccR",
+        ".ccccccccccccTceR",
+        "c.ccccccccc.ccccR",
+        "c.cccc...cc...ccc",
+        "cccccc...cc......",
+    ], head: (14.5, 4), scarf: ["...........SS....", "...........S....."], scarfBottom: 6)
     /// 감은 눈, 꼬리를 앞으로 감았다.
     static let curled = CatPose(rows: [
         ".c..c.........",
