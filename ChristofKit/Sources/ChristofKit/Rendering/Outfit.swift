@@ -17,7 +17,12 @@ struct Outfit: Sendable {
         }
     }
 
-    static let mustard = Outfit(base: "knit-mustard", shade: "knit-mustard-dark", rim: "knit-mustard-rim")
+    /// 평소 옷: 분홍 체크 플란넬 잠옷. 다섯 칸마다 가로·세로 줄(rim 색)이 지나고 겹친 칸은 크림색이다. 옷깃 줄은 무늬 없이 접힌 그늘이다.
+    static let pajamaRose = Outfit(base: "pajama-rose", shade: "pajama-rose-dark", rim: "pajama-rose-rim") { _, i, k, _ in
+        guard k > 0 else { return nil }
+        let v = i % 5 == 2, h = k % 5 == 3
+        return v && h ? "hanbok-collar" : v || h ? "pajama-rose-rim" : nil
+    }
     /// 설날 색동 한복: 첫 줄은 깃, 소매 두 칸은 줄마다 색동
     static let seollal = Outfit(base: "hanbok", shade: "hanbok", skirt: "pouch") { _, i, k, row in
         collar(k) ?? (isSleeve(i, row) ? saekdong[k % saekdong.count] : nil)
