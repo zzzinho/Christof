@@ -22,6 +22,7 @@ enum LofiPalette {
         "hair-rim": 0x6B4A45,
         "hair-brown": 0x5C3B30,
         "hair-brown-rim": 0x8A5A45,
+        "hair-brown-dark": 0x44291F,
         "skin": 0xB9876E,
         "hoodie": 0x6E5A80,
         "hoodie-dark": 0x54456A,

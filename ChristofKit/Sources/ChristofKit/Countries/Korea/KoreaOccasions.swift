@@ -15,7 +15,7 @@ public enum KoreaOccasions {
         Occasion(id: "KR.buddhasBirthday", name: "부처님오신날", rule: LunarDateRule(calendar: .dangi, month: 4, day: 8, daysBefore: lead), looks: OccasionLooks(
             window: [LanternString()], person: [PersonSprite.lotusPin], outfit: .buddha, cat: [CatHeadItem.lotus], room: [SillItem.lotusBowl],
             clock: [ClockLantern()], moment: OccasionMoment(hours: 19...22, cat: .beside))),  // 연등 같이 보기
-        // 추석 무렵엔 머리가 짧아 댕기가 옷깃에 묻히므로 옆머리에 리본 핀을 꽂는다.
+        // 추석 무렵엔 머리가 어깨 길이라 댕기가 옷깃에 묻히므로 옆머리에 리본 핀을 꽂는다.
         Occasion(id: "KR.chuseok", name: "추석", rule: LunarDateRule(calendar: .dangi, month: 8, day: 15, daysBefore: lead, daysAfter: 1), looks: OccasionLooks(
             window: [MoonHalo(), PineBranch()], person: [PersonSprite.ribbonPin], outfit: .chuseok, cat: [CatItem.bojagi],
             room: [DeskItem.songpyeon], clock: [ClockFace(face: "moon")], moment: OccasionMoment(hours: 19...23, cat: .beside))),  // 보름달 같이 보기

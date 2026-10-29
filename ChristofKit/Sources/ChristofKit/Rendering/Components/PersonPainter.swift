@@ -7,8 +7,9 @@ enum PersonPainter {
         /// 목에 건 헤드폰과 그 아랫줄
         let neck: [String]
         let neckBottom: Int
-        /// 머리가 길어지면 내려오는 자리: 시작 줄, 칸 범위, 최대 줄 수
-        let fall: (start: Int, cols: [ClosedRange<Int>], rows: Int)
+        /// 늘어진 머리. 단발 끝줄(start)부터 한 해에 rows 줄 자라고, 폭은 머리 폭(cols)이다.
+        /// 어깨 줄(shoulder)부터 한 칸씩 퍼지고, strands 는 끝의 결 자리다.
+        let fall: (start: Int, shoulder: Int, cols: (Int, Int), strands: [Int], rows: Int)
     }
 
     static let sprite = Sprite(
@@ -24,8 +25,8 @@ enum PersonPainter {
             ".KKhhhhhhhhhHKK.",
             ".KKhhhhhhhhhHKK.",
             "...hhhhhhhhhH...",
+            "...hhhhhhhhhH...",
             "....hhhhhhhH....",
-            ".....hhhhhh.....",
             "......sssS......",
             "...dddddddddd...",
             ".ooddddddddddoo.",
@@ -43,7 +44,7 @@ enum PersonPainter {
         body: 14,
         neck: ["..KK........KK..", "..KK........KK.."],
         neckBottom: 16,
-        fall: (13, [4...11], 10))
+        fall: (12, 15, (3, 12), [5, 9], 6))
 
     static func draw(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene) {
         let p = sprite, top = L.personTop, left = jsRound(Double(L.personX) - Double(p.rows[0].count) / 2)
@@ -59,16 +60,22 @@ enum PersonPainter {
                 if let name { g.set(left + i, top + j, LofiPalette.color(name)) }
             }
         }
-        if s.headwear == .neck { g.sprite(L.personX, top + p.neckBottom, p.neck, lit) }
-        // 늘어진 머리. 양 끝 칸을 한 줄 짧게 해 끝을 둥글게 하고, 가장 오른쪽 칸은 테두리 빛이다.
-        let length = jsRound(s.hair * Double(p.fall.rows)), right = p.fall.cols.map(\.upperBound).max() ?? 0
-        let hair = LofiPalette.color(lit["h"]!), rim = LofiPalette.color(lit["H"]!)
-        for cols in p.fall.cols {
-            for i in cols {
-                let edge = i == cols.lowerBound || i == cols.upperBound
-                for j in 0..<max(0, length - (edge ? 1 : 0)) { g.set(left + i, top + p.fall.start + j, i == right ? rim : hair) }
+        // 늘어진 머리는 목에서 좁아지지 않고 머리 폭 그대로 내려와 어깨에 얹히며 한 칸씩 퍼진다. 끝 두 줄을 한 칸씩 깎아 둥글게 하고(단발은 한 줄),
+        // 네 줄 넘게 자라면 끝 세 줄에 진한 결을 넣고 결 자리 끝을 비워 머리끝이 갈라져 보이게 한다. 오른쪽 끝 칸은 테두리 빛이다.
+        // 머리는 한 달에 1cm 남짓 자라서 한 해 6줄(3pt 한 줄이 2cm 쯤)이다. 더 길게 늘이거나 매끈한 판으로 두면 등에 붙인 판처럼 보였다.
+        let rows = 1 + jsRound(s.hair * Double(p.fall.rows)), (c0, c1) = p.fall.cols
+        let hair = LofiPalette.color(lit["h"]!), rim = LofiPalette.color(lit["H"]!), dark = LofiPalette.color("hair-brown-dark")
+        for j in 0..<rows {
+            let y = p.fall.start + j, fromEnd = rows - 1 - j, flare = y >= p.fall.shoulder ? 1 : 0
+            let inset = max(0, (rows >= 3 ? 2 : 1) - fromEnd), i0 = c0 - flare + inset, i1 = c1 + flare - inset
+            for i in stride(from: i0, through: i1, by: 1) {
+                let strand = rows >= 4 && fromEnd <= 3 && p.fall.strands.contains(i)
+                if strand && fromEnd == 0 { continue }
+                g.set(left + i, top + y, strand ? dark : i == i1 ? rim : hair)
             }
         }
+        // 목에 건 헤드폰은 늘어진 머리 위에 걸친다.
+        if s.headwear == .neck { g.sprite(L.personX, top + p.neckBottom, p.neck, lit) }
         for look in s.looks.person { look.draw(&g, L.personX, top, s) }
     }
 }

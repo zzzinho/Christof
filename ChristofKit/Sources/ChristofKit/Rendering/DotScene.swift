@@ -89,8 +89,8 @@ struct DotScene {
         let cats = Interaction.at(hour: hour).cats, picked = cats[random.int(0, cats.count - 1)]
         let moment = context.occasions.lazy.compactMap(\.looks.moment).first { [hour] in $0.hours.contains(hour) }
         catState = moment?.cat ?? picked
-        // 7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다.
-        hair = (Double((month + 5) % 12) + Double(day - 1) / 31) / 12
+        // 봄(3월 1일)에 턱선 단발로 자르고 겨울 끝(2월 말)까지 자란다.
+        hair = (Double((month + 9) % 12) + Double(day - 1) / 31) / 12
         // ponytail: 평소 옷은 시안 후보 셋(머스터드·세이지·코럴) 중 시안이 쓰는 머스터드만 옮겼다.
         outfit = looks.outfit ?? .mustard
     }
