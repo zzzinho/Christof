@@ -344,8 +344,8 @@ function sceneContext(scene) {
     minute: Number(scene.time.split(':')[1]),
     ...variety(month, day, scene.hour, scene.occasions),
     hair: hairLength(month, day),
-    // ponytail: 평소 옷은 잠옷 후보 셋(분홍·파랑·세이지) 중 분홍으로 둔다. 하나를 고르면 나머지 후보는 지운다.
-    outfit: OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'pajamaRose',
+    // ponytail: 평소 옷은 잠옷 후보 셋(물방울·줄무늬·극세사) 중 물방울로 둔다. 하나를 고르면 나머지 후보는 지운다.
+    outfit: OUTFIT_BY_OCCASION[scene.occasions.find(id => OUTFIT_BY_OCCASION[id])] ?? 'pajamaDot',
     // 구성 요소마다 진행 중인 이벤트들이 고른 모양 이름
     looks: catLooks(scene, Object.fromEntries(COMPONENTS.map(part => [part, [...new Set(scene.occasions.flatMap(id => [].concat(OCCASIONS[id].looks[part] ?? [])))]]))),
     // ponytail: 시안 장면에는 연도가 없어 2026년으로 친다. 0 = 일요일
@@ -394,7 +394,7 @@ function layout(W, H, s) {
 
 // ---- 스프라이트. 불빛(스탠드·트리)이 오른쪽에 있어 오른쪽 가장자리에 따뜻한 테두리 빛이 진다 ----
 
-// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄, wings: 할로윈 날개 뿌리(등 한가운데).
+// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄, wings: 할로윈 날개 뿌리(등 가운데).
 // 다섯 자세 모두 머리 폭(테두리 포함 6~7칸)과 몸집을 맞춘다.
 // side, walk 는 오른쪽(사람·불빛 쪽)을 본다.
 const CATS = {
@@ -416,7 +416,7 @@ const CATS = {
     ],
     scarf: ['..SSSSS....', '..S........', '..S........', '.S.........'],
     scarfBottom: 9,
-    wings: [3, 7],
+    wings: [[2, 8, -1], [5, 8, 1]],
   },
   front: {
     head: [4, 2],
@@ -454,7 +454,7 @@ const CATS = {
     ],
     scarf: ['......SSSS..', '......S.....'],
     scarfBottom: 5,
-    wings: [3, 8],
+    wings: [[5, 7, -1, true], [3, 8, -1]],
   },
   walk: {
     head: [12.5, 1],
@@ -472,25 +472,26 @@ const CATS = {
     ],
     scarf: ['..........SSS...', '...........S....'],
     scarfBottom: 4,
-    wings: [5, 4],
+    wings: [[7, 4, -1, true], [5, 4, -1]],
   },
-  // 웅크려 어깨뼈가 솟고, 목을 앞아래로 뻗어 밥그릇에 머리를 박았다. 그릇은 고양이 다음에 그려 입을 가린다.
+  // 걷는 자세에서 고개만 밥그릇으로 숙였다. 머리는 앞다리 앞, 어깨보다 낮다. 그릇은 고양이 다음에 그려 입을 가린다.
   eat: {
-    head: [14.5, 4],
+    head: [14.5, 6],
     rows: [
-      '.................',
-      '........ccR......',
-      '....cTccTccR.....',
+      'c................',
+      'c................',
+      'c................',
+      '.c...............',
+      '.cccTccTcccR.....',
       '..cTccTccTcR.c..c',
-      '.cccccccccccccccR',
-      '.ccccccccccccTceR',
-      'c.ccccccccc.ccccR',
-      'c.cccc...cc...ccc',
-      'cccccc...cc......',
+      '..ccccccccccccccR',
+      '..cccccccccRcTceR',
+      '..cc.c...cc..cccc',
+      '..c..c...cc......',
     ],
     scarf: ['...........SS....', '...........S.....'],
-    scarfBottom: 6,
-    wings: [6, 2],
+    scarfBottom: 8,
+    wings: [[7, 4, -1, true], [5, 4, -1]],
   },
   // 감은 눈, 꼬리를 앞으로 감았다.
   curled: {
@@ -506,7 +507,7 @@ const CATS = {
     ],
     scarf: ['.SSSS.........', '..S...........'],
     scarfBottom: 5,
-    wings: [8, 1],
+    wings: [[6, 2, 1, true], [8, 2, 1]],
   },
 };
 
@@ -568,7 +569,7 @@ const SPRITES = {
   catBeanie: ['..w..', '.BBB.', 'BBBBB'],
   catLotus: ['.P.', 'PpP'],
   // 왼쪽 날개. 오른쪽 아래 칸이 뿌리다. B 뼈대, m 막(아래 끝이 톱니).
-  devilWing: ['B...', 'mB..', 'mmB.', 'm.mB'],
+  devilWing: ['B......', 'mB.....', 'mmBB...', 'mmmmBB.', 'm.m.m.B'],
   pumpkin: [
     '....s....',
     '.ooosooo.',
@@ -1077,18 +1078,14 @@ function isSleeve(ch, i, row, p) {
   return i <= cloth[0] + 1 || i >= cloth[cloth.length - 1] - 1;
 }
 
-// 평소 옷: 체크 플란넬 잠옷. 다섯 칸마다 가로·세로 줄(rim 색)이 지나고 겹친 칸은 크림색이다. 옷깃 줄은 무늬 없이 접힌 그늘이다.
-const flannel = line => (ch, i, k) => {
-  if (k === 0) return null;
-  const v = i % 5 === 2, h = k % 5 === 3;
-  return v && h ? 'hanbok-collar' : v || h ? line : null;
-};
-const pajama = (name, tone) => ({ event: '평소', name, o: `pajama-${tone}`, d: `pajama-${tone}-dark`, rim: `pajama-${tone}-rim`, paint: flannel(`pajama-${tone}-rim`) });
+// 평소 옷: 잠옷 후보. 옷깃 줄(k = 0)에는 무늬를 넣지 않는다. 체크는 식탁보처럼 보여 뺐다.
+const pajama = (name, tone, paint) => ({ event: '평소', name, o: `pajama-${tone}`, d: `pajama-${tone}-dark`, rim: `pajama-${tone}-rim`, paint });
 
 const OUTFITS = {
-  pajamaRose: pajama('분홍 체크 잠옷', 'rose'),
-  pajamaBlue: pajama('파랑 체크 잠옷', 'blue'),
-  pajamaSage: pajama('세이지 체크 잠옷', 'sage'),
+  // 물방울은 세 줄마다 네 칸 간격으로 찍고 줄마다 두 칸씩 엇갈린다.
+  pajamaDot: pajama('분홍 물방울 잠옷', 'rose', (ch, i, k) => (k > 0 && k % 3 === 1 && (i + (k % 6 === 1 ? 0 : 2)) % 4 === 1 ? 'hanbok-collar' : null)),
+  pajamaStripe: pajama('파랑 줄무늬 잠옷', 'blue', (ch, i, k) => (k > 0 && i % 3 === 0 ? 'pajama-blue-rim' : null)),
+  pajamaFleece: pajama('세이지 극세사 잠옷', 'sage'),
   seollal: { event: '설날', name: '색동 한복', o: 'hanbok', d: 'hanbok', skirt: 'pouch',
     paint: (ch, i, k, row, p) => collar(k) ?? (isSleeve(ch, i, row, p) ? SAEKDONG[k % SAEKDONG.length] : null) },
   daeboreum: { event: '정월대보름', name: '쪽빛 저고리', o: 'pouch-knot', d: 'curtain-dark', skirt: 'lamp-body', paint: (ch, i, k) => collar(k) },
@@ -1164,14 +1161,12 @@ const CAT_LOOKS = {
   },
   // 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
   bojagi: (g, { item: [x, y] }) => g.sprite(x, y, ['k.k', '.k.', 'ABC', 'CAB'], { k: 'hanbok', A: 'hanbok', B: 'hanbok-jade', C: 'pouch-gold' }),
-  // 등 한가운데서 양쪽으로 펼친 작은 악마 날개. wings: 왼쪽 날개 뿌리 [열, 줄], 오른쪽 날개는 바로 옆 칸에서 뒤집어 그린다.
+  // 등 가운데에 단 악마 날개 한 쌍. wings: 날개마다 [뿌리 열, 뿌리 줄, 방향(-1 왼쪽, 1 오른쪽), 먼 날개]. 날개는 뿌리에서 위 바깥으로 뻗는다.
+  // 옆모습은 머리와 겹치지 않게 두 날개 모두 꼬리 쪽으로 뻗고, 먼 날개는 앞으로 비켜 그늘색으로 먼저 그린다.
   devilWings(g, spot) {
-    const { left, top } = catAnchor(spot), [x, y] = CATS[spot.pose].wings, wing = SPRITES.devilWing, w = wing[0].length, h = wing.length;
-    wing.forEach((row, j) => [...row].forEach((ch, i) => {
-      if (ch === '.') return;
-      const c = color(ch === 'B' ? 'santa-dark' : 'santa'), yy = top + y - (h - 1) + j;
-      g.set(left + x - (w - 1 - i), yy, c);
-      g.set(left + x + 1 + (w - 1 - i), yy, c);
+    const { left, top } = catAnchor(spot), wing = SPRITES.devilWing, w = wing[0].length, h = wing.length;
+    for (const [x, y, dir, far] of CATS[spot.pose].wings) wing.forEach((row, j) => [...row].forEach((ch, i) => {
+      if (ch !== '.') g.set(left + x + dir * (w - 1 - i), top + y - (h - 1) + j, color(far || ch === 'B' ? 'santa-dark' : 'santa'));
     }));
   },
   scarf: (g, spot) => drawCatScarf(g, spot, 'santa'),
@@ -1510,7 +1505,7 @@ const catBox = (L, s) => { const { x, bottom } = L.cats[s.catState]; return [x -
 partRows('part-person', L => L.boxes.person, 4, [
   ['헤드폰', '날짜·시각을 시드로 하나 고른다', Object.entries(HEADWEAR).map(([headwear, name]) => [name, '초승달 밤', {}, { ...FIXED, headwear }])],
   ['머리 길이', '봄(3월 1일)에 턱선 단발로 자르고 겨울 끝(2월 말)까지 한 해 6줄 자란다', ['3월 1일', '6월 1일', '9월 1일', '12월 1일', '2월 28일'].map(date => [date, '초승달 밤', { date }, { ...FIXED, headwear: 'bare' }])],
-  ['평소 옷 후보', '포근한 체크 플란넬 잠옷. 지금은 분홍. 하나를 고르면 나머지 후보는 지운다', ['pajamaRose', 'pajamaBlue', 'pajamaSage'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
+  ['평소 옷 후보', '포근한 잠옷. 지금은 물방울. 하나를 고르면 나머지 후보는 지운다', ['pajamaDot', 'pajamaStripe', 'pajamaFleece'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
   ['불', '해가 진 뒤·흐린 날은 스탠드를 켜서 오른쪽에 테두리 빛이 진다', [['켬', '초승달 밤', {}, FIXED], ['끔', '여름 낮 · 맑음', {}, FIXED]]],
   ['이벤트', '옷과 머리 장식', eventCells],
 ]);
