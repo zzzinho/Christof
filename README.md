@@ -1,54 +1,56 @@
 # Christof
 
-고른 지역의 날씨·시각·명절을 창밖 풍경으로 보여 주는 macOS 위젯입니다. 창문 모양이고, 3pt 도트로 그립니다. 이름은 트루먼 쇼에서 가상 세계를 연출하는 감독 Christof에서 따왔습니다. 이 창문이 가상의 창문이라는 뜻입니다.
+English | [한국어](README.ko.md)
+
+A macOS widget that shows the weather, time, and holidays of a place you choose as the view outside a window. It is drawn in 3pt pixel dots. The name comes from Christof, the director who stages the fake world in The Truman Show: this is a virtual window.
 
 | | |
 |---|---|
-| ![여름 맑은 낮](docs/images/busan-summer-day.png) | ![일몰](docs/images/busan-sunset.png) |
-| ![추석 보름달 밤](docs/images/busan-chuseok-night.png) | ![크리스마스 이브 밤](docs/images/busan-christmas-eve.png) |
+| ![Clear summer day](docs/images/busan-summer-day.png) | ![Sunset](docs/images/busan-sunset.png) |
+| ![Chuseok full moon night](docs/images/busan-chuseok-night.png) | ![Christmas Eve night](docs/images/busan-christmas-eve.png) |
 
-## 보여 주는 것
+## What it shows
 
-- **날씨**: 그 지역의 지금 날씨입니다. 맑음, 구름 조금, 흐림, 안개, 이슬비, 비, 눈, 뇌우를 창밖에 그립니다.
-- **시각**: 해와 달을 실제 위치에 그리고, 시각에 따라 낮, 해 질 녘, 밤으로 하늘색이 바뀝니다. 벽시계도 그 지역 시각을 가리킵니다.
-- **이벤트**
-  - 명절·기념일: 설날, 정월대보름, 부처님오신날, 추석, 할로윈, 크리스마스 이브·크리스마스, 새해 첫날
-  - 하늘 이벤트: 일출, 일몰, 보름달
-  - 이벤트마다 창밖, 옷, 고양이, 방 안 물건, 시계 모양이 바뀝니다.
-- **방 안**: 사람과 고양이가 시각에 따라 따로 지내기도 하고, 같이 있거나 같이 밥을 먹기도 합니다. 겨울에는 고양이가 요일마다 다른 색 목도리를 합니다.
+- **Weather**: the current weather of the place. Clear, partly cloudy, overcast, fog, drizzle, rain, snow, and thunderstorms are drawn outside the window.
+- **Time**: the sun and moon are drawn at their real positions, and the sky changes through day, dusk, and night. The wall clock shows the local time.
+- **Events**
+  - Holidays: Seollal (Lunar New Year), Jeongwol Daeboreum (first full moon), Buddha's Birthday, Chuseok, Halloween, Christmas Eve and Christmas, New Year's Day
+  - Sky events: sunrise, sunset, full moon
+  - Each event changes the view, the outfit, the cat, the things in the room, and the clock.
+- **The room**: depending on the time, the person and the cat spend time apart, stay together, or eat together. In winter the cat wears a scarf of a different color each day of the week.
 
-위젯에는 글자를 쓰지 않습니다. 지역, 시각, 날씨, 이벤트는 접근성 라벨로 읽어 줍니다. 로그인이나 계정은 없습니다.
+The widget has no text. VoiceOver reads the place, time, weather, and event. There is no login or account.
 
-지역은 위젯 편집에서 고릅니다.
+To choose the place, right-click the widget and edit it.
 
-## 설치 (macOS 26 이상)
+## Install (macOS 26 or later)
 
-터미널에서 실행합니다. 최신 릴리스를 `/Applications` 에 설치하고 앱을 엽니다. 이미 설치돼 있으면 새 버전으로 바꿉니다.
+Run this in Terminal. It installs the latest release into `/Applications` and opens the app. If it is already installed, it is replaced with the new version.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/install.sh | sh
 ```
 
-특정 버전을 설치하거나 이전 버전으로 되돌리려면 버전을 붙입니다. 버전 목록은 [Releases](https://github.com/zzzinho/Christof/releases)에 있습니다.
+To install a specific version or go back to an older one, add the version. Versions are listed in [Releases](https://github.com/zzzinho/Christof/releases).
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/install.sh | sh -s -- v0.1.0
 ```
 
-설치가 끝나면 바탕화면을 우클릭하고 "위젯 편집"을 고른 뒤, Christof 위젯을 바탕화면에 놓습니다. 앱에서는 위젯 미리보기를 보고 시각·날씨·이벤트를 바꿔 볼 수 있고, 맨 아래에 설치된 버전이 나옵니다.
+When it finishes, right-click the desktop, choose "Edit Widgets", and place the Christof widget on the desktop. The app shows a preview of the widget where you can try other times, weather, and events, and the installed version is at the bottom.
 
-Apple 공증을 받지 않은 앱입니다. 스크립트로 받으면 그냥 열립니다. 브라우저로 zip 을 받았다면 `xattr -dr com.apple.quarantine /Applications/Christof.app` 을 실행해야 열립니다.
+The app is not notarized by Apple. Installed with the script, it opens normally. If you downloaded the zip in a browser, run `xattr -dr com.apple.quarantine /Applications/Christof.app` before opening it.
 
-## 삭제
+## Uninstall
 
-앱과 위젯, 설정을 지웁니다. 바탕화면에 놓인 위젯도 함께 사라집니다.
+Removes the app, the widget, and the settings. Widgets on the desktop are removed too.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/uninstall.sh | sh
 ```
 
-`~/Library/Containers` 의 Christof 폴더는 macOS 가 막아 남을 수 있습니다. 남아도 문제는 없고, 지우려면 Finder 에서 휴지통으로 옮깁니다.
+macOS may keep the Christof folders in `~/Library/Containers`. They do no harm; to remove them, move them to the Trash in Finder.
 
-## 데이터
+## Data
 
-날씨는 [Open-Meteo](https://open-meteo.com/)에서 받습니다(CC BY 4.0). 해와 달의 위치는 기기에서 계산합니다.
+Weather comes from [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Sun and moon positions are calculated on the device.
