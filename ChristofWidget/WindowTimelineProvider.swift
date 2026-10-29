@@ -31,6 +31,8 @@ struct WindowTimelineProvider: AppIntentTimelineProvider {
         let start = Date(timeIntervalSinceReferenceDate: (now.timeIntervalSinceReferenceDate / step).rounded(.down) * step)
         // 리로드는 1시간 뒤 요청하지만 시스템이 미룰 수 있어, 엔트리를 3시간치 만들어 그동안 시계가 멈추지 않게 한다.
         // 시각을 고정했으면 장면이 바뀌지 않으므로 하나면 된다.
+        // chronod 는 타임라인 아카이브가 너무 크면 리로드를 통째로 버리고 placeholder 를 띄운다. 엔트리 하나가 크게(Canvas 도트)에서
+        // 약 65KB 라, 1분 간격 180개(약 11MB)는 거부되고 36개(약 2.4MB)는 받아들여졌다. 한도 값은 공개되어 있지 않다.
         let count = settings.fixedDate == nil ? 36 : 1
         let entries = (0..<count).map { i in
             entry(at: start.addingTimeInterval(Double(i) * step), region: region, forecast: forecast, settings: settings)
