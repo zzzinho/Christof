@@ -51,6 +51,10 @@ curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/uninstall.sh 
 
 `~/Library/Containers` 의 Christof 폴더는 macOS 가 막아 남을 수 있습니다. 남아도 문제는 없고, 지우려면 Finder 에서 휴지통으로 옮깁니다.
 
+## 디자인
+
+위젯 그림은 HTML 로 디자인하는 로컬 도구 [hunsu](https://github.com/zzzinho/hunsu)로 만들었습니다. 시안(`DESIGN.md`, `design.css`, `*.html`)은 저장소 루트에 있습니다.
+
 ## 데이터
 
 날씨는 [Open-Meteo](https://open-meteo.com/)에서 받습니다(CC BY 4.0). 해와 달의 위치는 기기에서 계산합니다.

@@ -51,6 +51,10 @@ curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/uninstall.sh 
 
 macOS may keep the Christof folders in `~/Library/Containers`. They do no harm; to remove them, move them to the Trash in Finder.
 
+## Design
+
+The look of the widget was designed with [hunsu](https://github.com/zzzinho/hunsu), a local tool for designing in HTML. The design files (`DESIGN.md`, `design.css`, `*.html`) are at the root of this repository.
+
 ## Data
 
 Weather comes from [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Sun and moon positions are calculated on the device.
