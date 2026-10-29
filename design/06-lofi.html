@@ -27,6 +27,13 @@
     display: grid;
     gap: 40px;
   }
+  .part {
+    display: grid;
+    gap: 24px;
+  }
+  .part figure {
+    margin: 0;
+  }
   .scene h2 {
     margin: 0 0 2px;
     font-size: 1rem;
@@ -73,17 +80,24 @@
 <body>
 <header>
   <h1>lofi 장면</h1>
-  <p>방 안 책상에 앉은 사람의 뒷모습, 뒤쪽 창은 배경. 위젯은 창문·사람·고양이·방 안·시계 다섯 구성 요소로 나뉘고, 이벤트마다 다섯 요소가 모두 바뀐다. 글자는 없다: 시각은 벽시계, 날씨는 창밖으로 보인다. 창밖과 벽은 때(밤·해 질 녘·낮·흐린 낮)를 따르고, 해가 진 뒤나 흐린 날은 스탠드를 켠다. 도트 3pt. 장면 목록은 01-window 와 같다.</p>
+  <p>방 안 책상에 앉은 사람의 뒷모습, 뒤쪽 창은 배경. 위젯은 창문·사람·고양이·방 안·시계 다섯 구성 요소로 나뉘고, 이벤트마다 다섯 요소가 모두 바뀐다. 아래 구성 요소 섹션은 사람·고양이·창밖·시계·방 안(창틀 포함)으로 나눠, 줄마다 한 가지만 바꿔 보인다. 글자는 없다: 시각은 벽시계, 날씨는 창밖으로 보인다. 창밖과 벽은 때(밤·해 질 녘·낮·흐린 낮)를 따르고, 해가 진 뒤나 흐린 날은 스탠드를 켠다. 도트 3pt. 장면 목록은 01-window 와 같다.</p>
   <p>사람은 갈색 단발 여성이고 머리는 날짜에 따라 길어진다. 옷은 이벤트마다 다르다. 고양이는 치즈 고양이다. 사람·고양이·소품은 검은 윤곽선을 두른다. 헤드폰(쓰기·목에 걸기·벗기)은 날짜·시각을 시드로 고른다. 사람과 고양이의 상호작용(따로·같이·밥)은 시각이 정하고 이벤트 순간이 덮는다. 둘 다 장면 설명에 적는다. 비교표는 헤드폰·창밖 보는 고양이로 고정한다.</p>
 </header>
 <main>
+  <h2>사람</h2>
+  <div id="part-person" class="part"></div>
+  <h2>고양이</h2>
+  <div id="part-cat" class="part"></div>
+  <h2>창밖</h2>
+  <div id="part-outside" class="part"></div>
+  <h2>시계</h2>
+  <div id="part-clock" class="part"></div>
+  <h2>방 안 (창틀 포함)</h2>
+  <div id="part-room" class="part"></div>
   <h2>구성 요소 × 이벤트</h2>
   <div id="components"></div>
   <h2>사람·고양이 상호작용</h2>
   <div id="interactions"></div>
-  <h2>겨울 고양이 목도리</h2>
-  <p class="meta">겨울에는 고양이가 목도리를 하고, 색은 요일마다 바뀐다. 크리스마스에는 빨간 목도리만 한다.</p>
-  <div id="scarves" class="sizes"></div>
   <h2>장면</h2>
   <div id="scenes"></div>
 </main>
@@ -1434,18 +1448,75 @@ function interactions() {
   return [...sections, moments];
 }
 
+// 구성 요소 섹션. 줄마다 한 가지만 바꿔 그 구성 요소 자리만 잘라 보인다.
+// 칸: [설명, 장면 제목, 장면에서 바꿀 값, 시드 대신 쓸 모습, 크기]. box(L, s): 잘라 보일 영역.
+function partRows(id, box, scale, rows) {
+  document.getElementById(id).append(...rows.map(([name, note, cells]) => {
+    const section = document.createElement('section');
+    section.className = 'scene';
+    section.innerHTML = `<h2>${name}</h2><p class="meta">${note}</p><div class="sizes"></div>`;
+    section.querySelector('.sizes').append(...cells.map(([caption, title, edit = {}, look = {}, size = 'medium']) => {
+      const { s, g, L, canvas } = render({ ...SCENES.find(scene => scene.title === title), ...edit }, SIZES[size], look);
+      const figure = document.createElement('figure');
+      figure.append(crop(canvas, box(L, s), g.cols, g.rows, scale));
+      figure.insertAdjacentHTML('beforeend', `<figcaption class="meta">${caption}</figcaption>`);
+      return figure;
+    }));
+    return section;
+  }));
+}
+
+const FIXED = { headwear: 'headphones', catState: 'window' };
+const eventCells = MATRIX_ROWS.map(([label, title]) => [label, title, {}, FIXED]);
+// 창밖·방 안의 때와 날씨 줄은 기본 먼 풍경(뒷산·아파트)으로 맞춰 그 축만 바뀌게 한다.
+const plain = { region: '대구', occasions: [] };
+const phaseCells = [['밤', '초승달 밤'], ['해 질 녘', '일몰'], ['낮', '여름 낮 · 맑음'], ['흐린 낮', '비 오는 오후']].map(([caption, title]) => [caption, title, plain, FIXED]);
+const catBox = (L, s) => { const { x, bottom } = L.cats[s.catState]; return [x - 12, bottom - 17, x + 13, bottom + 2]; };
+
+partRows('part-person', L => L.boxes.person, 4, [
+  ['헤드폰', '날짜·시각을 시드로 하나 고른다', Object.entries(HEADWEAR).map(([headwear, name]) => [name, '초승달 밤', {}, { ...FIXED, headwear }])],
+  ['머리 길이', '7월 1일에 단발로 자르고 이듬해 6월 말까지 길어진다', ['7월 1일', '10월 1일', '1월 1일', '4월 1일', '6월 30일'].map(date => [date, '초승달 밤', { date }, { ...FIXED, headwear: 'bare' }])],
+  ['평소 옷 후보', '지금은 머스터드. 하나를 고르면 나머지 후보는 지운다', ['mustard', 'sage', 'coral'].map(outfit => [OUTFITS[outfit].name, '초승달 밤', {}, { ...FIXED, outfit }])],
+  ['불', '해가 진 뒤·흐린 날은 스탠드를 켜서 오른쪽에 테두리 빛이 진다', [['켬', '초승달 밤', {}, FIXED], ['끔', '여름 낮 · 맑음', {}, FIXED]]],
+  ['이벤트', '옷과 머리 장식', eventCells],
+]);
+
+partRows('part-cat', catBox, 4, [
+  ['상태', '상호작용(아래)이 시각마다 고른다', Object.entries(CAT_STATES).map(([catState, name]) => [name, '초승달 밤', {}, { ...FIXED, catState }])],
+  ['겨울 목도리', '겨울에는 요일마다 색이 바뀐다. 크리스마스에는 빨간 목도리만 한다', WEEKDAY_SCARVES.map(([name], weekday) => [`${name}요일`, '따뜻한 겨울 낮', {}, { ...FIXED, weekday }])],
+  ['이벤트', '고양이 모양과 곁에 두는 물건', eventCells],
+]);
+
+partRows('part-outside', L => L.boxes.window, 3, [
+  ['때', '해 고도와 날씨로 정한다', phaseCells],
+  ['날씨', '오프라인(날씨 없음)은 맑은 하늘', [
+    ['맑음', ['clear', 0, 0.1, 25]], ['구름 조금', ['partlyCloudy', 0, 0.4, 25]], ['흐림', ['overcast', 0, 1, 22]], ['안개', ['fog', 0.7, 0.6, 20]],
+    ['이슬비', ['drizzle', 0.3, 0.9, 22]], ['비', ['rain', 0.6, 0.95, 22]], ['눈', ['snow', 0.6, 0.9, -2]], ['뇌우', ['thunderstorm', 0.8, 1, 26]], ['날씨 없음', null],
+  ].map(([caption, weather]) => [caption, '여름 낮 · 맑음', { ...plain, weather, season: weather?.[0] === 'snow' ? 'winter' : 'summer' }, FIXED])],
+  ['계절 가로수', '해가 진 뒤에는 실루엣', [['봄', 'spring'], ['여름', 'summer'], ['가을', 'autumn'], ['겨울', 'winter']].map(([caption, season]) => [caption, '여름 낮 · 맑음', { ...plain, season }, FIXED])],
+  ['지역 먼 풍경', '서울·부산 말고는 뒷산과 아파트', [['여름 낮 · 맑음', '낮'], ['초승달 밤', '밤']].flatMap(([title, when]) =>
+    [['대구', '기본'], ['서울', '서울'], ['부산', '부산']].map(([region, name]) => [`${name} ${when}`, title, { region, occasions: [] }, FIXED]))],
+  ['해·달', '창은 남쪽을 본다. 해·달 위치는 고도·방위각으로 정한다', [
+    ['일출', '일출', { region: '대구' }], ['낮 해', '여름 낮 · 맑음', plain], ['일몰', '일몰', { region: '대구' }],
+    ['초승달', '초승달 밤', plain], ['보름달', '정월대보름 밤', { region: '대구', occasions: ['sky.fullMoon'] }],
+  ].map(([caption, title, edit]) => [caption, title, edit, FIXED])],
+  ['이벤트', '창 장식', eventCells],
+]);
+
+partRows('part-clock', L => L.boxes.clock, 4, [
+  ['시각', '분침은 5분, 시침은 1시간 단위로 움직인다', [[15, '오후 3:00'], [18, '오후 6:42'], [21, '오후 9:15'], [0, '오전 12:57']].map(([hour, time]) => [time, '초승달 밤', { hour, time }, FIXED])],
+  ['이벤트', '문자판과 장식', eventCells],
+]);
+
+partRows('part-room', L => L.boxes.room, 2, [
+  ['때', '벽색과 스탠드 불', phaseCells],
+  ['크기', 'large 에만 선반이 있다', Object.keys(SIZES).map(size => [size, '초승달 밤', plain, FIXED, size])],
+  ['책상', '밥 시간에는 책·머그 대신 밥공기를 놓는다', [['평소', '초승달 밤', plain, FIXED], ['밥', '초승달 밤', plain, { ...FIXED, catState: 'eat' }]]],
+  ['이벤트', '방 안 물건과 창틀 장식', eventCells],
+]);
+
 document.getElementById('components').append(matrix());
 document.getElementById('interactions').append(...interactions());
-
-// 요일마다 창밖 보는 고양이를 잘라 나란히 본다.
-document.getElementById('scarves').append(...WEEKDAY_SCARVES.map(([name], weekday) => {
-  const { g, L, canvas } = render(SCENES.find(scene => scene.title === '따뜻한 겨울 낮'), SIZES.medium, { catState: 'window', weekday });
-  const figure = document.createElement('figure');
-  figure.style.margin = '0';
-  figure.append(crop(canvas, L.boxes.cat, g.cols, g.rows, 3));
-  figure.insertAdjacentHTML('beforeend', `<figcaption class="meta">${name}요일</figcaption>`);
-  return figure;
-}));
 document.getElementById('scenes').append(...SCENES.map(scene => {
   const widgets = Object.keys(SIZES).map(size => widget(scene, size));
   const weather = scene.weather ? `${scene.weather[0]} · 기온 ${scene.weather[3]}°` : '날씨 없음';
