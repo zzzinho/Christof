@@ -1331,8 +1331,9 @@ function drawClock(g, L, s) {
       for (let k = 0; k < width; k++) g.set(cx + Math.round(dx * t - dy * k * 0.7), cy + Math.round(dy * t + dx * k * 0.7), color('clock-hand'));
     }
   };
-  hand(s.minute / 60, 5, 1);
-  hand((s.hour % 12 + s.minute / 60) / 12, 3, 2);
+  // 위젯은 5분마다 다시 그려진다. 분침은 5분 눈금, 시침은 정시 자리에만 둔다.
+  hand(Math.floor(s.minute / 5) / 12, 5, 1);
+  hand((s.hour % 12) / 12, 3, 2);
   for (const look of looks) look.draw?.(g, cx, cy, s);
 }
 
