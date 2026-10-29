@@ -137,7 +137,7 @@ const OCCASIONS = {
   'KR.buddhasBirthday': { name: '부처님오신날', looks: { window: 'lanterns', person: 'lotusPin', cat: 'lotus', room: 'lotusBowl', clock: 'lantern' }, moment: { hours: [19, 22], cat: 'beside', name: '연등 같이 보기' } },
   'KR.chuseok': { name: '추석', looks: { window: ['moonHalo', 'pineBranch'], person: 'ribbonPin', cat: 'bojagi', room: 'songpyeon', clock: 'moonFace' }, moment: { hours: [19, 23], cat: 'beside', name: '보름달 같이 보기' } },
   'KR.newYearsDay': { name: '새해 첫날', looks: { window: 'sunGlow', person: 'beanie', cat: 'beanie', room: 'calendar', clock: 'sparkles' }, moment: { hours: [6, 8], cat: 'beside', name: '첫 해 같이 보기' } },
-  'KR.halloween': { name: '할로윈', looks: { window: 'bats', person: 'witchHat', cat: 'batWings', room: 'pumpkin', clock: 'spider' }, moment: { hours: [19, 23], cat: 'walk', name: '고양이 혼자 밤 순찰' } },
+  'KR.halloween': { name: '할로윈', looks: { window: 'bats', person: 'witchHat', cat: 'devilWings', room: 'pumpkin', clock: 'spider' }, moment: { hours: [19, 23], cat: 'walk', name: '고양이 혼자 밤 순찰' } },
   'KR.christmasEve': { name: '크리스마스 이브', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' }, moment: { hours: [20, 23], cat: 'shoulder', name: '어깨에서 잠든 고양이' } },
   'KR.christmas': { name: '크리스마스', looks: { window: 'frost', person: 'santaHat', cat: 'scarf', room: 'tree', clock: 'holly' }, moment: { hours: [8, 11], cat: 'pet', name: '크리스마스 아침 쓰다듬기' } },
   'sky.sunrise': { name: '일출', looks: {}, moment: { hours: [0, 23], cat: 'beside', name: '해돋이 같이 보기' } },
@@ -394,7 +394,7 @@ function layout(W, H, s) {
 
 // ---- 스프라이트. 불빛(스탠드·트리)이 오른쪽에 있어 오른쪽 가장자리에 따뜻한 테두리 빛이 진다 ----
 
-// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄.
+// rows: 치즈 고양이(T 는 줄무늬), head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄, wings: 할로윈 날개 뿌리(등 한가운데).
 // 다섯 자세 모두 머리 폭(테두리 포함 6~7칸)과 몸집을 맞춘다.
 // side, walk 는 오른쪽(사람·불빛 쪽)을 본다.
 const CATS = {
@@ -416,6 +416,7 @@ const CATS = {
     ],
     scarf: ['..SSSSS....', '..S........', '..S........', '.S.........'],
     scarfBottom: 9,
+    wings: [3, 7],
   },
   front: {
     head: [4, 2],
@@ -453,6 +454,7 @@ const CATS = {
     ],
     scarf: ['......SSSS..', '......S.....'],
     scarfBottom: 5,
+    wings: [3, 8],
   },
   walk: {
     head: [12.5, 1],
@@ -470,6 +472,7 @@ const CATS = {
     ],
     scarf: ['..........SSS...', '...........S....'],
     scarfBottom: 4,
+    wings: [5, 4],
   },
   // 웅크려 어깨뼈가 솟고, 목을 앞아래로 뻗어 밥그릇에 머리를 박았다. 그릇은 고양이 다음에 그려 입을 가린다.
   eat: {
@@ -487,6 +490,7 @@ const CATS = {
     ],
     scarf: ['...........SS....', '...........S.....'],
     scarfBottom: 6,
+    wings: [6, 2],
   },
   // 감은 눈, 꼬리를 앞으로 감았다.
   curled: {
@@ -502,6 +506,7 @@ const CATS = {
     ],
     scarf: ['.SSSS.........', '..S...........'],
     scarfBottom: 5,
+    wings: [8, 1],
   },
 };
 
@@ -562,6 +567,8 @@ const SPRITES = {
   catPouch: ['..p..', '.PPP.', 'PpgpP', 'PpppP', '.PPP.'],
   catBeanie: ['..w..', '.BBB.', 'BBBBB'],
   catLotus: ['.P.', 'PpP'],
+  // 왼쪽 날개. 오른쪽 아래 칸이 뿌리다. B 뼈대, m 막(아래 끝이 톱니).
+  devilWing: ['B...', 'mB..', 'mmB.', 'm.mB'],
   pumpkin: [
     '....s....',
     '.ooosooo.',
@@ -1149,13 +1156,15 @@ const CAT_LOOKS = {
   },
   // 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
   bojagi: (g, { item: [x, y] }) => g.sprite(x, y, ['k.k', '.k.', 'ABC', 'CAB'], { k: 'hanbok', A: 'hanbok', B: 'hanbok-jade', C: 'pouch-gold' }),
-  // 등 양쪽에 펼친 박쥐 날개. 머리 줄 아래부터 몸 바깥으로 뻗는다.
-  batWings(g, spot) {
-    const { left, width, head: [, y] } = catAnchor(spot);
-    for (const [dx, dy] of [[1, 4], [2, 3], [3, 2], [4, 2], [1, 5], [2, 4], [3, 3], [2, 5], [1, 6]]) {
-      g.set(left - dx, y + dy, color('hoodie-dark'));
-      g.set(left + width - 3 + dx, y + dy, color('hoodie-dark'));
-    }
+  // 등 한가운데서 양쪽으로 펼친 작은 악마 날개. wings: 왼쪽 날개 뿌리 [열, 줄], 오른쪽 날개는 바로 옆 칸에서 뒤집어 그린다.
+  devilWings(g, spot) {
+    const { left, top } = catAnchor(spot), [x, y] = CATS[spot.pose].wings, wing = SPRITES.devilWing, w = wing[0].length, h = wing.length;
+    wing.forEach((row, j) => [...row].forEach((ch, i) => {
+      if (ch === '.') return;
+      const c = color(ch === 'B' ? 'santa-dark' : 'santa'), yy = top + y - (h - 1) + j;
+      g.set(left + x - (w - 1 - i), yy, c);
+      g.set(left + x + 1 + (w - 1 - i), yy, c);
+    }));
   },
   scarf: (g, spot) => drawCatScarf(g, spot, 'santa'),
   winterScarf: (g, spot, s) => drawCatScarf(g, spot, WEEKDAY_SCARVES[s.weekday][1]),
