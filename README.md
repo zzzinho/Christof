@@ -1,6 +1,6 @@
 # Christof
 
-고른 지역의 날씨·시각·명절을 창밖 풍경으로 보여 주는 macOS·iOS 위젯입니다. 창문 모양이고, 3pt 도트로 그립니다. 이름은 트루먼 쇼에서 가상 세계를 연출하는 감독 Christof에서 따왔습니다. 이 창문이 가상의 창문이라는 뜻입니다.
+고른 지역의 날씨·시각·명절을 창밖 풍경으로 보여 주는 macOS 위젯입니다. 창문 모양이고, 3pt 도트로 그립니다. 이름은 트루먼 쇼에서 가상 세계를 연출하는 감독 Christof에서 따왔습니다. 이 창문이 가상의 창문이라는 뜻입니다.
 
 | | |
 |---|---|
@@ -48,37 +48,6 @@ curl -fsSL https://raw.githubusercontent.com/zzzinho/Christof/main/uninstall.sh 
 ```
 
 `~/Library/Containers` 의 Christof 폴더는 macOS 가 막아 남을 수 있습니다. 남아도 문제는 없고, 지우려면 Finder 에서 휴지통으로 옮깁니다.
-
-iOS용은 배포하지 않습니다. 유료 개발자 계정이 없어서입니다. iOS에서는 소스를 빌드해 시뮬레이터에서 실행해 볼 수 있습니다.
-
-## 빌드
-
-Xcode 27이 필요하고, 배포 타깃은 iOS·macOS 26입니다.
-
-```sh
-swift test --package-path ChristofKit
-xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'platform=macOS' build
-xcodebuild -project Christof.xcodeproj -scheme Christof -destination 'generic/platform=iOS Simulator' build
-```
-
-## 배포와 버전
-
-버전은 `MAJOR.MINOR.PATCH` 입니다. `v0.2.0` 처럼 버전 태그를 올리면 GitHub Actions가 테스트를 돌리고 macOS 앱을 빌드해 릴리스에 올립니다. 앱 버전은 태그를 따르고, 빌드 번호는 워크플로 실행 번호입니다.
-
-```sh
-git tag v0.2.0 && git push origin v0.2.0
-```
-
-- MAJOR: 설정이 호환되지 않게 바뀔 때
-- MINOR: 이벤트, 지역, 장면처럼 보이는 것이 늘어날 때
-- PATCH: 고친 것만 있을 때
-
-## 구조
-
-- `ChristofKit/`: 날씨, 천문, 이벤트 판정, 그리기를 담은 Swift 패키지입니다. 앱과 위젯이 함께 씁니다.
-- `Christof/`: 미리보기와 설정을 보여 주는 앱입니다.
-- `ChristofWidget/`: 위젯 익스텐션입니다.
-- `06-lofi.html`, `DESIGN.md`, `design.css`: 그림 시안입니다. `ChristofKit` 의 그리기는 이 시안을 옮긴 것이고, 같은 장면이면 시안과 같은 칸을 칠합니다.
 
 ## 데이터
 
