@@ -17,10 +17,8 @@ struct Outfit: Sendable {
         }
     }
 
-    /// 평소 옷: 분홍 물방울 잠옷. 물방울은 세 줄마다 네 칸 간격으로 찍고 줄마다 두 칸씩 엇갈린다. 옷깃 줄(k = 0)에는 무늬를 넣지 않는다.
-    static let pajamaDot = Outfit(base: "pajama-rose", shade: "pajama-rose-dark", rim: "pajama-rose-rim") { _, i, k, _ in
-        k > 0 && k % 3 == 1 && (i + (k % 6 == 1 ? 0 : 2)) % 4 == 1 ? "hanbok-collar" : nil
-    }
+    /// 평소 옷: 무늬 없는 세이지 극세사 잠옷
+    static let pajamaSage = Outfit(base: "pajama-sage", shade: "pajama-sage-dark", rim: "pajama-sage-rim")
     /// 설날 색동 한복: 첫 줄은 깃, 소매 두 칸은 줄마다 색동
     static let seollal = Outfit(base: "hanbok", shade: "hanbok", skirt: "pouch") { _, i, k, row in
         collar(k) ?? (isSleeve(i, row) ? saekdong[k % saekdong.count] : nil)

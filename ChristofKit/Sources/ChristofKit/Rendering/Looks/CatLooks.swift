@@ -30,7 +30,8 @@ struct CatHeadItem: CatLook {
     }
 
     static let beanie = CatHeadItem(rows: ["..w..", ".BBB.", "BBBBB"], colors: ["w": "santa-trim", "B": "beanie"], dy: 1)
-    static let lotus = CatHeadItem(rows: [".P.", "PpP"], colors: ["P": "spring-1", "p": "spring-2"])
+    /// 잎받침 위에 핀 연꽃. 3×2 로는 이마의 얼룩처럼 보였다.
+    static let lotus = CatHeadItem(rows: ["..P..", ".PPP.", "PpPpP", ".ggg."], colors: ["P": "lotus-lantern", "p": "spring-1", "g": "plant"])
     /// 할로윈: 끝이 꺾인 고깔과 금색 별. 챙이 귀 줄을 덮는다.
     static let wizardHat = CatHeadItem(rows: ["....WW.", "...WW..", "..WWW..", "..WgW..", "WWWWWWW"], colors: ["W": "witch", "g": "pouch-gold"])
 }
