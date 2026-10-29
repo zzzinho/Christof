@@ -4,9 +4,13 @@ enum PersonPainter {
         let rows: [String]
         /// 옷이 시작하는 줄
         let body: Int
-        /// 목에 건 헤드폰과 그 아랫줄
+        /// 헤드폰: n·k 머리띠, K 겉판, a 포인트, C 쿠션. cable 은 왼쪽 귀덮개에서 어깨로 늘어진 케이블의 [칸, 줄]이다.
+        let cable: [(Int, Int)]
+        /// 목에 건 귀덮개와 목 뒤로 두른 머리띠, 각각의 아랫줄
         let neck: [String]
         let neckBottom: Int
+        let neckBand: [String]
+        let neckBandBottom: Int
         /// 늘어진 머리. 단발 끝줄(start)부터 한 해에 rows 줄 자라고, 폭은 머리 폭(cols)이다.
         /// 어깨 줄(shoulder)부터 한 칸씩 퍼지고, strands 는 끝의 결 자리다.
         let fall: (start: Int, shoulder: Int, cols: (Int, Int), strands: [Int], rows: Int)
@@ -20,10 +24,10 @@ enum PersonPainter {
             "....nnnnnnnn....",
             "...khhhhhhhhk...",
             "..khhhhhhhhhHk..",
-            "..khhhhhhhhhHk..",
             ".KKhhhhhhhhhHKK.",
-            ".KKhhhhhhhhhHKK.",
-            ".KKhhhhhhhhhHKK.",
+            "KaChhhhhhhhhHCaK",
+            "KaChhhhhhhhhHCaK",
+            ".KChhhhhhhhhHCK.",
             "...hhhhhhhhhH...",
             "...hhhhhhhhhH...",
             "....hhhhhhhH....",
@@ -42,16 +46,19 @@ enum PersonPainter {
             "oooooodooooooorr",
         ],
         body: 14,
-        neck: ["..KK........KK..", "..KK........KK.."],
-        neckBottom: 16,
+        cable: [(1, 10), (1, 11), (2, 12), (2, 13), (2, 14), (2, 15), (2, 16), (3, 17), (3, 18)],
+        neck: ["..KK........KK..", ".KaC........CaK.", ".KaC........CaK.", "..KK........KK.."],
+        neckBottom: 15,
+        neckBand: ["...kkkkkkkkkk..."],
+        neckBandBottom: 14,
         fall: (12, 15, (3, 12), [5, 9], 6))
 
     static func draw(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene) {
         let p = sprite, top = L.personTop, left = jsRound(Double(L.personX) - Double(p.rows[0].count) / 2)
         let lit = Sprites.colors(lightOn: s.lightOn)
-        // 헤드폰을 벗으면 머리띠 정수리(n)만 머리색이고 머리띠 옆(k)·귀덮개(K)는 비운다.
+        // 헤드폰을 벗으면 머리띠 정수리(n)만 머리색이고 머리띠 옆(k)·귀덮개(K·a·C)는 비운다.
         // 머리띠 옆까지 머리색으로 채우면 관자놀이가 귀 자리보다 넓어져 양쪽이 튀어나와 보인다.
-        let colors = s.headwear == .headphones ? lit : lit.merging(["n": "hair-brown"]) { $1 }.filter { $0.key != "k" && $0.key != "K" }
+        let colors = s.headwear == .headphones ? lit : lit.merging(["n": "hair-brown"]) { $1 }.filter { !"kKCa".contains($0.key) }
         for (j, row) in p.rows.enumerated() {
             for (i, ch) in row.enumerated() {
                 // 불을 끈 낮에는 옷의 테두리 빛(r) 자리도 기본 색이다.
@@ -60,6 +67,8 @@ enum PersonPainter {
                 if let name { g.set(left + i, top + j, LofiPalette.color(name)) }
             }
         }
+        // 목 뒤로 두른 머리띠는 늘어진 머리 밑에 깔려 단발일 때만 보인다.
+        if s.headwear == .neck { g.sprite(L.personX, top + p.neckBandBottom, p.neckBand, lit) }
         // 늘어진 머리는 목에서 좁아지지 않고 머리 폭 그대로 내려와 어깨에 얹히며 한 칸씩 퍼진다. 끝 두 줄을 한 칸씩 깎아 둥글게 하고(단발은 한 줄),
         // 네 줄 넘게 자라면 끝 세 줄에 진한 결을 넣고 결 자리 끝을 비워 머리끝이 갈라져 보이게 한다. 오른쪽 끝 칸은 테두리 빛이다.
         // 머리는 한 달에 1cm 남짓 자라서 한 해 6줄(3pt 한 줄이 2cm 쯤)이다. 더 길게 늘이거나 매끈한 판으로 두면 등에 붙인 판처럼 보였다.
@@ -74,8 +83,12 @@ enum PersonPainter {
                 g.set(left + i, top + y, strand ? dark : i == i1 ? rim : hair)
             }
         }
-        // 목에 건 헤드폰은 늘어진 머리 위에 걸친다.
+        // 귀덮개와 케이블은 늘어진 머리 위에 걸친다. 케이블은 윤곽선과 구분되게 머리띠 색이다.
         if s.headwear == .neck { g.sprite(L.personX, top + p.neckBottom, p.neck, lit) }
+        if s.headwear == .headphones {
+            let band = LofiPalette.color(lit["n"]!)
+            for (i, j) in p.cable { g.set(left + i, top + j, band) }
+        }
         for look in s.looks.person { look.draw(&g, L.personX, top, s) }
     }
 }
