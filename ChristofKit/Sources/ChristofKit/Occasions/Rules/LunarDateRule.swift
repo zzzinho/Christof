@@ -17,8 +17,12 @@ public struct LunarDateRule: OccasionRule {
     }
 
     public func isActive(at date: Date, in region: Region) -> Bool {
+        daysUntil(date, in: region) != nil
+    }
+
+    public func daysUntil(_ date: Date, in region: Region) -> Int? {
         var lunar = Calendar(identifier: calendar)
         lunar.timeZone = region.timeZone
-        return lunar.isWithinDays(of: month, day, daysBefore: daysBefore, daysAfter: daysAfter, at: date)
+        return lunar.daysUntil(month, day, daysBefore: daysBefore, daysAfter: daysAfter, from: date)
     }
 }

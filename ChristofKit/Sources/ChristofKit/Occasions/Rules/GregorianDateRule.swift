@@ -14,8 +14,12 @@ public struct GregorianDateRule: OccasionRule {
     }
 
     public func isActive(at date: Date, in region: Region) -> Bool {
+        daysUntil(date, in: region) != nil
+    }
+
+    public func daysUntil(_ date: Date, in region: Region) -> Int? {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = region.timeZone
-        return calendar.isWithinDays(of: month, day, daysBefore: daysBefore, daysAfter: daysAfter, at: date)
+        return calendar.daysUntil(month, day, daysBefore: daysBefore, daysAfter: daysAfter, from: date)
     }
 }

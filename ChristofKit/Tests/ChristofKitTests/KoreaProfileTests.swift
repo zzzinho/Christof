@@ -17,24 +17,25 @@ private func occasion(_ id: String) throws -> Occasion {
 private let seoul = KoreaRegions.all[0]
 
 // 날짜는 Calendar(identifier: .dangi) 로 다시 계산해 확인했다.
-@Test("명절은 연휴 첫날부터 마지막 날까지만 진행 중", arguments: [
-    ("KR.seollal", kst(2025, 1, 28), kst(2025, 1, 30)), // 전날이 음력 12/29 (29일 달)
-    ("KR.seollal", kst(2026, 2, 16), kst(2026, 2, 18)),
-    ("KR.seollal", kst(2027, 2, 6), kst(2027, 2, 8)), // 전날이 음력 12/30 (30일 달)
-    ("KR.chuseok", kst(2025, 10, 5), kst(2025, 10, 7)), // 윤6월이 있는 해
-    ("KR.chuseok", kst(2026, 9, 24), kst(2026, 9, 26)),
-    ("KR.chuseok", kst(2027, 9, 14), kst(2027, 9, 16)),
+@Test("명절은 그날 2주 전부터 연휴 마지막 날까지 진행 중", arguments: [
+    ("KR.seollal", kst(2025, 1, 29), kst(2025, 1, 30)),
+    ("KR.seollal", kst(2026, 2, 17), kst(2026, 2, 18)),
+    ("KR.seollal", kst(2027, 2, 7), kst(2027, 2, 8)),
+    ("KR.chuseok", kst(2025, 10, 6), kst(2025, 10, 7)), // 윤6월이 있는 해
+    ("KR.chuseok", kst(2026, 9, 25), kst(2026, 9, 26)),
+    ("KR.chuseok", kst(2027, 9, 15), kst(2027, 9, 16)),
     ("KR.buddhasBirthday", kst(2025, 5, 5), kst(2025, 5, 5)),
     ("KR.buddhasBirthday", kst(2026, 5, 24), kst(2026, 5, 24)),
     ("KR.jeongwolDaeboreum", kst(2026, 3, 3), kst(2026, 3, 3)),
     ("KR.christmas", kst(2026, 12, 25), kst(2026, 12, 25)),
 ])
-func holidaySpan(_ id: String, _ first: Date, _ last: Date) throws {
+func holidaySpan(_ id: String, _ day: Date, _ last: Date) throws {
     let holiday = try occasion(id)
     let oneDay: TimeInterval = 24 * 3600
-    #expect(!holiday.isActive(at: first - oneDay, in: seoul), "연휴 전날")
-    for day in stride(from: first, through: last, by: oneDay) {
-        #expect(holiday.isActive(at: day, in: seoul), "\(day)")
+    let first = day - 14 * oneDay
+    #expect(!holiday.isActive(at: first - oneDay, in: seoul), "기간 전날")
+    for date in stride(from: first, through: last, by: oneDay) {
+        #expect(holiday.isActive(at: date, in: seoul), "\(date)")
     }
     #expect(!holiday.isActive(at: last + oneDay, in: seoul), "연휴 다음 날")
 }
@@ -49,7 +50,7 @@ func chuseokEndsAtMidnight(_ date: Date, _ expected: Bool) throws {
 
 @Test("같은 순간이라도 지역 시간대의 날짜로 판정한다", arguments: [
     (kst(2026, 9, 27, 0, 30), false, true), // UTC 로는 9/26 15:30, 아직 연휴
-    (kst(2026, 9, 24, 0, 30), true, false), // UTC 로는 9/23 15:30, 아직 연휴 전
+    (kst(2026, 9, 11, 0, 30), true, false), // UTC 로는 9/10 15:30, 아직 기간 전
 ])
 func judgesInRegionTimeZone(_ date: Date, _ inSeoul: Bool, _ inUTC: Bool) throws {
     let utcRegion = Region(id: "test.utc", name: "UTC", countryCode: "KR", latitude: seoul.latitude, longitude: seoul.longitude, timeZone: TimeZone(identifier: "UTC")!)

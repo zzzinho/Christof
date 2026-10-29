@@ -20,6 +20,19 @@ func automaticFollowsDate() {
     #expect(occasionIDs(at: kst(2026, 7, 1, 12), .automatic) == [])
 }
 
+@Test("기간이 겹치면 그날이 먼저 오는 명절 하나만 나오고, 그날이 지나면 다음 명절로 넘어간다", arguments: [
+    (kst(2026, 10, 16, 12), [String]()), // 할로윈 15일 전
+    (kst(2026, 10, 17, 12), ["KR.halloween"]),
+    (kst(2026, 12, 20, 12), ["KR.christmasEve"]), // 이브·크리스마스·새해 첫날이 겹친다
+    (kst(2026, 12, 25, 12), ["KR.christmas"]),
+    (kst(2026, 12, 26, 12), ["KR.newYearsDay"]),
+    (kst(2026, 2, 18, 12), ["KR.seollal"]), // 설 연휴 마지막 날, 정월대보름 기간과 겹친다
+    (kst(2026, 2, 19, 12), ["KR.jeongwolDaeboreum"]),
+])
+func earliestOverlappingOccasionWins(_ date: Date, _ expected: [String]) {
+    #expect(occasionIDs(at: date, .automatic) == expected)
+}
+
 @Test("수동이면 날짜와 상관없이 고른 명절 하나만 나온다")
 func manualOverridesDate() {
     #expect(occasionIDs(at: kst(2026, 7, 1, 12), .manual(occasionID: "KR.chuseok")) == ["KR.chuseok"])
