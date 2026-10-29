@@ -16,6 +16,8 @@ struct CatItem: CatLook {
     static let walnut = CatItem(rows: ["nNn", "NnN"], colors: ["n": "wood-light", "N": "branch"])
     /// 추석 선물: 조각보로 싸고 위를 매듭지은 보자기
     static let bojagi = CatItem(rows: ["k.k", ".k.", "ABC", "CAB"], colors: ["k": "hanbok", "A": "hanbok", "B": "hanbok-jade", "C": "pouch-gold"])
+    /// 부처님오신날: 잎받침 위에 핀 연꽃
+    static let lotus = CatItem(rows: ["..P..", ".PPP.", "PpPpP", ".ggg."], colors: ["P": "lotus-lantern", "p": "spring-1", "g": "plant"])
 }
 
 /// 머리 위 가운데 칸에 아래 끝을 맞춘 모양. dy 만큼 내려 머리에 씌운다.
@@ -30,8 +32,6 @@ struct CatHeadItem: CatLook {
     }
 
     static let beanie = CatHeadItem(rows: ["..w..", ".BBB.", "BBBBB"], colors: ["w": "santa-trim", "B": "beanie"], dy: 1)
-    /// 잎받침 위에 핀 연꽃. 3×2 로는 이마의 얼룩처럼 보였다.
-    static let lotus = CatHeadItem(rows: ["..P..", ".PPP.", "PpPpP", ".ggg."], colors: ["P": "lotus-lantern", "p": "spring-1", "g": "plant"])
     /// 할로윈: 끝이 꺾인 고깔과 금색 별. 챙이 귀 줄을 덮는다.
     static let wizardHat = CatHeadItem(rows: ["....WW.", "...WW..", "..WWW..", "..WgW..", "WWWWWWW"], colors: ["W": "witch", "g": "pouch-gold"])
 }
