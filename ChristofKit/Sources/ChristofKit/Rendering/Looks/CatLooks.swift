@@ -33,19 +33,19 @@ struct CatHeadItem: CatLook {
     static let lotus = CatHeadItem(rows: [".P.", "PpP"], colors: ["P": "spring-1", "p": "spring-2"])
 }
 
-/// 등 한가운데서 양쪽으로 펼친 작은 악마 날개. 자세마다 왼쪽 날개 뿌리 칸(pose.wings)이 있고, 오른쪽 날개는 바로 옆 칸에서 뒤집어 그린다.
+/// 등 가운데에 단 악마 날개 한 쌍. 날개는 뿌리(pose.wings)에서 위 바깥으로 뻗는다.
+/// 옆모습은 머리와 겹치지 않게 두 날개 모두 꼬리 쪽으로 뻗고, 먼 날개는 앞으로 비켜 그늘색으로 먼저 그린다.
 struct DevilWings: CatLook {
     /// 왼쪽 날개. 오른쪽 아래 칸이 뿌리다. B 뼈대, m 막(아래 끝이 톱니).
-    static let wing = ["B...", "mB..", "mmB.", "m.mB"]
+    static let wing = ["B......", "mB.....", "mmBB...", "mmmmBB.", "m.m.m.B"]
 
     func draw(_ g: inout DotGrid, _ spot: CatSpot, _ s: DotScene) {
-        guard let (x, y) = spot.pose.wings else { return }
         let top = spot.bottom - spot.pose.rows.count, w = Self.wing[0].count, h = Self.wing.count
-        for (j, row) in Self.wing.enumerated() {
-            for (i, ch) in row.enumerated() where ch != "." {
-                let c = LofiPalette.color(ch == "B" ? "santa-dark" : "santa"), yy = top + y - (h - 1) + j
-                g.set(spot.left + x - (w - 1 - i), yy, c)
-                g.set(spot.left + x + 1 + (w - 1 - i), yy, c)
+        for (x, y, dir, far) in spot.pose.wings {
+            for (j, row) in Self.wing.enumerated() {
+                for (i, ch) in row.enumerated() where ch != "." {
+                    g.set(spot.left + x + dir * (w - 1 - i), top + y - (h - 1) + j, LofiPalette.color(far || ch == "B" ? "santa-dark" : "santa"))
+                }
             }
         }
     }

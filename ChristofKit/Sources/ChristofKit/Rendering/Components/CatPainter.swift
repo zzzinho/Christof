@@ -24,14 +24,15 @@ enum CatPainter {
 }
 
 /// T 는 줄무늬. 다섯 자세 모두 머리 폭(테두리 포함 6~7칸)과 몸집을 맞춘다. side, walk 는 오른쪽(사람·불빛 쪽)을 본다.
-/// head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄, wings: 할로윈 날개 뿌리(등 한가운데).
+/// head: 머리 위 가운데 칸(귀 사이), scarf: 목도리, scarfBottom: 목도리 아랫줄이 닿는 고양이 줄, wings: 할로윈 날개(그리는 순서대로).
 /// front 는 쓰는 상태가 없어 날개 자리가 없다.
 struct CatPose {
     let rows: [String]
     let head: (x: Double, y: Int)
     let scarf: [String]
     let scarfBottom: Int
-    var wings: (x: Int, y: Int)?
+    /// 날개마다 뿌리 칸, 뻗는 방향(-1 왼쪽, 1 오른쪽), 먼 날개(그늘색)
+    var wings: [(x: Int, y: Int, dir: Int, far: Bool)] = []
 
     static let back = CatPose(rows: [
         ".c....c....",
@@ -46,7 +47,7 @@ struct CatPose {
         "ccccccccR..",
         "cTTcccccRc.",
         ".ccccccccc.",
-    ], head: (3.5, 2), scarf: ["..SSSSS....", "..S........", "..S........", ".S........."], scarfBottom: 9, wings: (3, 7))
+    ], head: (3.5, 2), scarf: ["..SSSSS....", "..S........", "..S........", ".S........."], scarfBottom: 9, wings: [(2, 8, -1, false), (5, 8, 1, false)])
     static let front = CatPose(rows: [
         ".c.....c..",
         ".cc...cc..",
@@ -73,7 +74,7 @@ struct CatPose {
         "..ccccccccR.",
         "c.ccccccccR.",
         "ccccccccccR.",
-    ], head: (8.5, 1), scarf: ["......SSSS..", "......S....."], scarfBottom: 5, wings: (3, 8))
+    ], head: (8.5, 1), scarf: ["......SSSS..", "......S....."], scarfBottom: 5, wings: [(5, 7, -1, true), (3, 8, -1, false)])
     static let walk = CatPose(rows: [
         "c..........c..c.",
         "c.........ccccc.",
@@ -85,19 +86,20 @@ struct CatPose {
         "..cccccccccR....",
         "..cc.c...cc.R...",
         "..c..c...c..c...",
-    ], head: (12.5, 1), scarf: ["..........SSS...", "...........S...."], scarfBottom: 4, wings: (5, 4))
-    /// 웅크려 어깨뼈가 솟고, 목을 앞아래로 뻗어 밥그릇에 머리를 박았다.
+    ], head: (12.5, 1), scarf: ["..........SSS...", "...........S...."], scarfBottom: 4, wings: [(7, 4, -1, true), (5, 4, -1, false)])
+    /// 걷는 자세에서 고개만 밥그릇으로 숙였다. 머리는 앞다리 앞, 어깨보다 낮다.
     static let eat = CatPose(rows: [
-        ".................",
-        "........ccR......",
-        "....cTccTccR.....",
+        "c................",
+        "c................",
+        "c................",
+        ".c...............",
+        ".cccTccTcccR.....",
         "..cTccTccTcR.c..c",
-        ".cccccccccccccccR",
-        ".ccccccccccccTceR",
-        "c.ccccccccc.ccccR",
-        "c.cccc...cc...ccc",
-        "cccccc...cc......",
-    ], head: (14.5, 4), scarf: ["...........SS....", "...........S....."], scarfBottom: 6, wings: (6, 2))
+        "..ccccccccccccccR",
+        "..cccccccccRcTceR",
+        "..cc.c...cc..cccc",
+        "..c..c...cc......",
+    ], head: (14.5, 6), scarf: ["...........SS....", "...........S....."], scarfBottom: 8, wings: [(7, 4, -1, true), (5, 4, -1, false)])
     /// 감은 눈, 꼬리를 앞으로 감았다.
     static let curled = CatPose(rows: [
         ".c..c.........",
@@ -107,5 +109,5 @@ struct CatPose {
         "cccccccTccTccR",
         "ccTTTTTTTcccR.",
         ".ccccccccccc..",
-    ], head: (2.5, 1), scarf: [".SSSS.........", "..S..........."], scarfBottom: 5, wings: (8, 1))
+    ], head: (2.5, 1), scarf: [".SSSS.........", "..S..........."], scarfBottom: 5, wings: [(6, 2, 1, true), (8, 2, 1, false)])
 }
