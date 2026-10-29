@@ -4,8 +4,7 @@ enum PersonPainter {
         let rows: [String]
         /// 옷이 시작하는 줄
         let body: Int
-        /// 헤드폰: n·k 머리띠, K 겉판, a 포인트, C 쿠션. cable 은 왼쪽 귀덮개에서 어깨로 늘어진 케이블의 [칸, 줄]이다.
-        let cable: [(Int, Int)]
+        /// 헤드폰(에어팟 맥스): F 머리띠 틀, n 캐노피, k 강철 팔, K 알루미늄 귀덮개, C 쿠션
         /// 목에 건 귀덮개와 목 뒤로 두른 머리띠, 각각의 아랫줄
         let neck: [String]
         let neckBottom: Int
@@ -19,16 +18,16 @@ enum PersonPainter {
     static let sprite = Sprite(
         rows: [
             "................",
-            "................",
-            ".....hhhhhH.....",
-            "....nnnnnnnn....",
+            ".....FFFFFF.....",
+            "....FhhhhhHF....",
+            "...knnnnnnnnk...",
             "...khhhhhhhhk...",
             "..khhhhhhhhhHk..",
             ".KKhhhhhhhhhHKK.",
-            "KaChhhhhhhhhHCaK",
-            "KaChhhhhhhhhHCaK",
-            ".KChhhhhhhhhHCK.",
-            "...hhhhhhhhhH...",
+            "KKChhhhhhhhhHCKK",
+            "KKChhhhhhhhhHCKK",
+            "KKChhhhhhhhhHCKK",
+            ".KKhhhhhhhhhHKK.",
             "...hhhhhhhhhH...",
             "....hhhhhhhH....",
             "......sssS......",
@@ -46,19 +45,18 @@ enum PersonPainter {
             "oooooodooooooorr",
         ],
         body: 14,
-        cable: [(1, 10), (1, 11), (2, 12), (2, 13), (2, 14), (2, 15), (2, 16), (3, 17), (3, 18)],
-        neck: ["..KK........KK..", ".KaC........CaK.", ".KaC........CaK.", "..KK........KK.."],
+        neck: ["..KK........KK..", ".KKC........CKK.", ".KKC........CKK.", "..KK........KK.."],
         neckBottom: 15,
-        neckBand: ["...kkkkkkkkkk..."],
+        neckBand: ["...nnnnnnnnnn..."],
         neckBandBottom: 14,
         fall: (12, 15, (3, 12), [5, 9], 6))
 
     static func draw(_ g: inout DotGrid, _ L: RoomLayout, _ s: DotScene) {
         let p = sprite, top = L.personTop, left = jsRound(Double(L.personX) - Double(p.rows[0].count) / 2)
         let lit = Sprites.colors(lightOn: s.lightOn)
-        // 헤드폰을 벗으면 머리띠 정수리(n)만 머리색이고 머리띠 옆(k)·귀덮개(K·a·C)는 비운다.
-        // 머리띠 옆까지 머리색으로 채우면 관자놀이가 귀 자리보다 넓어져 양쪽이 튀어나와 보인다.
-        let colors = s.headwear == .headphones ? lit : lit.merging(["n": "hair-brown"]) { $1 }.filter { !"kKCa".contains($0.key) }
+        // 헤드폰을 벗으면 캐노피(n)만 머리색이고 머리띠 틀(F)·팔(k)·귀덮개(K·C)는 비운다.
+        // 팔 자리까지 머리색으로 채우면 관자놀이가 귀 자리보다 넓어져 양쪽이 튀어나와 보인다.
+        let colors = s.headwear == .headphones ? lit : lit.merging(["n": "hair-brown"]) { $1 }.filter { !"FkKC".contains($0.key) }
         for (j, row) in p.rows.enumerated() {
             for (i, ch) in row.enumerated() {
                 // 불을 끈 낮에는 옷의 테두리 빛(r) 자리도 기본 색이다.
@@ -83,12 +81,8 @@ enum PersonPainter {
                 g.set(left + i, top + y, strand ? dark : i == i1 ? rim : hair)
             }
         }
-        // 귀덮개와 케이블은 늘어진 머리 위에 걸친다. 케이블은 윤곽선과 구분되게 머리띠 색이다.
+        // 목에 건 귀덮개는 늘어진 머리 위에 걸친다.
         if s.headwear == .neck { g.sprite(L.personX, top + p.neckBottom, p.neck, lit) }
-        if s.headwear == .headphones {
-            let band = LofiPalette.color(lit["n"]!)
-            for (i, j) in p.cable { g.set(left + i, top + j, band) }
-        }
         for look in s.looks.person { look.draw(&g, L.personX, top, s) }
     }
 }

@@ -2,7 +2,7 @@
 
 enum Sprites {
     static let colors: [Character: String] = [
-        "h": "hair-brown", "H": "hair-brown-rim", "n": "headphone-band", "k": "headphone-band", "K": "headphone-band", "C": "headphone", "a": "headphone-accent", "s": "skin", "S": "hoodie-rim", "e": "outline",
+        "h": "hair-brown", "H": "hair-brown-rim", "F": "headphone-band", "n": "headphone-band", "k": "headphone-steel", "K": "headphone-cup", "C": "headphone-band", "s": "skin", "S": "hoodie-rim", "e": "outline",
         "c": "cheese", "R": "cheese-rim", "T": "cheese-dark",
         "L": "lamp", "b": "lamp-body", "Y": "lamp-light", "m": "mug-dark", "M": "mug", "t": "steam",
         "1": "book-1", "2": "book-2", "3": "book-3", "l": "plant", "p": "pot",
