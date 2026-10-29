@@ -23,7 +23,7 @@ public enum KoreaOccasions {
             window: [SunGlow()], person: [PersonSprite.beanie, PersonSprite.scarf], outfit: .newYear, cat: [CatHeadItem.beanie],
             room: [DeskItem.calendar], clock: [Sparkles()], moment: OccasionMoment(hours: 6...8, cat: .beside))),  // 첫 해 같이 보기
         Occasion(id: "KR.halloween", name: "할로윈", rule: GregorianDateRule(month: 10, day: 31, daysBefore: lead), looks: OccasionLooks(
-            window: [Bats()], person: [PersonSprite.witchHat], outfit: .halloween, cat: [BatWings()], room: [SillItem.pumpkin, Cobweb()],
+            window: [Bats()], person: [PersonSprite.witchHat], outfit: .halloween, cat: [DevilWings()], room: [SillItem.pumpkin, Cobweb()],
             clock: [Spider()], moment: OccasionMoment(hours: 19...23, cat: .walk))),  // 고양이 혼자 밤 순찰
         Occasion(id: "KR.christmasEve", name: "크리스마스 이브", rule: GregorianDateRule(month: 12, day: 24, daysBefore: lead),
                  looks: christmas(moment: OccasionMoment(hours: 20...23, cat: .shoulder))),  // 어깨에서 잠든 고양이
